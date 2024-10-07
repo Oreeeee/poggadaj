@@ -3,7 +3,6 @@ package universal
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"net"
 )
 
@@ -21,12 +20,11 @@ func InitGG_Packet(packetType uint32, data []byte) *GG_Packet {
 	}
 }
 
-func (p *GG_Packet) Receive(conn net.Conn) {
+func (p *GG_Packet) Receive(conn net.Conn) error {
 	recvBuf := make([]byte, 2048)
 	_, err := conn.Read(recvBuf)
 	if err != nil {
-		fmt.Println("Read Error:", err)
-		return
+		return err
 	}
 
 	buf := bytes.NewBuffer(recvBuf)
@@ -35,6 +33,8 @@ func (p *GG_Packet) Receive(conn net.Conn) {
 	binary.Read(buf, binary.LittleEndian, &p.Length)
 	p.Data = make([]byte, p.Length)
 	buf.Read(p.Data)
+
+	return nil
 }
 
 func (p *GG_Packet) Send(conn net.Conn) (int, error) {

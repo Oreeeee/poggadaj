@@ -24,7 +24,10 @@ func handleConnection(currConn GGConnection) {
 
 	for {
 		pRecv := universal.GG_Packet{}
-		pRecv.Receive(currConn.Conn)
+		if pRecv.Receive(currConn.Conn) != nil {
+			fmt.Println("Error receiving data, dropping connection!: ", err)
+			break
+		}
 
 		if pRecv.PacketType == gg60.GG_LOGIN60 {
 			fmt.Println("Received GG_LOGIN60")
