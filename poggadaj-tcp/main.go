@@ -29,6 +29,9 @@ func handleConnection(conn net.Conn) {
 
 		if pRecv.PacketType == gg60.GG_LOGIN60 {
 			fmt.Println("Received GG_LOGIN60")
+			p := gg60.GG_Login60{}
+			p.Deserialize(pRecv.Data)
+			fmt.Println("Decoded data: ", p)
 			continue
 		}
 	}
