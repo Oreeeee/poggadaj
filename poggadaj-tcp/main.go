@@ -8,15 +8,15 @@ import (
 	"poggadaj-tcp/universal"
 )
 
-func handleConnection(conn net.Conn) {
-	defer conn.Close()
+func handleConnection(currConn GGConnection) {
+	defer currConn.Conn.Close()
 
 	// Here we create a GG_WELCOME packet once the client connects to the server
 	ggw := universal.InitGG_Welcome()
 	ggwB := ggw.Serialize()
 	packet := universal.InitGG_Packet(universal.GG_WELCOME, ggwB)
 
-	_, err := packet.Send(conn)
+	_, err := packet.Send(currConn.Conn)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
@@ -24,7 +24,7 @@ func handleConnection(conn net.Conn) {
 
 	for {
 		pRecv := universal.GG_Packet{}
-		pRecv.Receive(conn)
+		pRecv.Receive(currConn.Conn)
 
 		if pRecv.PacketType == gg60.GG_LOGIN60 {
 			fmt.Println("Received GG_LOGIN60")
@@ -32,11 +32,14 @@ func handleConnection(conn net.Conn) {
 			p.Deserialize(pRecv.Data)
 			fmt.Println("Decoded data: ", p)
 
+			currConn.UIN = p.UIN
+
 			fmt.Println("Sending login response")
 			if p.Hash == 4105424095 { // Password: 123
+				currConn.Authenticated = true
 				fmt.Println("Sending GG_LOGIN_OK")
 				pOut := universal.InitGG_Packet(universal.GG_LOGIN_OK, []byte{})
-				_, err := pOut.Send(conn)
+				_, err := pOut.Send(currConn.Conn)
 				if err != nil {
 					fmt.Println("Error: ", err)
 				}
@@ -44,7 +47,7 @@ func handleConnection(conn net.Conn) {
 			} else {
 				fmt.Println("Sending GG_LOGIN_FAILED")
 				pOut := universal.InitGG_Packet(universal.GG_LOGIN_FAILED, []byte{})
-				_, err := pOut.Send(conn)
+				_, err := pOut.Send(currConn.Conn)
 				if err != nil {
 					fmt.Println("Error: ", err)
 				}
@@ -73,6 +76,8 @@ func main() {
 
 	fmt.Println("Listening...")
 
+	var connList []*GGConnection
+
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -81,6 +86,13 @@ func main() {
 		}
 
 		fmt.Println("Accepted connection: ", conn.RemoteAddr())
-		go handleConnection(conn)
+
+		// Create a connection object
+		ggConn := &GGConnection{}
+		ggConn.Conn = conn
+		ggConn.Authenticated = false
+		connList = append(connList, ggConn)
+
+		go handleConnection(*ggConn)
 	}
 }
