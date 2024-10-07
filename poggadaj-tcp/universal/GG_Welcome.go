@@ -10,6 +10,7 @@ type GG_Welcome struct {
 }
 
 func InitGG_Welcome() *GG_Welcome {
+	// TODO: Generate an actually random seed here
 	return &GG_Welcome{seed: 0xFFFFFFFF}
 }
 

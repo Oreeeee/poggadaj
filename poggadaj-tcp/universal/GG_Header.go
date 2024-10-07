@@ -3,26 +3,29 @@ package universal
 import (
 	"bytes"
 	"encoding/binary"
+	"net"
 )
 
-type GG_Header struct {
+type GG_Packet struct {
 	PacketType uint32
 	Length     uint32
 	Data       []byte
 }
 
-func InitGG_Header(packetType uint32, data []byte) *GG_Header {
-	return &GG_Header{
+func InitGG_Packet(packetType uint32, data []byte) *GG_Packet {
+	return &GG_Packet{
 		PacketType: packetType,
 		Length:     uint32(len(data)),
 		Data:       data,
 	}
 }
 
-func (h *GG_Header) Serialize() []byte {
+func (p *GG_Packet) Send(conn net.Conn) (int, error) {
 	buf := new(bytes.Buffer)
-	binary.Write(buf, binary.LittleEndian, h.PacketType)
-	binary.Write(buf, binary.LittleEndian, h.Length)
-	buf.Write(h.Data)
-	return buf.Bytes()
+
+	binary.Write(buf, binary.LittleEndian, p.PacketType)
+	binary.Write(buf, binary.LittleEndian, p.Length)
+	buf.Write(p.Data)
+
+	return conn.Write(buf.Bytes())
 }

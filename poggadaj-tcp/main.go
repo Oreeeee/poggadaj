@@ -11,12 +11,12 @@ import (
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
 
+	// Here we create a GG_WELCOME packet once the client connects to the server
 	ggw := universal.InitGG_Welcome()
 	ggwB := ggw.Serialize()
-	response := universal.InitGG_Header(universal.GG_WELCOME, ggwB)
-	responseBytes := response.Serialize()
+	packet := universal.InitGG_Packet(universal.GG_WELCOME, ggwB)
 
-	_, err := conn.Write(responseBytes)
+	_, err := packet.Send(conn)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
