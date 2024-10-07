@@ -25,14 +25,33 @@ func handleConnection(conn net.Conn) {
 	for {
 		pRecv := universal.GG_Packet{}
 		pRecv.Receive(conn)
-		fmt.Println("Received data")
 
 		if pRecv.PacketType == gg60.GG_LOGIN60 {
 			fmt.Println("Received GG_LOGIN60")
 			p := gg60.GG_Login60{}
 			p.Deserialize(pRecv.Data)
 			fmt.Println("Decoded data: ", p)
-			continue
+
+			fmt.Println("Sending login response")
+			if p.Hash == 4105424095 { // Password: 123
+				fmt.Println("Sending GG_LOGIN_OK")
+				pOut := universal.InitGG_Packet(universal.GG_LOGIN_OK, []byte{})
+				_, err := pOut.Send(conn)
+				if err != nil {
+					fmt.Println("Error: ", err)
+				}
+				continue
+			} else {
+				fmt.Println("Sending GG_LOGIN_FAILED")
+				pOut := universal.InitGG_Packet(universal.GG_LOGIN_FAILED, []byte{})
+				_, err := pOut.Send(conn)
+				if err != nil {
+					fmt.Println("Error: ", err)
+				}
+				break
+			}
+		} else {
+			fmt.Println("Received unknown packet: ", pRecv.PacketType)
 		}
 	}
 }
