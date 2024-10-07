@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"poggadaj-tcp/gg60"
 	"poggadaj-tcp/universal"
-	"time"
 )
 
 func handleConnection(conn net.Conn) {
@@ -21,7 +21,17 @@ func handleConnection(conn net.Conn) {
 		fmt.Println("Error: ", err)
 	}
 	fmt.Println("Sent data")
-	time.Sleep(10 * time.Second)
+
+	for {
+		pRecv := universal.GG_Packet{}
+		pRecv.Receive(conn)
+		fmt.Println("Received data")
+
+		if pRecv.PacketType == gg60.GG_LOGIN60 {
+			fmt.Println("Received GG_LOGIN60")
+			continue
+		}
+	}
 }
 
 func main() {
