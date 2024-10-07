@@ -17,6 +17,7 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 	fmt.Println("Sending login response")
 	if p.Hash == 4105424095 { // Password: 123
 		currConn.Authenticated = true
+		currConn.Status = p.Status
 		fmt.Println("Sending GG_LOGIN_OK")
 		pOut := universal.InitGG_Packet(universal.GG_LOGIN_OK, []byte{})
 		_, err := pOut.Send(currConn.Conn)
@@ -49,6 +50,7 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 			fmt.Println("Received GG_NEW_STATUS")
 			p := universal.GG_New_Status{}
 			p.Deserialize(pRecv.Data)
+			currConn.Status = p.Status
 			fmt.Println("New status: ", p.Status)
 		default:
 			fmt.Println("Received unknown packet, ignoring: ", pRecv.PacketType)
