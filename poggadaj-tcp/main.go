@@ -52,6 +52,11 @@ func handleConnection(conn net.Conn) {
 			}
 		} else if pRecv.PacketType == universal.GG_LIST_EMPTY {
 			fmt.Println("Received GG_LIST_EMPTY")
+		} else if pRecv.PacketType == universal.GG_NEW_STATUS {
+			fmt.Println("Received GG_NEW_STATUS")
+			p := universal.GG_New_Status{}
+			p.Deserialize(pRecv.Data)
+			fmt.Println("New status: ", p.Status)
 		} else {
 			fmt.Println("Received unknown packet: ", pRecv.PacketType)
 		}
