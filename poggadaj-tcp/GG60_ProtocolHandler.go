@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"poggadaj-tcp/gg60"
 	"poggadaj-tcp/universal"
+	"time"
 )
 
 func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
@@ -57,6 +58,20 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 			p := universal.GG_Send_MSG{}
 			p.Deserialize(pRecv.Data, pRecv.Length)
 			fmt.Printf("Recipient: %d, Message: %s\n", p.Recipient, p.Content)
+
+			// Send GG_RECV_MSG in response
+			pS := universal.GG_Recv_MSG{
+				Sender:   p.Recipient,
+				Seq:      0,
+				Time:     uint32(time.Now().Unix()),
+				MsgClass: 0x08,
+				Content:  []byte("responding!"),
+			}
+			pOut := universal.InitGG_Packet(universal.GG_RECV_MSG, pS.Serialize())
+			_, err := pOut.Send(currConn.Conn)
+			if err != nil {
+				fmt.Println("Error: ", err)
+			}
 		default:
 			fmt.Printf("Received unknown packet, ignoring: 0x00%x\n", pRecv.PacketType)
 		}
