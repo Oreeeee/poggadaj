@@ -49,6 +49,7 @@ func main() {
 	fmt.Println("Listening...")
 
 	var connList []*GGConnection
+	msgChans := make(map[uint32]chan Message)
 
 	for {
 		conn, err := l.Accept()
@@ -63,6 +64,7 @@ func main() {
 		ggConn := &GGConnection{}
 		ggConn.Conn = conn
 		ggConn.Authenticated = false
+		ggConn.MsgChans = &msgChans
 		connList = append(connList, ggConn)
 
 		go handleConnection(*ggConn)

@@ -7,6 +7,25 @@ import (
 	"time"
 )
 
+func MsgChannel_GG60(currConn GGConnection) {
+	for {
+		msg := <-currConn.MsgChan
+		fmt.Println(currConn.UIN, " received a message!")
+		pS := universal.GG_Recv_MSG{
+			Sender:   msg.From,
+			Seq:      0,
+			Time:     uint32(time.Now().Unix()),
+			MsgClass: 0x08,
+			Content:  msg.Content,
+		}
+		pOut := universal.InitGG_Packet(universal.GG_RECV_MSG, pS.Serialize())
+		_, err := pOut.Send(currConn.Conn)
+		if err != nil {
+			fmt.Println("Error: ", err)
+		}
+	}
+}
+
 func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 	// Handle the initial log in
 	p := gg60.GG_Login60{}
@@ -35,6 +54,13 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 		return
 	}
 
+	// Create a message channel for the current user
+	currConn.MsgChan = make(chan Message)
+	(*currConn.MsgChans)[currConn.UIN] = currConn.MsgChan
+
+	// Start a message sending channel
+	go MsgChannel_GG60(currConn)
+
 	// Connection loop
 	for {
 		pRecv := universal.GG_Packet{}
@@ -58,20 +84,7 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 			p := universal.GG_Send_MSG{}
 			p.Deserialize(pRecv.Data, pRecv.Length)
 			fmt.Printf("Recipient: %d, Message: %s\n", p.Recipient, p.Content)
-
-			// Send GG_RECV_MSG in response
-			pS := universal.GG_Recv_MSG{
-				Sender:   p.Recipient,
-				Seq:      0,
-				Time:     uint32(time.Now().Unix()),
-				MsgClass: 0x08,
-				Content:  []byte("responding!"),
-			}
-			pOut := universal.InitGG_Packet(universal.GG_RECV_MSG, pS.Serialize())
-			_, err := pOut.Send(currConn.Conn)
-			if err != nil {
-				fmt.Println("Error: ", err)
-			}
+			(*currConn.MsgChans)[p.Recipient] <- Message{currConn.UIN, p.Content}
 		default:
 			fmt.Printf("Received unknown packet, ignoring: 0x00%x\n", pRecv.PacketType)
 		}
