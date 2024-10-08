@@ -53,7 +53,7 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 			currConn.Status = p.Status
 			fmt.Println("New status: ", p.Status)
 		default:
-			fmt.Println("Received unknown packet, ignoring: ", pRecv.PacketType)
+			fmt.Printf("Received unknown packet, ignoring: 0x00%x\n", pRecv.PacketType)
 		}
 	}
 }
