@@ -12,3 +12,25 @@ services:
     restart: always
     ports:
       - "8074:8074"
+
+  db:
+    image: postgres:17
+    restart: always
+    volumes:
+      - ./db:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=poggadaj
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+
+  pgadmin:
+    image: dpage/pgadmin4:8.12
+    restart: always
+    ports:
+      - "8822:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+      - PGADMIN_DISABLE_POSTFIX=true
