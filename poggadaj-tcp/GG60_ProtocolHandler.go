@@ -52,6 +52,11 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 			p.Deserialize(pRecv.Data)
 			currConn.Status = p.Status
 			fmt.Println("New status: ", p.Status)
+		case universal.GG_SEND_MSG:
+			fmt.Println("Client is sending a message...")
+			p := universal.GG_Send_MSG{}
+			p.Deserialize(pRecv.Data, pRecv.Length)
+			fmt.Printf("Recipient: %d, Message: %s\n", p.Recipient, p.Content)
 		default:
 			fmt.Printf("Received unknown packet, ignoring: 0x00%x\n", pRecv.PacketType)
 		}
