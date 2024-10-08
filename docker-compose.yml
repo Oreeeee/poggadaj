@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  http:
+    build: poggadaj-http
+    restart: always
+    ports:
+      - "80:8080"
+
+  tcp:
+    build: poggadaj-tcp
+    restart: always
+    ports:
+      - "8074:8074"

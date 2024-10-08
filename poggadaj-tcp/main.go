@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"poggadaj-tcp/gg60"
 	"poggadaj-tcp/universal"
 )
@@ -39,7 +40,12 @@ func handleConnection(currConn GGConnection) {
 }
 
 func main() {
-	l, err := net.Listen("tcp", "127.0.0.1:8074")
+	ip := "0.0.0.0:8074"
+	if len(os.Args) > 1 && os.Args[1] == "dockerless" {
+		ip = "127.0.0.1:8074"
+	}
+
+	l, err := net.Listen("tcp", ip)
 	if err != nil {
 		log.Fatal(err)
 		return
