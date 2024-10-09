@@ -12,6 +12,8 @@ services:
     restart: always
     ports:
       - "8074:8074"
+    environment:
+      - DB_PASSWORD=${DB_PASSWORD}
 
   db:
     image: postgres:17

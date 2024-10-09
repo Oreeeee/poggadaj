@@ -2,12 +2,15 @@ package main
 
 import (
 	"fmt"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 	"net"
 	"os"
 	"poggadaj-tcp/gg60"
 	"poggadaj-tcp/universal"
 )
+
+var DatabaseConn *pgxpool.Pool
 
 // This function handles connections before the client version of GG is known.
 // Its purpose is to send GG_WELCOME, receive the packet type of the incoming
@@ -45,14 +48,19 @@ func main() {
 		ip = "127.0.0.1:8074"
 	}
 
+	dbconn, err := GetDBConn()
+	DatabaseConn = dbconn
+
 	l, err := net.Listen("tcp", ip)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 	defer l.Close()
+	defer DatabaseConn.Close()
 
 	fmt.Println("Listening...")
+	//fmt.Println(GetGG32Hash(0))
 
 	var connList []*GGConnection
 	msgChans := make(map[uint32]chan Message)
