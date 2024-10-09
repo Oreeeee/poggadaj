@@ -11,6 +11,4 @@ type GGConnection struct {
 	GGVer         int
 	Authenticated bool
 	Conn          net.Conn
-	MsgChan       chan Message
-	MsgChans      *map[uint32]chan Message
 }

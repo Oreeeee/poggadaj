@@ -8,8 +8,10 @@ import (
 )
 
 func MsgChannel_GG60(currConn GGConnection) {
+	pubsub := GetMessageChannel(currConn.UIN)
 	for {
-		msg := <-currConn.MsgChan
+		msg := RecvMessageChannel(pubsub)
+
 		fmt.Println(currConn.UIN, " received a message!")
 		pS := universal.GG_Recv_MSG{
 			Sender:   msg.From,
@@ -59,10 +61,6 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 		return
 	}
 
-	// Create a message channel for the current user
-	currConn.MsgChan = make(chan Message)
-	(*currConn.MsgChans)[currConn.UIN] = currConn.MsgChan
-
 	// Start a message sending channel
 	go MsgChannel_GG60(currConn)
 
@@ -89,10 +87,12 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 			fmt.Println("New status: ", p.Status)
 		case universal.GG_SEND_MSG:
 			fmt.Println("Client is sending a message...")
+
 			p := universal.GG_Send_MSG{}
 			p.Deserialize(pRecv.Data, pRecv.Length)
 			fmt.Printf("Recipient: %d, Message: %s\n", p.Recipient, p.Content)
-			(*currConn.MsgChans)[p.Recipient] <- Message{currConn.UIN, p.Content}
+
+			PublishMessageChannel(p.Recipient, Message{currConn.UIN, p.Content})
 		default:
 			fmt.Printf("Received unknown packet, ignoring: 0x00%x\n", pRecv.PacketType)
 		}
