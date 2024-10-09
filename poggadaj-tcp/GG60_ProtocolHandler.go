@@ -76,9 +76,15 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 			fmt.Println("Received GG_LIST_EMPTY")
 		case universal.GG_NEW_STATUS:
 			fmt.Println("Received GG_NEW_STATUS")
+
 			p := universal.GG_New_Status{}
 			p.Deserialize(pRecv.Data)
-			currConn.Status = p.Status
+
+			err := SetUserStatus(currConn.UIN, p.Status)
+			if err != nil {
+				fmt.Println("Failed to set user status:", err)
+			}
+
 			fmt.Println("New status: ", p.Status)
 		case universal.GG_SEND_MSG:
 			fmt.Println("Client is sending a message...")

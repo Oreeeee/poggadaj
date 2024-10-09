@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	"log"
 	"net"
 	"os"
@@ -11,6 +12,7 @@ import (
 )
 
 var DatabaseConn *pgxpool.Pool
+var CacheConn *redis.Client
 
 // This function handles connections before the client version of GG is known.
 // Its purpose is to send GG_WELCOME, receive the packet type of the incoming
@@ -50,6 +52,8 @@ func main() {
 
 	dbconn, err := GetDBConn()
 	DatabaseConn = dbconn
+
+	CacheConn = GetCacheConn()
 
 	l, err := net.Listen("tcp", ip)
 	if err != nil {

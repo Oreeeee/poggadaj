@@ -27,6 +27,11 @@ services:
       - POSTGRES_USER=poggadaj
       - POSTGRES_PASSWORD=${DB_PASSWORD}
 
+  cache:
+    image: valkey/valkey:8.0-alpine
+    ports:
+      - "6379:6379"
+
   pgadmin:
     image: dpage/pgadmin4:8.12
     restart: always
