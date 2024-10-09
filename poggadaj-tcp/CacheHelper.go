@@ -15,9 +15,14 @@ func GetCacheConn() *redis.Client {
 }
 
 func SetUserStatus(uin uint32, status uint32) error {
-	return CacheConn.Set(
+	err := CacheConn.Set(
 		context.Background(),
 		fmt.Sprintf("ggstatus:%d", uin),
 		status,
 		0).Err()
+
+	if err != nil {
+		fmt.Println("Failed to set user status:", err)
+	}
+	return err
 }

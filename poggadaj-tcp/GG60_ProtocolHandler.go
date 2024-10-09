@@ -36,15 +36,19 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 
 	fmt.Println("Sending login response")
 	passHash, _ := GetGG32Hash(currConn.UIN)
-	if p.Hash == passHash { // Password: 123
+	if p.Hash == passHash {
 		currConn.Authenticated = true
 		currConn.Status = p.Status
+
 		fmt.Println("Sending GG_LOGIN_OK")
 		pOut := universal.InitGG_Packet(universal.GG_LOGIN_OK, []byte{})
 		_, err := pOut.Send(currConn.Conn)
 		if err != nil {
 			fmt.Println("Error: ", err)
 		}
+
+		// Set user's status
+		SetUserStatus(currConn.UIN, p.Status)
 	} else {
 		fmt.Println("Sending GG_LOGIN_FAILED")
 		pOut := universal.InitGG_Packet(universal.GG_LOGIN_FAILED, []byte{})
@@ -80,10 +84,7 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 			p := universal.GG_New_Status{}
 			p.Deserialize(pRecv.Data)
 
-			err := SetUserStatus(currConn.UIN, p.Status)
-			if err != nil {
-				fmt.Println("Failed to set user status:", err)
-			}
+			SetUserStatus(currConn.UIN, p.Status)
 
 			fmt.Println("New status: ", p.Status)
 		case universal.GG_SEND_MSG:
