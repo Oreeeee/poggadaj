@@ -19,17 +19,11 @@ func GetDBConn() (*pgxpool.Pool, error) {
 	)
 }
 
-func GetGG32Hash(uin uint32) uint32 {
+func GetGG32Hash(uin uint32) (uint32, error) {
 	var GG32Hash_i64 int64
-	for {
-		err := DatabaseConn.QueryRow(
-			context.Background(),
-			fmt.Sprintf("SELECT password_gg32 FROM gguser WHERE uin=%d", uin),
-		).Scan(&GG32Hash_i64)
-		if err != nil {
-			fmt.Println("Error!", err)
-			continue
-		}
-		return uint32(GG32Hash_i64)
-	}
+	err := DatabaseConn.QueryRow(
+		context.Background(),
+		fmt.Sprintf("SELECT password_gg32 FROM gguser WHERE uin=%d", uin),
+	).Scan(&GG32Hash_i64)
+	return uint32(GG32Hash_i64), err
 }

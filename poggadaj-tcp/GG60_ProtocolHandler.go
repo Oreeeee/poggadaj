@@ -35,7 +35,8 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 	currConn.UIN = p.UIN
 
 	fmt.Println("Sending login response")
-	if p.Hash == 4105424095 { // Password: 123
+	passHash, _ := GetGG32Hash(currConn.UIN)
+	if p.Hash == passHash { // Password: 123
 		currConn.Authenticated = true
 		currConn.Status = p.Status
 		fmt.Println("Sending GG_LOGIN_OK")
