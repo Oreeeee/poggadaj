@@ -136,6 +136,14 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 			fmt.Printf("Recipient: %d, Message: %s\n", p.Recipient, p.Content)
 
 			PublishMessageChannel(p.Recipient, Message{currConn.UIN, p.Content})
+		case universal.GG_PING:
+			fmt.Println("Received GG_PING")
+
+			pOut := universal.InitGG_Packet(universal.GG_PONG, []byte{})
+			_, err := pOut.Send(currConn.Conn)
+			if err != nil {
+				fmt.Println("Error: ", err)
+			}
 		default:
 			fmt.Printf("Received unknown packet, ignoring: 0x00%x\n", pRecv.PacketType)
 		}
