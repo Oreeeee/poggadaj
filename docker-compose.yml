@@ -35,6 +35,7 @@ services:
 
   cache:
     image: valkey/valkey:8.0-alpine
+    restart: always
     ports:
       - "6379:6379"
 
