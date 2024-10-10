@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/redis/go-redis/v9"
+	"os"
 )
 
 func GetCacheConn() *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr:     "cache:6379",
+		Addr:     fmt.Sprintf("%s:6379", os.Getenv("CACHE_ADDRESS")),
 		Password: "",
 		DB:       0,
 	})

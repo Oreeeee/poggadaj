@@ -45,17 +45,12 @@ func handleConnection(currConn GGConnection) {
 }
 
 func main() {
-	ip := "0.0.0.0:8074"
-	if len(os.Args) > 1 && os.Args[1] == "dockerless" {
-		ip = "127.0.0.1:8074"
-	}
-
 	dbconn, err := GetDBConn()
 	DatabaseConn = dbconn
 
 	CacheConn = GetCacheConn()
 
-	l, err := net.Listen("tcp", ip)
+	l, err := net.Listen("tcp", fmt.Sprintf("%s:8074", os.Getenv("LISTEN_ADDRESS")))
 	if err != nil {
 		log.Fatal(err)
 		return

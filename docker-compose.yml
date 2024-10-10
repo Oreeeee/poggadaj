@@ -6,6 +6,9 @@ services:
     restart: always
     ports:
       - "80:8080"
+    environment:
+      - LISTEN_ADDRESS=0.0.0.0
+      - LISTEN_PORT=8080
 
   tcp:
     build: poggadaj-tcp
@@ -13,7 +16,10 @@ services:
     ports:
       - "8074:8074"
     environment:
+      - LISTEN_ADDRESS=0.0.0.0
+      - DB_ADDRESS=db
       - DB_PASSWORD=${DB_PASSWORD}
+      - CACHE_ADDRESS=cache
 
   db:
     image: postgres:17

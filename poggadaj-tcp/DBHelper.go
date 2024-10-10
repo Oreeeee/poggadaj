@@ -8,14 +8,15 @@ import (
 )
 
 func GetDBConn() (*pgxpool.Pool, error) {
-	ip := "db"
-	if len(os.Args) > 1 && os.Args[1] == "dockerless" {
-		ip = "127.0.0.1"
-	}
+	dbaddr := os.Getenv("DB_ADDRESS")
 	password := os.Getenv("DB_PASSWORD")
 	return pgxpool.New(
 		context.Background(),
-		fmt.Sprintf("user=poggadaj password=%s host=%s port=5432 dbname=poggadaj sslmode=disable", password, ip),
+		fmt.Sprintf(
+			"user=poggadaj password=%s host=%s port=5432 dbname=poggadaj sslmode=disable",
+			password,
+			dbaddr,
+		),
 	)
 }
 

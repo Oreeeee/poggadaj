@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"os"
@@ -20,10 +21,9 @@ func main() {
 		GetMainBanner_Handler,
 	)
 
-	ip := "0.0.0.0:8080" // When running in Docker
-	if len(os.Args) > 1 && os.Args[1] == "dockerless" {
-		ip = "127.0.0.1:80"
-	}
-
-	log.Fatal(r.Run(ip))
+	log.Fatal(
+		r.Run(
+			fmt.Sprintf("%s:%s", os.Getenv("LISTEN_ADDRESS"), os.Getenv("LISTEN_PORT")),
+		),
+	)
 }
