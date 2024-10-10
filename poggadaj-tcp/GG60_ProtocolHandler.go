@@ -74,6 +74,18 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 		}
 
 		switch pRecv.PacketType {
+		case universal.GG_NOTIFY_FIRST:
+			fmt.Println("Received GG_NOTIFY_FIRST")
+		case universal.GG_NOTIFY_LAST:
+			fmt.Println("Received GG_NOTIFY_LAST")
+			universal.GG_NotifyContactDeserialize(pRecv.Data, pRecv.Length, &currConn.NotifyList)
+			fmt.Println(currConn.NotifyList)
+		case universal.GG_ADD_NOTIFY:
+			fmt.Println("Received GG_ADD_NOTIFY")
+			universal.GG_AddNotify(pRecv.Data, &currConn.NotifyList)
+			fmt.Println(currConn.NotifyList)
+		case universal.GG_REMOVE_NOTIFY:
+			fmt.Println("Received GG_REMOVE_NOTIFY (unimplemented)")
 		case universal.GG_LIST_EMPTY:
 			fmt.Println("Received GG_LIST_EMPTY")
 		case universal.GG_NEW_STATUS:
