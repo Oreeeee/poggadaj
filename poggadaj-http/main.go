@@ -17,7 +17,15 @@ func main() {
 	)
 
 	// adserver.gadu-gadu.pl
+	// TODO: Implement different responses depending on the endpoint
+	// TODO: Make the responses configurable
 	r.GET("/getmainbanner.asp",
+		GetMainBanner_Handler,
+	)
+	r.GET("/smallbanner.asp",
+		GetMainBanner_Handler,
+	)
+	r.GET("/getbanner.asp",
 		GetMainBanner_Handler,
 	)
 
