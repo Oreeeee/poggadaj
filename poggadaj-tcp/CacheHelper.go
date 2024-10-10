@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"os"
+	"poggadaj-tcp/universal"
 )
 
 func GetCacheConn() *redis.Client {
@@ -16,7 +17,8 @@ func GetCacheConn() *redis.Client {
 	})
 }
 
-func SetUserStatus(uin uint32, status uint32) error {
+func SetUserStatus(uin uint32, status uint32) {
+	// Set user's status in cache
 	err := CacheConn.Set(
 		context.Background(),
 		fmt.Sprintf("ggstatus:%d", uin),
@@ -26,7 +28,37 @@ func SetUserStatus(uin uint32, status uint32) error {
 	if err != nil {
 		fmt.Println("Failed to set user status:", err)
 	}
-	return err
+
+	// Publish a status change announcement
+	payload, err2 := json.Marshal(universal.StatusChangeMsg{uin, status})
+	if err2 != nil {
+		fmt.Println("Failed to marshal status:", err2)
+	}
+
+	err = CacheConn.Publish(context.Background(), "ggstatus", payload).Err()
+	if err != nil {
+		fmt.Println("Failed to publish status:", err)
+	}
+}
+
+func GetStatusChannel() *redis.PubSub {
+	return CacheConn.Subscribe(context.Background(), "ggstatus")
+}
+
+func RecvStatusChannel(pubsub *redis.PubSub) universal.StatusChangeMsg {
+	statusChange := universal.StatusChangeMsg{}
+	msg, err := pubsub.ReceiveMessage(context.Background())
+
+	if err != nil {
+		fmt.Println("Failed to receive status change:", err)
+	}
+
+	err = json.Unmarshal([]byte(msg.Payload), &statusChange)
+	if err != nil {
+		fmt.Println("Failed to unmarshal status change:", err)
+	}
+
+	return statusChange
 }
 
 func PublishMessageChannel(sender uint32, msg Message) error {

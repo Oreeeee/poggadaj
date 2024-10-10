@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func MsgChannel_GG60(currConn GGConnection) {
+func MsgChannel_GG60(currConn *GGConnection) {
 	pubsub := GetMessageChannel(currConn.UIN)
 	for {
 		msg := RecvMessageChannel(pubsub)
@@ -24,6 +24,36 @@ func MsgChannel_GG60(currConn GGConnection) {
 		_, err := pOut.Send(currConn.Conn)
 		if err != nil {
 			fmt.Println("Error: ", err)
+		}
+	}
+}
+
+func StatusChannel_GG60(currConn *GGConnection) {
+	pubsub := GetStatusChannel()
+	for {
+		statusChange := RecvStatusChannel(pubsub)
+		fmt.Println(statusChange)
+
+		// Check if the status change is applicable for this connection
+		for _, e := range currConn.NotifyList {
+			if e.UIN == statusChange.UIN {
+				fmt.Printf("%d's status change is relevant for %d", statusChange.UIN, currConn.UIN)
+
+				p := gg60.GG_Status60{
+					UIN:        statusChange.UIN,
+					Status:     uint8(statusChange.Status),
+					RemoteIP:   0,
+					RemotePort: 0,
+					Version:    0,
+					ImageSize:  0,
+					Unknown1:   0,
+				}
+				pOut := universal.InitGG_Packet(universal.GG_STATUS60, p.Serialize())
+				_, err := pOut.Send(currConn.Conn)
+				if err != nil {
+					fmt.Println("Error: ", err)
+				}
+			}
 		}
 	}
 }
@@ -61,8 +91,9 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 		return
 	}
 
-	// Start a message sending channel
-	go MsgChannel_GG60(currConn)
+	// Start send channels
+	go MsgChannel_GG60(&currConn)
+	go StatusChannel_GG60(&currConn)
 
 	// Connection loop
 	for {
