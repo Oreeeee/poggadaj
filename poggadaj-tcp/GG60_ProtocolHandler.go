@@ -118,6 +118,24 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 			fmt.Println("Received GG_NOTIFY_LAST")
 			universal.GG_NotifyContactDeserialize(pRecv.Data, pRecv.Length, &currConn.NotifyList)
 			fmt.Println(currConn.NotifyList)
+
+			// Respond with GG_NOTIFY_REPLY
+			// TODO: unfuck this shit
+			//response := make([]byte, 0)
+			//buf := bytes.NewBuffer(response)
+			//for _, notifyContact := range currConn.NotifyList {
+			//	statusChange := universal.StatusChangeMsg{
+			//		UIN:    notifyContact.UIN,
+			//		Status: FetchUserStatus(notifyContact.UIN),
+			//	}
+			//	binary.Write(buf, binary.LittleEndian, universal.GG_NotifyReplySerialize(statusChange))
+			//}
+			//
+			//pOut := universal.InitGG_Packet(universal.GG_NOTIFY_REPLY60, buf.Bytes())
+			//_, err := pOut.Send(currConn.Conn)
+			//if err != nil {
+			//	fmt.Println("Error: ", err)
+			//}
 		case universal.GG_ADD_NOTIFY:
 			fmt.Println("Received GG_ADD_NOTIFY")
 			universal.GG_AddNotify(pRecv.Data, &currConn.NotifyList)

@@ -7,6 +7,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"os"
 	"poggadaj-tcp/universal"
+	"strconv"
 )
 
 func GetCacheConn() *redis.Client {
@@ -98,4 +99,17 @@ func RecvMessageChannel(pubsub *redis.PubSub) Message {
 	fmt.Println("Message received over pubsub:", msg.Payload)
 
 	return message
+}
+
+func FetchUserStatus(uin uint32) uint32 {
+	status, err := CacheConn.Get(context.Background(), fmt.Sprintf("ggstatus:%d", uin)).Result()
+	if err != nil {
+		fmt.Println("Failed to fetch user status:", err)
+	}
+
+	statusInt, err2 := strconv.Atoi(status)
+	if err2 != nil {
+		fmt.Println("Failed to fetch user status:", err)
+	}
+	return uint32(statusInt)
 }
