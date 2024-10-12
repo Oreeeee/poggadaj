@@ -6,13 +6,16 @@ import (
 )
 
 func GetMainBanner(c *gin.Context) {
-	c.String(http.StatusOK, "Hello from poggadaj-HTTP")
+	ads := GetAds(BANNERTYPE_MAIN)
+	c.String(http.StatusOK, ads[0].Html.String)
 }
 
 func GetSmallBanner(c *gin.Context) {
-	c.String(http.StatusOK, "Hello from poggadaj-HTTP")
+	ads := GetAds(BANNERTYPE_SMALL)
+	c.String(http.StatusOK, ads[0].Html.String)
 }
 
 func GetBanner(c *gin.Context) {
-	c.String(http.StatusOK, "Hello from poggadaj-HTTP")
+	ads := GetAds(BANNERTYPE_BANNER)
+	c.String(http.StatusOK, ads[0].Html.String)
 }
