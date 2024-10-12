@@ -2,17 +2,19 @@ package main
 
 import (
 	"fmt"
+	"github.com/charmbracelet/log"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
-	"log"
 	"net"
 	"os"
 	"poggadaj-tcp/gg60"
 	"poggadaj-tcp/universal"
+	"time"
 )
 
 var DatabaseConn *pgxpool.Pool
 var CacheConn *redis.Client
+var Logger *log.Logger
 
 // This function handles connections before the client version of GG is known.
 // Its purpose is to send GG_WELCOME, receive the packet type of the incoming
@@ -50,9 +52,18 @@ func main() {
 
 	CacheConn = GetCacheConn()
 
+	Logger = log.NewWithOptions(os.Stdout, log.Options{
+		ReportCaller:    true,
+		ReportTimestamp: true,
+		TimeFormat:      time.DateTime,
+		Level:           log.DebugLevel,
+	})
+
+	Logger.Infof("It works!")
+
 	l, err := net.Listen("tcp", fmt.Sprintf("%s:8074", os.Getenv("LISTEN_ADDRESS")))
 	if err != nil {
-		log.Fatal(err)
+		Logger.Fatal(err)
 		return
 	}
 	defer l.Close()
