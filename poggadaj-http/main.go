@@ -26,13 +26,13 @@ func main() {
 	// TODO: Implement different responses depending on the endpoint
 	// TODO: Make the responses configurable
 	r.GET("/getmainbanner.asp",
-		GetMainBanner_Handler,
+		GetMainBanner,
 	)
 	r.GET("/smallbanner.asp",
-		GetMainBanner_Handler,
+		GetSmallBanner,
 	)
 	r.GET("/getbanner.asp",
-		GetMainBanner_Handler,
+		GetBanner,
 	)
 
 	log.Fatal(
