@@ -87,6 +87,9 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 
 		// Set user's status
 		SetUserStatus(currConn.UIN, p.Status)
+
+		// Change user's status to not available after disconnect
+		defer SetUserStatus(currConn.UIN, universal.GG_STATUS_NOT_AVAIL)
 	} else {
 		fmt.Println("Sending GG_LOGIN_FAILED")
 		pOut := universal.InitGG_Packet(universal.GG_LOGIN_FAILED, []byte{})
