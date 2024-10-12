@@ -113,6 +113,7 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 		switch pRecv.PacketType {
 		case universal.GG_NOTIFY_FIRST:
 			fmt.Println("Received GG_NOTIFY_FIRST")
+			universal.GG_NotifyContactDeserialize(pRecv.Data, pRecv.Length, &currConn.NotifyList)
 		case universal.GG_NOTIFY_LAST:
 			fmt.Println("Received GG_NOTIFY_LAST")
 			universal.GG_NotifyContactDeserialize(pRecv.Data, pRecv.Length, &currConn.NotifyList)
