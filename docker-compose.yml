@@ -9,6 +9,8 @@ services:
     environment:
       - LISTEN_ADDRESS=0.0.0.0
       - LISTEN_PORT=8080
+      - DB_ADDRESS=db
+      - DB_PASSWORD=${DB_PASSWORD}
 
   tcp:
     build: poggadaj-tcp
