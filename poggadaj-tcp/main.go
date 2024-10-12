@@ -58,8 +58,6 @@ func main() {
 		Level:           log.DebugLevel,
 	})
 
-	Logger.Infof("It works!")
-
 	l, err := net.Listen("tcp", fmt.Sprintf("%s:8074", os.Getenv("LISTEN_ADDRESS")))
 	if err != nil {
 		Logger.Fatal(err)
