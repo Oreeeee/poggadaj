@@ -3,12 +3,18 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 	"os"
 	"poggadaj_http/appmsg"
 )
 
+var DatabaseConn *pgxpool.Pool
+
 func main() {
+	dbconn, _ := GetDBConn()
+	DatabaseConn = dbconn
+
 	r := gin.Default()
 
 	// appmsg.gadu-gadu.pl
