@@ -29,19 +29,18 @@ func handleConnection(currConn GGConnection) {
 
 	_, err := packet.Send(currConn.Conn)
 	if err != nil {
-		fmt.Println("Error: ", err)
+		Logger.Errorf("Error: %s", err)
 	}
-	fmt.Println("Sent data")
 
 	// Wait for the next packet, which will tell us the protocol version handler we need
 	pRecv := universal.GG_Packet{}
 	if pRecv.Receive(currConn.Conn) != nil {
-		fmt.Println("Error receiving data, dropping connection!: ", err)
+		Logger.Errorf("Error receiving data, dropping connection!: %s", err)
 		return
 	}
 
 	if pRecv.PacketType == gg60.GG_LOGIN60 {
-		fmt.Println("Received GG_LOGIN60, switching to Handle_GG60")
+		Logger.Infof("Gadu-Gadu 6.0 protocol detected")
 		Handle_GG60(currConn, pRecv)
 	}
 }
@@ -69,18 +68,18 @@ func main() {
 	defer l.Close()
 	defer DatabaseConn.Close()
 
-	fmt.Println("Listening...")
+	Logger.Infof("Listening on %s:%d", os.Getenv("LISTEN_ADDRESS"), 8074)
 
 	var connList []*GGConnection
 
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			fmt.Println("Error accepting: ", err)
+			Logger.Errorf("Error accepting from %s: %s", conn.RemoteAddr(), err)
 			continue
 		}
 
-		fmt.Println("Accepted connection: ", conn.RemoteAddr())
+		Logger.Infof("Accepted connection from %s", conn.RemoteAddr())
 
 		// Create a connection object
 		ggConn := &GGConnection{}
