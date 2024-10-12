@@ -37,11 +37,17 @@ func StatusChannel_GG60(currConn *GGConnection) {
 		// Check if the status change is applicable for this connection
 		for _, e := range currConn.NotifyList {
 			if e.UIN == statusChange.UIN {
-				fmt.Printf("%d's status change is relevant for %d", statusChange.UIN, currConn.UIN)
+				fmt.Printf("%d's status change is relevant for %d\n", statusChange.UIN, currConn.UIN)
+
+				status := statusChange.Status
+				if status == universal.GG_STATUS_INVISIBLE {
+					fmt.Println("Got GG_STATUS_INVISIBLE, sending GG_STATUS_NOT_AVAIL")
+					status = universal.GG_STATUS_NOT_AVAIL
+				}
 
 				p := gg60.GG_Status60{
 					UIN:        statusChange.UIN,
-					Status:     uint8(statusChange.Status),
+					Status:     uint8(status),
 					RemoteIP:   0,
 					RemotePort: 0,
 					Version:    0,
