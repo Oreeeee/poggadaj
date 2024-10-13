@@ -1,0 +1,7 @@
+package main
+
+const (
+	BANNERTYPE_BANNER = 0
+	BANNERTYPE_SMALL  = 1
+	BANNERTYPE_MAIN   = 2
+)
