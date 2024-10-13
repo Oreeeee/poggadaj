@@ -39,22 +39,27 @@ func StatusChannel_GG60(currConn *GGConnection) {
 		// Check if the status change is applicable for this connection
 		for _, e := range currConn.NotifyList {
 			if e.UIN == statusChange.UIN {
-				Logger.Debugf("%d's status change is relevant for %d\n", statusChange.UIN, currConn.UIN)
+				Logger.Debugf("%d's status change is relevant for %d", statusChange.UIN, currConn.UIN)
 
 				status := statusChange.Status
-				if status == universal.GG_STATUS_INVISIBLE {
+				switch status {
+				case universal.GG_STATUS_INVISIBLE:
 					Logger.Debugf("Got GG_STATUS_INVISIBLE, sending GG_STATUS_NOT_AVAIL")
 					status = universal.GG_STATUS_NOT_AVAIL
+				case universal.GG_STATUS_INVISIBLE_DESCR:
+					Logger.Debugf("Got GG_STATUS_INVISIBLE_DESCR, sending GG_STATUS_NOT_AVAIL_DESCR")
+					status = universal.GG_STATUS_NOT_AVAIL_DESCR
 				}
 
 				p := gg60.GG_Status60{
-					UIN:        statusChange.UIN,
-					Status:     uint8(status),
-					RemoteIP:   0,
-					RemotePort: 0,
-					Version:    0,
-					ImageSize:  0,
-					Unknown1:   0,
+					UIN:         statusChange.UIN,
+					Status:      uint8(status),
+					RemoteIP:    0,
+					RemotePort:  0,
+					Version:     0,
+					ImageSize:   0,
+					Unknown1:    0,
+					Description: statusChange.Description,
 				}
 				pOut := universal.InitGG_Packet(universal.GG_STATUS60, p.Serialize())
 				_, err := pOut.Send(currConn.Conn)
@@ -87,10 +92,16 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 		}
 
 		// Set user's status
-		SetUserStatus(currConn.UIN, p.Status)
+		SetUserStatus(universal.StatusChangeMsg{
+			UIN:    currConn.UIN,
+			Status: p.Status,
+		})
 
 		// Change user's status to not available after disconnect
-		defer SetUserStatus(currConn.UIN, universal.GG_STATUS_NOT_AVAIL)
+		defer SetUserStatus(universal.StatusChangeMsg{
+			UIN:    currConn.UIN,
+			Status: universal.GG_STATUS_NOT_AVAIL,
+		})
 	} else {
 		Logger.Debugf("Sending GG_LOGIN_FAILED")
 		pOut := universal.InitGG_Packet(universal.GG_LOGIN_FAILED, []byte{})
@@ -127,10 +138,7 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 			response := make([]byte, 0)
 			buf := bytes.NewBuffer(response)
 			for _, notifyContact := range currConn.NotifyList {
-				statusChange := universal.StatusChangeMsg{
-					UIN:    notifyContact.UIN,
-					Status: FetchUserStatus(notifyContact.UIN),
-				}
+				statusChange := FetchUserStatus(notifyContact.UIN)
 				binary.Write(buf, binary.LittleEndian, universal.GG_NotifyReplySerialize(statusChange))
 			}
 
@@ -151,11 +159,15 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 			Logger.Debugf("Received GG_NEW_STATUS")
 
 			p := universal.GG_New_Status{}
-			p.Deserialize(pRecv.Data)
+			p.Deserialize(pRecv.Data, pRecv.Length)
 
-			SetUserStatus(currConn.UIN, p.Status)
+			SetUserStatus(universal.StatusChangeMsg{
+				UIN:         currConn.UIN,
+				Status:      p.Status,
+				Description: p.Description,
+			})
 
-			Logger.Debugf("New status: %d", p.Status)
+			Logger.Debugf("New status: 0x00%x, Description: %s", p.Status, p.Description)
 		case universal.GG_SEND_MSG:
 			Logger.Debugf("Client is sending a message...")
 
