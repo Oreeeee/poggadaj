@@ -9,9 +9,9 @@ import (
 	"time"
 )
 
-func MsgChannel_GG60(currConn *GGConnection) {
+func MsgChannel_GG60(currConn *GGConnection, run *bool) {
 	pubsub := GetMessageChannel(currConn.UIN)
-	for {
+	for *run {
 		msg := RecvMessageChannel(pubsub)
 
 		Logger.Debugf("%d received a message!", currConn.UIN)
@@ -28,11 +28,12 @@ func MsgChannel_GG60(currConn *GGConnection) {
 			Logger.Errorf("Error: %s", err)
 		}
 	}
+	Logger.Debugf("Quitting message channel")
 }
 
-func StatusChannel_GG60(currConn *GGConnection) {
+func StatusChannel_GG60(currConn *GGConnection, run *bool) {
 	pubsub := GetStatusChannel()
-	for {
+	for *run {
 		statusChange := RecvStatusChannel(pubsub)
 		//fmt.Println(statusChange)
 
@@ -69,6 +70,7 @@ func StatusChannel_GG60(currConn *GGConnection) {
 			}
 		}
 	}
+	Logger.Debugf("Quitting status channel")
 }
 
 func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
@@ -113,8 +115,12 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 	}
 
 	// Start send channels
-	go MsgChannel_GG60(&currConn)
-	go StatusChannel_GG60(&currConn)
+	runMsgChannel := true
+	runStatusChannel := true
+	go MsgChannel_GG60(&currConn, &runMsgChannel)
+	go StatusChannel_GG60(&currConn, &runStatusChannel)
+	defer func(r *bool) { *r = false }(&runMsgChannel)
+	defer func(r *bool) { *r = false }(&runStatusChannel)
 
 	// Connection loop
 	for {
