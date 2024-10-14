@@ -10,9 +10,14 @@ import (
 )
 
 func MsgChannel_GG60(currConn *GGConnection, run *bool) {
+	defer Logger.Debugf("Quitting message channel")
 	pubsub := GetMessageChannel(currConn.UIN)
 	for *run {
 		msg := RecvMessageChannel(pubsub)
+		if !*run {
+			// Sanity check to not accidentally write to a closed socket
+			continue
+		}
 
 		Logger.Debugf("%d received a message!", currConn.UIN)
 		pS := universal.GG_Recv_MSG{
@@ -28,13 +33,17 @@ func MsgChannel_GG60(currConn *GGConnection, run *bool) {
 			Logger.Errorf("Error: %s", err)
 		}
 	}
-	Logger.Debugf("Quitting message channel")
 }
 
 func StatusChannel_GG60(currConn *GGConnection, run *bool) {
+	defer Logger.Debugf("Quitting status channel")
 	pubsub := GetStatusChannel()
 	for *run {
 		statusChange := RecvStatusChannel(pubsub)
+		if !*run {
+			// Sanity check to not accidentally write to a closed socket
+			continue
+		}
 		//fmt.Println(statusChange)
 
 		// Check if the status change is applicable for this connection
@@ -70,7 +79,6 @@ func StatusChannel_GG60(currConn *GGConnection, run *bool) {
 			}
 		}
 	}
-	Logger.Debugf("Quitting status channel")
 }
 
 func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
