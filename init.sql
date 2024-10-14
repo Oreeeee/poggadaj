@@ -6,6 +6,11 @@ CREATE TABLE gguser (
     notify_list INTEGER[]
 );
 
+ALTER SEQUENCE gguser_uin_seq
+MINVALUE 1
+START 1
+RESTART 1;
+
 CREATE TABLE adserver_ad (
     id SERIAL PRIMARY KEY,
     adtype SMALLINT,
@@ -17,9 +22,9 @@ CREATE TABLE adserver_ad (
 
 -- Initial data
 INSERT INTO gguser
-    (uin, password_gg32, password_sha1)
+    (password_gg32, password_sha1)
     VALUES
-    (1, 4105424095, NULL); -- Creates an initial user with the number 1 and password 123
+    (4105424095, NULL); -- Creates an initial user with the number 1 and password 123
 
 INSERT INTO adserver_ad
 (adtype, bannertype, html)
