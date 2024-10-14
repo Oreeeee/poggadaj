@@ -40,13 +40,3 @@ services:
     restart: always
     ports:
       - "6379:6379"
-
-  pgadmin:
-    image: dpage/pgadmin4:8.12
-    restart: always
-    ports:
-      - "8822:80"
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
-      - PGADMIN_DISABLE_POSTFIX=true
