@@ -1,15 +1,19 @@
 -- Schema
-CREATE TABLE gguser (
-    uin SERIAL PRIMARY KEY,
-    password_gg32 BIGINT,
-    password_sha1 VARCHAR(20),
-    notify_list INTEGER[]
-);
-
-ALTER SEQUENCE gguser_uin_seq
+CREATE SEQUENCE uin_seq
 MINVALUE 1
 START 1
-RESTART 1;
+INCREMENT 1
+AS INT;
+
+CREATE TABLE gguser (
+    id SERIAL PRIMARY KEY,
+    uin INT,
+    password_gg32 BIGINT,
+    password_sha1 VARCHAR(20),
+    name TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    joined TIMESTAMP DEFAULT now()
+);
 
 CREATE TABLE adserver_ad (
     id SERIAL PRIMARY KEY,
@@ -19,27 +23,11 @@ CREATE TABLE adserver_ad (
     html TEXT
 );
 
-
 -- Initial data
-INSERT INTO gguser
-    (password_gg32, password_sha1)
-    VALUES
-    (4105424095, NULL); -- Creates an initial user with the number 1 and password 123
-
 INSERT INTO adserver_ad
 (adtype, bannertype, html)
 VALUES
     (0, 0, 'Hello from poggadaj-HTTP!');
-
-INSERT INTO adserver_ad
-(adtype, bannertype, html)
-VALUES
-    (0, 0, 'This is one of the banner responses.');
-
-INSERT INTO adserver_ad
-(adtype, bannertype, html)
-VALUES
-    (0, 0, 'Lorem ipsum');
 
 INSERT INTO adserver_ad
 (adtype, bannertype, html)
@@ -49,24 +37,4 @@ VALUES
 INSERT INTO adserver_ad
 (adtype, bannertype, html)
 VALUES
-    (0, 1, 'This is one of the small banner responses.');
-
-INSERT INTO adserver_ad
-(adtype, bannertype, html)
-VALUES
-    (0, 1, 'Lorem ipsum');
-
-INSERT INTO adserver_ad
-    (adtype, bannertype, html)
-    VALUES
     (0, 2, 'Hello from poggadaj-HTTP!');
-
-INSERT INTO adserver_ad
-(adtype, bannertype, html)
-VALUES
-    (0, 2, 'This is one of the main banner responses.');
-
-INSERT INTO adserver_ad
-(adtype, bannertype, html)
-VALUES
-    (0, 2, 'Lorem ipsum');
