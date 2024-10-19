@@ -58,6 +58,23 @@ func loginUser(c echo.Context) error {
 	return c.String(http.StatusUnauthorized, "")
 }
 
+func gg32ChangePassword(c echo.Context) error {
+	if !ValidateSession(c) {
+		return c.String(http.StatusUnauthorized, "")
+	}
+	u, err := c.Cookie("Username")
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "")
+	}
+	username := u.Value
+
+	password := c.FormValue("password")
+	if UpdateUserGG32(username, password, 0xFFFFFFFF) != nil {
+		return c.String(http.StatusInternalServerError, "")
+	}
+	return c.String(http.StatusOK, "")
+}
+
 func main() {
 	dbconn, _ := GetDBConn()
 	DatabaseConn = dbconn
@@ -69,6 +86,7 @@ func main() {
 	})
 	r.POST("/api/v1/register", registerUser)
 	r.POST("/api/v1/login", loginUser)
+	r.POST("/api/v1/gg32-changepwd", gg32ChangePassword)
 	r.Logger.Fatal(
 		r.Start(
 			fmt.Sprintf("%s:%s", os.Getenv("LISTEN_ADDRESS"), os.Getenv("LISTEN_PORT")),

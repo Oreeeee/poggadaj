@@ -59,3 +59,10 @@ func GetUserPasswordHash(name string) (string, error) {
 	}
 	return passwordHash, nil
 }
+
+func UpdateUserGG32(name string, password string, seed uint32) error {
+	hashedPassword := GG32LoginHash(password, seed)
+	query := "UPDATE gguser SET password_gg32=$1 WHERE name=$2"
+	_, err := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
+	return err
+}
