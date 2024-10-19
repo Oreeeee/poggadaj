@@ -49,3 +49,13 @@ func CreateUser(name string, password string) (int, error) {
 
 	return newUserUIN, nil
 }
+
+func GetUserPasswordHash(name string) (string, error) {
+	query := "SELECT password FROM gguser WHERE name=$1"
+	var passwordHash string
+	err := DatabaseConn.QueryRow(context.Background(), query, name).Scan(&passwordHash)
+	if err != nil {
+		return "", err
+	}
+	return passwordHash, nil
+}
