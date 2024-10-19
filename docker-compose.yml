@@ -14,6 +14,18 @@ services:
       - GG_SERVICE_IP=${GG_SERVICE_IP}
       - GG_SERVICE_PORT=${GG_SERVICE_PORT}
 
+  api:
+    build: poggadaj-api
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - LISTEN_ADDRESS=0.0.0.0
+      - LISTEN_PORT=8080
+      - DB_ADDRESS=db
+      - DB_PASSWORD=${DB_PASSWORD}
+      - CACHE_ADDRESS=cache
+
   tcp:
     build: poggadaj-tcp
     restart: always
