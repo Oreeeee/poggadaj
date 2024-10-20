@@ -20,6 +20,12 @@ services:
     ports:
       - "8080:8080"
 
+  frontend:
+    build: poggadaj-web
+    restart: always
+    environment:
+      - NODE_ENV=production
+
   api:
     build: poggadaj-api
     restart: always
