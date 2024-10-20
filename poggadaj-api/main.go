@@ -79,6 +79,13 @@ func gg32ChangePassword(c echo.Context) error {
 	return c.String(http.StatusOK, "")
 }
 
+func isAuthenticated(c echo.Context) error {
+	if !ValidateSession(c) {
+		return c.String(http.StatusUnauthorized, "")
+	}
+	return c.String(http.StatusOK, "")
+}
+
 func main() {
 	dbconn, _ := GetDBConn()
 	DatabaseConn = dbconn
@@ -92,6 +99,7 @@ func main() {
 	r.GET("/api/v1/register", registerUser)
 	r.GET("/api/v1/login", loginUser)
 	r.GET("/api/v1/gg32-changepwd", gg32ChangePassword)
+	r.GET("/api/v1/is-authenticated", isAuthenticated)
 	r.Logger.Fatal(
 		r.Start(
 			fmt.Sprintf("%s:%s", os.Getenv("LISTEN_ADDRESS"), os.Getenv("LISTEN_PORT")),
