@@ -1,0 +1,3 @@
+[submodule "poggadaj-web"]
+	path = poggadaj-web
+	url = git@github.com:Oreeeee/poggadaj-web.git
