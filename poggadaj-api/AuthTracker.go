@@ -30,8 +30,8 @@ func GenerateAuthorizedSession(user string) AuthorizedSession {
 }
 
 func ValidateSession(c echo.Context) bool {
-	nameCookie, _ := c.Cookie("Username")
-	authCookie, _ := c.Cookie("Auth")
+	nameCookie := GetCookieSafe(c, "Username")
+	authCookie := GetCookieSafe(c, "Auth")
 
 	for i := range Sessions {
 		session := Sessions[i]
