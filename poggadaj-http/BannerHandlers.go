@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"math/rand"
 	"net/http"
 )
@@ -34,14 +34,14 @@ func buildResponse(bannerType int) string {
 	return response
 }
 
-func GetMainBanner(c *gin.Context) {
-	c.String(http.StatusOK, buildResponse(BANNERTYPE_MAIN))
+func GetMainBanner(c echo.Context) error {
+	return c.String(http.StatusOK, buildResponse(BANNERTYPE_MAIN))
 }
 
-func GetSmallBanner(c *gin.Context) {
-	c.String(http.StatusOK, buildResponse(BANNERTYPE_SMALL))
+func GetSmallBanner(c echo.Context) error {
+	return c.String(http.StatusOK, buildResponse(BANNERTYPE_SMALL))
 }
 
-func GetBanner(c *gin.Context) {
-	c.String(http.StatusOK, buildResponse(BANNERTYPE_BANNER))
+func GetBanner(c echo.Context) error {
+	return c.String(http.StatusOK, buildResponse(BANNERTYPE_BANNER))
 }

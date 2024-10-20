@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/labstack/echo/v4"
 	"log"
 	"os"
 	"poggadaj_http/appmsg"
@@ -15,7 +15,8 @@ func main() {
 	dbconn, _ := GetDBConn()
 	DatabaseConn = dbconn
 
-	r := gin.Default()
+	r := echo.New()
+	r.HideBanner = true
 
 	// appmsg.gadu-gadu.pl
 	r.GET("/appsvc/appmsg4.asp",
@@ -36,7 +37,7 @@ func main() {
 	)
 
 	log.Fatal(
-		r.Run(
+		r.Start(
 			fmt.Sprintf("%s:%s", os.Getenv("LISTEN_ADDRESS"), os.Getenv("LISTEN_PORT")),
 		),
 	)
