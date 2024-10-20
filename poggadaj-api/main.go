@@ -15,8 +15,8 @@ func registerUser(c echo.Context) error {
 	name := c.FormValue("name")
 	password := c.FormValue("password")
 
-	if len(password) > 64 || len(password) < 8 {
-		return c.JSON(http.StatusBadRequest, &RegisterResponse{Error: "Password doesn't fit these constraints: >7<64"})
+	if !PasswordFitsRestrictions(password) {
+		return c.JSON(http.StatusBadRequest, &RegisterResponse{Error: "Password doesn't fit constraints"})
 	}
 	uin, err := CreateUser(name, password)
 	if err != nil {
@@ -69,6 +69,9 @@ func gg32ChangePassword(c echo.Context) error {
 	username := u.Value
 
 	password := c.FormValue("password")
+	if !PasswordFitsRestrictions(password) {
+		return c.String(http.StatusBadRequest, "Password doesn't fit constraints")
+	}
 	if UpdateUserGG32(username, password, 0xFFFFFFFF) != nil {
 		return c.String(http.StatusInternalServerError, "")
 	}

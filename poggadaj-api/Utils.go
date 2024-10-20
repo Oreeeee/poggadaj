@@ -12,3 +12,10 @@ func GetCookieSafe(c echo.Context, name string) *http.Cookie {
 	}
 	return &http.Cookie{}
 }
+
+func PasswordFitsRestrictions(password string) bool {
+	if len(password) < 8 || len(password) > 64 {
+		return false
+	}
+	return true
+}
