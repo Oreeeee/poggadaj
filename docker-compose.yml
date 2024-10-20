@@ -14,11 +14,15 @@ services:
       - GG_SERVICE_IP=${GG_SERVICE_IP}
       - GG_SERVICE_PORT=${GG_SERVICE_PORT}
 
-  api:
-    build: poggadaj-api
+  nginx:
+    build: poggadaj-nginx
     restart: always
     ports:
       - "8080:8080"
+
+  api:
+    build: poggadaj-api
+    restart: always
     environment:
       - LISTEN_ADDRESS=0.0.0.0
       - LISTEN_PORT=8080
