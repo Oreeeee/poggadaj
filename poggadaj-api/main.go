@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"net/http"
 	"os"
 )
@@ -84,6 +85,7 @@ func main() {
 
 	r := echo.New()
 	r.HideBanner = true
+	r.Use(middleware.CORS()) // TODO: Configure
 	r.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
