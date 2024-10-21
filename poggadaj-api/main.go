@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 var DatabaseConn *pgxpool.Pool
@@ -69,7 +70,9 @@ func gg32ChangePassword(c echo.Context) error {
 	if !PasswordFitsRestrictions(password) {
 		return c.String(http.StatusBadRequest, "Password doesn't fit constraints")
 	}
-	if UpdateUserGG32(username, password, 0xFFFFFFFF) != nil {
+	seed64, _ := strconv.ParseUint(os.Getenv("GG_SEED"), 10, 32)
+	seed := uint32(seed64)
+	if UpdateUserGG32(username, password, seed) != nil {
 		return c.String(http.StatusInternalServerError, "")
 	}
 	return c.String(http.StatusOK, "")

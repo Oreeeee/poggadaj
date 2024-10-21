@@ -35,6 +35,7 @@ services:
       - DB_ADDRESS=db
       - DB_PASSWORD=${DB_PASSWORD}
       - CACHE_ADDRESS=cache
+      - GG_SEED=${GG_SEED}
 
   tcp:
     build: poggadaj-tcp
@@ -46,6 +47,7 @@ services:
       - DB_ADDRESS=db
       - DB_PASSWORD=${DB_PASSWORD}
       - CACHE_ADDRESS=cache
+      - GG_SEED=${GG_SEED}
 
   db:
     image: postgres:17
