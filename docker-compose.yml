@@ -56,7 +56,7 @@ services:
       - ./db:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     environment:
       - POSTGRES_USER=poggadaj
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -65,4 +65,4 @@ services:
     image: valkey/valkey:8.0-alpine
     restart: always
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
