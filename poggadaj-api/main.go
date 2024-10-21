@@ -60,14 +60,10 @@ func loginUser(c echo.Context) error {
 }
 
 func gg32ChangePassword(c echo.Context) error {
-	if !ValidateSession(c) {
+	sessionValid, username := ValidateSession(c)
+	if !sessionValid {
 		return c.String(http.StatusUnauthorized, "")
 	}
-	u, err := c.Cookie("Username")
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "")
-	}
-	username := u.Value
 
 	password := c.FormValue("password")
 	if !PasswordFitsRestrictions(password) {
@@ -80,10 +76,27 @@ func gg32ChangePassword(c echo.Context) error {
 }
 
 func isAuthenticated(c echo.Context) error {
-	if !ValidateSession(c) {
+	sessionValid, _ := ValidateSession(c)
+	if !sessionValid {
 		return c.String(http.StatusUnauthorized, "")
 	}
 	return c.String(http.StatusOK, "")
+}
+
+func userData(c echo.Context) error {
+	sessionValid, username := ValidateSession(c)
+	if !sessionValid {
+		return c.String(http.StatusUnauthorized, "")
+	}
+	uin, joined, err := GetUserData(username)
+	if err != nil {
+		fmt.Println(err)
+		return c.String(http.StatusBadRequest, "{}")
+	}
+	return c.JSON(http.StatusOK, UserDataResponse{
+		UIN:    uin,
+		Joined: joined,
+	})
 }
 
 func main() {
@@ -100,6 +113,7 @@ func main() {
 	r.GET("/api/v1/login", loginUser)
 	r.GET("/api/v1/gg32-changepwd", gg32ChangePassword)
 	r.GET("/api/v1/is-authenticated", isAuthenticated)
+	r.GET("/api/v1/user-data", userData)
 	r.Logger.Fatal(
 		r.Start(
 			fmt.Sprintf("%s:%s", os.Getenv("LISTEN_ADDRESS"), os.Getenv("LISTEN_PORT")),

@@ -6,6 +6,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"os"
+	"time"
 )
 
 func GetDBConn() (*pgxpool.Pool, error) {
@@ -65,4 +66,12 @@ func UpdateUserGG32(name string, password string, seed uint32) error {
 	query := "UPDATE gguser SET password_gg32=$1 WHERE name=$2"
 	_, err := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
 	return err
+}
+
+func GetUserData(name string) (int, time.Time, error) {
+	query := "SELECT uin, joined FROM gguser WHERE name=$1"
+	var uin int
+	var joined time.Time
+	err := DatabaseConn.QueryRow(context.Background(), query, name).Scan(&uin, &joined)
+	return uin, joined, err
 }

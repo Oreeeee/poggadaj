@@ -29,7 +29,7 @@ func GenerateAuthorizedSession(user string) AuthorizedSession {
 	}
 }
 
-func ValidateSession(c echo.Context) bool {
+func ValidateSession(c echo.Context) (bool, string) {
 	nameCookie := GetCookieSafe(c, "Username")
 	authCookie := GetCookieSafe(c, "Auth")
 
@@ -38,8 +38,8 @@ func ValidateSession(c echo.Context) bool {
 		userMatches := session.User == nameCookie.Value
 		cookieMatches := session.AuthCookie == authCookie.Value
 		if userMatches && cookieMatches && authCookie.Expires.Unix() < time.Now().Unix() {
-			return true
+			return true, session.User
 		}
 	}
-	return false
+	return false, ""
 }
