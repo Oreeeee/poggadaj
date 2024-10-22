@@ -153,7 +153,12 @@ func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
 			buf := bytes.NewBuffer(response)
 			for _, notifyContact := range currConn.NotifyList {
 				statusChange := FetchUserStatus(notifyContact.UIN)
-				binary.Write(buf, binary.LittleEndian, universal.GG_NotifyReplySerialize(statusChange))
+				notifyReply := gg60.GG_Notify_Reply60{
+					UIN:         statusChange.UIN,
+					Status:      uint8(statusChange.Status),
+					Description: statusChange.Description,
+				}
+				binary.Write(buf, binary.LittleEndian, notifyReply.Serialize())
 			}
 
 			pOut := universal.InitGG_Packet(universal.GG_NOTIFY_REPLY60, buf.Bytes())
