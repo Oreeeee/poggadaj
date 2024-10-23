@@ -10,8 +10,8 @@ Currently the GG60 (Gadu-Gadu 6.1) protocol is targeted
 | Feature                                 | Gadu-Gadu 6.x | Gadu-Gadu 7.0-7.1 |
 |:----------------------------------------|:-------------:|:------------------|
 | Logging in                              |       ✅       | ✅                 |
-| Getting statuses on log in              |       ✅       | ~                 |
-| Adding contacts (in the same session)   |       ✅       | ?                 |
+| Getting statuses on log in              |       ✅       | ✅                 |
+| Adding contacts (in the same session)   |       ✅       | ✅                 |
 | Removing contacts (in the same session) |       ❌       | ❌                 |
 | Realtime status updates                 |       ✅       | ✅                 |
 | Simple statuses                         |       ✅       | ✅                 |
