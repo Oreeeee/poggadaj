@@ -75,7 +75,7 @@ func HandleConnection(conn net.Conn) {
 			logging.L.Debugf("Received GG_ADD_NOTIFY")
 			client.HandleAddNotify(pRecv)
 		case universal.GG_REMOVE_NOTIFY:
-			logging.L.Debugf("Received GG_REMOVE_NOTIFY (unimplemented)")
+			logging.L.Debugf("Received GG_REMOVE_NOTIFY")
 			client.HandleRemoveNotify(pRecv)
 		case universal.GG_LIST_EMPTY:
 			logging.L.Debugf("Received GG_LIST_EMPTY")

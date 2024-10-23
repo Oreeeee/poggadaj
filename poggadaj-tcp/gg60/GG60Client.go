@@ -74,7 +74,19 @@ func (c *GG60Client) HandleAddNotify(pRecv uv.GG_Packet) {
 	uv.GG_AddNotify(pRecv.Data, &c.cI.NotifyList)
 }
 
-func (c *GG60Client) HandleRemoveNotify(pRecv uv.GG_Packet) {}
+func (c *GG60Client) HandleRemoveNotify(pRecv uv.GG_Packet) {
+	p := uv.GG_Remove_Notify{}
+	p.Deserialize(pRecv.Data)
+
+	// Look for the contact that matches
+	for i, notify := range c.cI.NotifyList {
+		if notify.UIN == p.UIN {
+			log.L.Debugf("Removed UIN: %d", notify.UIN)
+			c.cI.NotifyList[i] = uv.GG_NotifyContact{}
+			return // We don't need to look further
+		}
+	}
+}
 
 func (c *GG60Client) HandleNewStatus(pRecv uv.GG_Packet) {
 	p := uv.GG_New_Status{}
