@@ -5,6 +5,7 @@ import (
 	"poggadaj-tcp/gg60"
 	"poggadaj-tcp/logging"
 	"poggadaj-tcp/universal"
+	"poggadaj-tcp/utils"
 )
 
 func HandleConnection(conn net.Conn) {
@@ -51,8 +52,8 @@ func HandleConnection(conn net.Conn) {
 	runStatusChannel := true
 	go MsgChannel(client, clientInfo, &runMsgChannel)
 	go StatusChannel(client, clientInfo, &runStatusChannel)
-	defer func(r *bool) { *r = false }(&runMsgChannel)
-	defer func(r *bool) { *r = false }(&runStatusChannel)
+	defer utils.CloseChannel(&runMsgChannel)
+	defer utils.CloseChannel(&runStatusChannel)
 
 	// Connection loop
 	for {
