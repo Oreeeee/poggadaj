@@ -13,6 +13,7 @@ Currently the GG60 (Gadu-Gadu 6.1) protocol is targeted
 | Getting statuses on log in              |       ✅       | ✅                 |
 | Adding contacts (in the same session)   |       ✅       | ✅                 |
 | Removing contacts (in the same session) |       ✅       | ✅                 |
+| Saving contacts on the server           |       ❌       | ❌                 |
 | Realtime status updates                 |       ✅       | ✅                 |
 | Simple statuses                         |       ✅       | ✅                 |
 | Statuses with descriptions              |       ✅       | ✅                 |
