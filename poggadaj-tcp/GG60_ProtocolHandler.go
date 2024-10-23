@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net"
 	"poggadaj-tcp/database"
 	"poggadaj-tcp/gg60"
 	"poggadaj-tcp/logging"
@@ -53,11 +54,11 @@ func StatusChannel_GG60(c GGClient, cI *structs.ClientInfo, run *bool) {
 	}
 }
 
-func Handle_GG60(currConn GGConnection, pRecv universal.GG_Packet) {
+func Handle_GG60(conn net.Conn, pRecv universal.GG_Packet) {
 	// Handle the initial log in
 	client := gg60.GG60Client{}
 	clientInfo := client.GetClientInfoPtr()
-	clientInfo.Conn = currConn.Conn
+	clientInfo.Conn = conn
 	client.HandleLogin(pRecv)
 
 	if !clientInfo.Authenticated {
