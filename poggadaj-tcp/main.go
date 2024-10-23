@@ -3,18 +3,14 @@ package main
 import (
 	"fmt"
 	"github.com/charmbracelet/log"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/redis/go-redis/v9"
 	"net"
 	"os"
+	"poggadaj-tcp/database"
 	"poggadaj-tcp/gg60"
+	"poggadaj-tcp/logging"
 	"poggadaj-tcp/universal"
 	"time"
 )
-
-var DatabaseConn *pgxpool.Pool
-var CacheConn *redis.Client
-var Logger *log.Logger
 
 // This function handles connections before the client version of GG is known.
 // Its purpose is to send GG_WELCOME, receive the packet type of the incoming
@@ -29,29 +25,29 @@ func handleConnection(currConn GGConnection) {
 
 	_, err := packet.Send(currConn.Conn)
 	if err != nil {
-		Logger.Errorf("Error: %s", err)
+		logging.L.Errorf("Error: %s", err)
 	}
 
 	// Wait for the next packet, which will tell us the protocol version handler we need
 	pRecv := universal.GG_Packet{}
 	if pRecv.Receive(currConn.Conn) != nil {
-		Logger.Errorf("Error receiving data, dropping connection!: %s", err)
+		logging.L.Errorf("Error receiving data, dropping connection!: %s", err)
 		return
 	}
 
 	if pRecv.PacketType == gg60.GG_LOGIN60 {
-		Logger.Infof("Gadu-Gadu 6.0 protocol detected")
+		logging.L.Infof("Gadu-Gadu 6.0 protocol detected")
 		Handle_GG60(currConn, pRecv)
 	}
 }
 
 func main() {
-	dbconn, err := GetDBConn()
-	DatabaseConn = dbconn
+	dbconn, err := database.GetDBConn()
+	database.DatabaseConn = dbconn
 
-	CacheConn = GetCacheConn()
+	database.CacheConn = database.GetCacheConn()
 
-	Logger = log.NewWithOptions(os.Stdout, log.Options{
+	logging.L = log.NewWithOptions(os.Stdout, log.Options{
 		ReportCaller:    true,
 		ReportTimestamp: true,
 		TimeFormat:      time.DateTime,
@@ -60,24 +56,24 @@ func main() {
 
 	l, err := net.Listen("tcp", fmt.Sprintf("%s:8074", os.Getenv("LISTEN_ADDRESS")))
 	if err != nil {
-		Logger.Fatal(err)
+		logging.L.Fatal(err)
 		return
 	}
 	defer l.Close()
-	defer DatabaseConn.Close()
+	defer database.DatabaseConn.Close()
 
-	Logger.Infof("Listening on %s:%d", os.Getenv("LISTEN_ADDRESS"), 8074)
+	logging.L.Infof("Listening on %s:%d", os.Getenv("LISTEN_ADDRESS"), 8074)
 
 	var connList []*GGConnection
 
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			Logger.Errorf("Error accepting from %s: %s", conn.RemoteAddr(), err)
+			logging.L.Errorf("Error accepting from %s: %s", conn.RemoteAddr(), err)
 			continue
 		}
 
-		Logger.Infof("Accepted connection from %s", conn.RemoteAddr())
+		logging.L.Infof("Accepted connection from %s", conn.RemoteAddr())
 
 		// Create a connection object
 		ggConn := &GGConnection{}

@@ -1,4 +1,4 @@
-package main
+package utils
 
 func GG32LoginHash(password string, seed uint32) uint32 {
 	var x, y, z uint32

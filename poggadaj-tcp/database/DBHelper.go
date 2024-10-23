@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"context"
@@ -28,3 +28,5 @@ func GetGG32Hash(uin uint32) (uint32, error) {
 	).Scan(&GG32Hash_i64)
 	return uint32(GG32Hash_i64), err
 }
+
+var DatabaseConn *pgxpool.Pool
