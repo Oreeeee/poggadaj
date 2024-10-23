@@ -1,9 +1,7 @@
 package main
 
 import (
-	"net"
 	"poggadaj-tcp/database"
-	"poggadaj-tcp/gg60"
 	"poggadaj-tcp/logging"
 	"poggadaj-tcp/structs"
 	"poggadaj-tcp/universal"
@@ -50,66 +48,6 @@ func StatusChannel_GG60(c GGClient, cI *structs.ClientInfo, run *bool) {
 
 				c.SendStatus(statusChange)
 			}
-		}
-	}
-}
-
-func Handle_GG60(conn net.Conn, pRecv universal.GG_Packet) {
-	// Handle the initial log in
-	client := gg60.GG60Client{}
-	clientInfo := client.GetClientInfoPtr()
-	clientInfo.Conn = conn
-	client.HandleLogin(pRecv)
-
-	if !clientInfo.Authenticated {
-		return
-	}
-
-	defer client.Clean()
-
-	// Start send channels
-	runMsgChannel := true
-	runStatusChannel := true
-	go MsgChannel_GG60(&client, clientInfo, &runMsgChannel)
-	go StatusChannel_GG60(&client, clientInfo, &runStatusChannel)
-	defer func(r *bool) { *r = false }(&runMsgChannel)
-	defer func(r *bool) { *r = false }(&runStatusChannel)
-
-	// Connection loop
-	for {
-		pRecv := universal.GG_Packet{}
-		err := pRecv.Receive(clientInfo.Conn)
-		if err != nil {
-			logging.L.Errorf("Error receiving data, dropping connection!: %s", err)
-			return
-		}
-
-		switch pRecv.PacketType {
-		case universal.GG_NOTIFY_FIRST:
-			logging.L.Debugf("Received GG_NOTIFY_FIRST")
-			client.HandleNotifyFirst(pRecv)
-		case universal.GG_NOTIFY_LAST:
-			logging.L.Debugf("Received GG_NOTIFY_LAST")
-			client.HandleNotifyLast(pRecv)
-		case universal.GG_ADD_NOTIFY:
-			logging.L.Debugf("Received GG_ADD_NOTIFY")
-			client.HandleAddNotify(pRecv)
-		case universal.GG_REMOVE_NOTIFY:
-			logging.L.Debugf("Received GG_REMOVE_NOTIFY (unimplemented)")
-			client.HandleRemoveNotify(pRecv)
-		case universal.GG_LIST_EMPTY:
-			logging.L.Debugf("Received GG_LIST_EMPTY")
-		case universal.GG_NEW_STATUS:
-			logging.L.Debugf("Received GG_NEW_STATUS")
-			client.HandleNewStatus(pRecv)
-		case universal.GG_SEND_MSG:
-			logging.L.Debugf("Client is sending a message...")
-			client.HandleSendMsg(pRecv)
-		case universal.GG_PING:
-			logging.L.Debugf("Received GG_PING")
-			client.SendPong()
-		default:
-			logging.L.Warnf("Received unknown packet, ignoring: 0x00%x\n", pRecv.PacketType)
 		}
 	}
 }
