@@ -7,7 +7,7 @@ import (
 	"poggadaj-tcp/universal"
 )
 
-func MsgChannel_GG60(c GGClient, cI *structs.ClientInfo, run *bool) {
+func MsgChannel(c GGClient, cI *structs.ClientInfo, run *bool) {
 	defer logging.L.Debugf("Quitting message channel")
 	pubsub := database.GetMessageChannel(cI.UIN)
 	for *run {
@@ -22,7 +22,7 @@ func MsgChannel_GG60(c GGClient, cI *structs.ClientInfo, run *bool) {
 	}
 }
 
-func StatusChannel_GG60(c GGClient, cI *structs.ClientInfo, run *bool) {
+func StatusChannel(c GGClient, cI *structs.ClientInfo, run *bool) {
 	defer logging.L.Debugf("Quitting status channel")
 	pubsub := database.GetStatusChannel()
 	for *run {

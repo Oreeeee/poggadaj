@@ -49,8 +49,8 @@ func HandleConnection(conn net.Conn) {
 	// Start send channels
 	runMsgChannel := true
 	runStatusChannel := true
-	go MsgChannel_GG60(client, clientInfo, &runMsgChannel)
-	go StatusChannel_GG60(client, clientInfo, &runStatusChannel)
+	go MsgChannel(client, clientInfo, &runMsgChannel)
+	go StatusChannel(client, clientInfo, &runStatusChannel)
 	defer func(r *bool) { *r = false }(&runMsgChannel)
 	defer func(r *bool) { *r = false }(&runStatusChannel)
 
