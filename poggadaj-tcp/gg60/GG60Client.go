@@ -19,6 +19,7 @@ type GG60Client struct {
 func (c *GG60Client) HandleLogin(pRecv uv.GG_Packet) bool {
 	p := GG_Login60{}
 	p.Deserialize(pRecv.Data)
+	log.StructPPrint("GG_LOGIN60", p.PrettyPrint())
 
 	c.cI.UIN = p.UIN
 
