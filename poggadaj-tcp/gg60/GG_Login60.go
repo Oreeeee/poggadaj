@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"poggadaj-tcp/utils"
 )
 
 type GG_Login60 struct {
@@ -43,9 +44,9 @@ func (p *GG_Login60) PrettyPrint() []string {
 		fmt.Sprintf("Status: 0x%x", p.Status),
 		fmt.Sprintf("Version: %d", p.Version),
 		fmt.Sprintf("Unknown1: 0x%x", p.Unknown1),
-		fmt.Sprintf("LocalIP: %d", p.LocalIP),
+		fmt.Sprintf("LocalIP: %s", utils.LeIntToIPv4(p.LocalIP).String()),
 		fmt.Sprintf("LocalPort: %d", p.LocalPort),
-		fmt.Sprintf("ExternalIP: %d", p.ExternalIP),
+		fmt.Sprintf("ExternalIP: %s", utils.LeIntToIPv4(p.ExternalIP).String()),
 		fmt.Sprintf("ExternalPort: %d", p.ExternalPort),
 		fmt.Sprintf("ImageSize: %d", p.ImageSize),
 		fmt.Sprintf("Unknown2: 0x%x", p.Unknown2),
