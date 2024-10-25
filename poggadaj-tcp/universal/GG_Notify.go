@@ -16,10 +16,11 @@ func GG_NotifyContactDeserialize(data []byte, packetSize uint32, contactList *[]
 	}
 }
 
-func GG_AddNotify(data []byte, contactList *[]GG_NotifyContact) {
+func GG_AddNotify(data []byte, contactList *[]GG_NotifyContact) GG_NotifyContact {
 	buf := bytes.NewBuffer(data)
 	contact := GG_NotifyContact{}
 	binary.Read(buf, binary.LittleEndian, &contact.UIN)
 	binary.Read(buf, binary.LittleEndian, &contact.Type)
 	*contactList = append(*contactList, contact)
+	return contact
 }

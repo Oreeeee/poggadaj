@@ -71,7 +71,8 @@ func (c *GG60Client) HandleNotifyLast(pRecv uv.GG_Packet) {
 }
 
 func (c *GG60Client) HandleAddNotify(pRecv uv.GG_Packet) {
-	uv.GG_AddNotify(pRecv.Data, &c.cI.NotifyList)
+	contact := uv.GG_AddNotify(pRecv.Data, &c.cI.NotifyList)
+	c.SendStatus(db.FetchUserStatus(contact.UIN))
 }
 
 func (c *GG60Client) HandleRemoveNotify(pRecv uv.GG_Packet) {
