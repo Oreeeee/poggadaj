@@ -3,6 +3,7 @@ package main
 import (
 	"net"
 	"poggadaj-tcp/gg60"
+	"poggadaj-tcp/gg70"
 	"poggadaj-tcp/logging"
 	"poggadaj-tcp/universal"
 	"poggadaj-tcp/utils"
@@ -29,12 +30,15 @@ func HandleConnection(conn net.Conn) {
 	}
 
 	var client GGClient
-	if pRecv.PacketType == gg60.GG_LOGIN60 {
+	switch pRecv.PacketType {
+	case gg60.GG_LOGIN60:
 		logging.L.Infof("Gadu-Gadu 6.0 protocol detected")
 		client = &gg60.GG60Client{}
-	} else {
+	case gg70.GG_LOGIN70:
+		logging.L.Infof("Gadu-Gadu 7.0 protocol detected")
+		client = &gg70.GG70Client{}
+	default:
 		logging.L.Infof("Unknown protocol version!")
-		return
 	}
 
 	clientInfo := client.GetClientInfoPtr()
