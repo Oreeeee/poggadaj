@@ -1,5 +1,7 @@
 package utils
 
+import "fmt"
+
 func GG32LoginHash(password string, seed uint32) uint32 {
 	var x, y, z uint32
 
@@ -21,4 +23,9 @@ func GG32LoginHash(password string, seed uint32) uint32 {
 	}
 
 	return y
+}
+
+func StringifySHA1(hash [64]byte) string {
+	s := fmt.Sprintf("%x", hash[:20])
+	return s
 }

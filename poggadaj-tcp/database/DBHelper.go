@@ -29,4 +29,14 @@ func GetGG32Hash(uin uint32) (uint32, error) {
 	return uint32(GG32Hash_i64), err
 }
 
+func GetSHA1Hash(uin uint32) (string, error) {
+	var SHA1 string
+	err := DatabaseConn.QueryRow(
+		context.Background(),
+		"SELECT password_sha1 FROM gguser WHERE uin=$1",
+		uin,
+	).Scan(&SHA1)
+	return SHA1, err
+}
+
 var DatabaseConn *pgxpool.Pool
