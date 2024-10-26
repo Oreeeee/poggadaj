@@ -9,7 +9,7 @@ CREATE TABLE gguser (
     id SERIAL PRIMARY KEY,
     uin INT UNIQUE,
     password_gg32 BIGINT,
-    password_sha1 VARCHAR(20),
+    password_sha1 VARCHAR(40),
     name TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     joined TIMESTAMP DEFAULT now()
