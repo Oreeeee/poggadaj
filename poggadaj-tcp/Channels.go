@@ -2,12 +2,13 @@ package main
 
 import (
 	"poggadaj-tcp/database"
+	"poggadaj-tcp/generichandlers"
 	"poggadaj-tcp/logging"
 	"poggadaj-tcp/structs"
 	"poggadaj-tcp/universal"
 )
 
-func MsgChannel(c GGClient, cI *structs.ClientInfo, run *bool) {
+func MsgChannel(c generichandlers.GGClient, cI *structs.ClientInfo, run *bool) {
 	defer logging.L.Debugf("Quitting message channel")
 	pubsub := database.GetMessageChannel(cI.UIN)
 	for *run {
@@ -22,7 +23,7 @@ func MsgChannel(c GGClient, cI *structs.ClientInfo, run *bool) {
 	}
 }
 
-func StatusChannel(c GGClient, cI *structs.ClientInfo, run *bool) {
+func StatusChannel(c generichandlers.GGClient, cI *structs.ClientInfo, run *bool) {
 	defer logging.L.Debugf("Quitting status channel")
 	pubsub := database.GetStatusChannel()
 	for *run {
