@@ -7,7 +7,9 @@ import (
 	"poggadaj-tcp/gg60"
 	"poggadaj-tcp/gg70"
 	"poggadaj-tcp/logging"
-	"poggadaj-tcp/universal"
+	"poggadaj-tcp/protocol/packets"
+	"poggadaj-tcp/protocol/packets/c2s"
+	"poggadaj-tcp/protocol/packets/s2c"
 	"poggadaj-tcp/utils"
 )
 
@@ -15,9 +17,9 @@ func HandleConnection(conn net.Conn) {
 	defer conn.Close()
 
 	// Here we create a GG_WELCOME packet once the client connects to the server
-	ggw := universal.InitGG_Welcome()
+	ggw := s2c.InitGG_Welcome()
 	ggwB := ggw.Serialize()
-	packet := universal.InitGG_Packet(universal.GG_WELCOME, ggwB)
+	packet := packets.InitGG_Packet(s2c.GG_WELCOME, ggwB)
 
 	_, err := packet.Send(conn)
 	if err != nil {
@@ -25,7 +27,7 @@ func HandleConnection(conn net.Conn) {
 	}
 
 	// Wait for the next packet, which will tell us the protocol version handler we need
-	pRecv := universal.GG_Packet{}
+	pRecv := packets.GG_Packet{}
 	if pRecv.Receive(conn) != nil {
 		logging.L.Errorf("Error receiving data, dropping connection!: %s", err)
 		return
@@ -63,7 +65,7 @@ func HandleConnection(conn net.Conn) {
 
 	// Connection loop
 	for {
-		pRecv := universal.GG_Packet{}
+		pRecv := packets.GG_Packet{}
 		err := pRecv.Receive(clientInfo.Conn)
 		if err != nil {
 			logging.L.Errorf("Error receiving data, dropping connection!: %s", err)
@@ -71,27 +73,27 @@ func HandleConnection(conn net.Conn) {
 		}
 
 		switch pRecv.PacketType {
-		case universal.GG_NOTIFY_FIRST:
+		case c2s.GG_NOTIFY_FIRST:
 			logging.L.Debugf("Received GG_NOTIFY_FIRST")
 			client.HandleNotifyFirst(pRecv)
-		case universal.GG_NOTIFY_LAST:
+		case c2s.GG_NOTIFY_LAST:
 			logging.L.Debugf("Received GG_NOTIFY_LAST")
 			client.HandleNotifyLast(pRecv)
-		case universal.GG_ADD_NOTIFY:
+		case c2s.GG_ADD_NOTIFY:
 			logging.L.Debugf("Received GG_ADD_NOTIFY")
 			client.HandleAddNotify(pRecv)
-		case universal.GG_REMOVE_NOTIFY:
+		case c2s.GG_REMOVE_NOTIFY:
 			logging.L.Debugf("Received GG_REMOVE_NOTIFY")
 			client.HandleRemoveNotify(pRecv)
-		case universal.GG_LIST_EMPTY:
+		case c2s.GG_LIST_EMPTY:
 			logging.L.Debugf("Received GG_LIST_EMPTY")
-		case universal.GG_NEW_STATUS:
+		case c2s.GG_NEW_STATUS:
 			logging.L.Debugf("Received GG_NEW_STATUS")
 			client.HandleNewStatus(pRecv)
-		case universal.GG_SEND_MSG:
+		case c2s.GG_SEND_MSG:
 			logging.L.Debugf("Client is sending a message...")
 			client.HandleSendMsg(pRecv)
-		case universal.GG_PING:
+		case c2s.GG_PING:
 			logging.L.Debugf("Received GG_PING")
 			client.SendPong()
 		default:

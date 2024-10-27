@@ -1,4 +1,4 @@
-package gg60
+package s2c
 
 import (
 	"bytes"

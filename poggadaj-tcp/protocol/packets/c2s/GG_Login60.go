@@ -1,4 +1,4 @@
-package gg70
+package c2s
 
 import (
 	"bytes"
@@ -7,10 +7,9 @@ import (
 	"poggadaj-tcp/utils"
 )
 
-type GG_Login70 struct {
+type GG_Login60 struct {
 	UIN          uint32
-	HashType     uint8
-	Hash         [64]byte
+	Hash         uint32
 	Status       uint32
 	Version      uint32
 	Unknown1     byte
@@ -22,11 +21,10 @@ type GG_Login70 struct {
 	Unknown2     byte
 }
 
-func (p *GG_Login70) Deserialize(data []byte) {
+func (p *GG_Login60) Deserialize(data []byte) {
 	buf := bytes.NewBuffer(data)
 
 	binary.Read(buf, binary.LittleEndian, &p.UIN)
-	binary.Read(buf, binary.LittleEndian, &p.HashType)
 	binary.Read(buf, binary.LittleEndian, &p.Hash)
 	binary.Read(buf, binary.LittleEndian, &p.Status)
 	binary.Read(buf, binary.LittleEndian, &p.Version)
@@ -39,12 +37,11 @@ func (p *GG_Login70) Deserialize(data []byte) {
 	binary.Read(buf, binary.LittleEndian, &p.Unknown2)
 }
 
-func (p *GG_Login70) PrettyPrint() []string {
+func (p *GG_Login60) PrettyPrint() []string {
 	s := []string{
 		fmt.Sprintf("UIN: %d", p.UIN),
-		fmt.Sprintf("HashType: %d", p.HashType),
-		fmt.Sprintf("Hash: 0x%x", p.Hash),
-		fmt.Sprintf("Status: %d", p.Status),
+		fmt.Sprintf("Hash: %d", p.Hash),
+		fmt.Sprintf("Status: 0x%x", p.Status),
 		fmt.Sprintf("Version: %d", p.Version),
 		fmt.Sprintf("Unknown1: 0x%x", p.Unknown1),
 		fmt.Sprintf("LocalIP: %s", utils.LeIntToIPv4(p.LocalIP).String()),

@@ -1,4 +1,4 @@
-package universal
+package s2c
 
 import (
 	"bytes"

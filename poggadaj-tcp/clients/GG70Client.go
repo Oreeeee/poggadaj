@@ -3,8 +3,9 @@ package clients
 import (
 	db "poggadaj-tcp/database"
 	gh "poggadaj-tcp/generichandlers"
-	"poggadaj-tcp/gg70"
 	log "poggadaj-tcp/logging"
+	"poggadaj-tcp/protocol/packets"
+	"poggadaj-tcp/protocol/packets/c2s"
 	"poggadaj-tcp/structs"
 	uv "poggadaj-tcp/universal"
 	"poggadaj-tcp/utils"
@@ -14,8 +15,8 @@ type GG70Client struct {
 	cI structs.ClientInfo
 }
 
-func (c *GG70Client) HandleLogin(pRecv uv.GG_Packet) bool {
-	p := gg70.GG_Login70{}
+func (c *GG70Client) HandleLogin(pRecv packets.GG_Packet) bool {
+	p := c2s.GG_Login70{}
 	p.Deserialize(pRecv.Data)
 	log.StructPPrint("GG_LOGIN70", p.PrettyPrint())
 
@@ -44,27 +45,27 @@ func (c *GG70Client) HandleLogin(pRecv uv.GG_Packet) bool {
 	return false
 }
 
-func (c *GG70Client) HandleNotifyFirst(pRecv uv.GG_Packet) {
+func (c *GG70Client) HandleNotifyFirst(pRecv packets.GG_Packet) {
 	gh.HandleNotifyFirst(c, pRecv)
 }
 
-func (c *GG70Client) HandleNotifyLast(pRecv uv.GG_Packet) {
+func (c *GG70Client) HandleNotifyLast(pRecv packets.GG_Packet) {
 	gh.HandleNotifyLast(c, pRecv)
 }
 
-func (c *GG70Client) HandleAddNotify(pRecv uv.GG_Packet) {
+func (c *GG70Client) HandleAddNotify(pRecv packets.GG_Packet) {
 	gh.HandleAddNotify(c, pRecv)
 }
 
-func (c *GG70Client) HandleRemoveNotify(pRecv uv.GG_Packet) {
+func (c *GG70Client) HandleRemoveNotify(pRecv packets.GG_Packet) {
 	gh.HandleRemoveNotify(c, pRecv)
 }
 
-func (c *GG70Client) HandleNewStatus(pRecv uv.GG_Packet) {
+func (c *GG70Client) HandleNewStatus(pRecv packets.GG_Packet) {
 	gh.HandleNewStatus(c, pRecv)
 }
 
-func (c *GG70Client) HandleSendMsg(pRecv uv.GG_Packet) {
+func (c *GG70Client) HandleSendMsg(pRecv packets.GG_Packet) {
 	gh.HandleSendMsg(c, pRecv)
 }
 

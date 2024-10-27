@@ -1,4 +1,4 @@
-package universal
+package c2s
 
 import (
 	"bytes"

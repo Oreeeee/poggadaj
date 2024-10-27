@@ -1,4 +1,4 @@
-package universal
+package packets
 
 import (
 	"bytes"
