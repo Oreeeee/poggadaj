@@ -113,12 +113,23 @@ func (c *GGClient) HandleNotifyLast(pRecv packets.GG_Packet) {
 	buf := bytes.NewBuffer(response)
 	for _, notifyContact := range c.NotifyList {
 		statusChange := db.FetchUserStatus(notifyContact.UIN)
-		notifyReply := s2c.GG_Notify_Reply60{
-			UIN:         statusChange.UIN,
-			Status:      uint8(statusChange.Status),
-			Description: statusChange.Description,
+		if c.ProtocolLevel == 77 {
+			notifyReply := s2c.GG_Notify_Reply77{
+				UIN:         statusChange.UIN,
+				Status:      uint8(statusChange.Status),
+				Description: statusChange.Description,
+			}
+			log.StructPPrint("GG_NOTIFY_REPLY77", notifyReply.PrettyPrint())
+			binary.Write(buf, binary.LittleEndian, notifyReply.Serialize())
+		} else {
+			notifyReply := s2c.GG_Notify_Reply60{
+				UIN:         statusChange.UIN,
+				Status:      uint8(statusChange.Status),
+				Description: statusChange.Description,
+			}
+			log.StructPPrint("GG_NOTIFY_REPLY60", notifyReply.PrettyPrint())
+			binary.Write(buf, binary.LittleEndian, notifyReply.Serialize())
 		}
-		binary.Write(buf, binary.LittleEndian, notifyReply.Serialize())
 	}
 
 	c.SendNotifyReply(buf.Bytes())
@@ -238,7 +249,12 @@ func (c *GGClient) SendRecvMsg(msg structs.Message) {
 }
 
 func (c *GGClient) SendNotifyReply(data []byte) {
-	pOut := packets.InitGG_Packet(s2c.GG_NOTIFY_REPLY60, data)
+	var pOut *packets.GG_Packet
+	if c.ProtocolLevel == 77 {
+		pOut = packets.InitGG_Packet(s2c.GG_NOTIFY_REPLY77, data)
+	} else {
+		pOut = packets.InitGG_Packet(s2c.GG_NOTIFY_REPLY60, data)
+	}
 	_, err := pOut.Send(c.Conn)
 	if err != nil {
 		log.L.Debugf("Error: %s", err)

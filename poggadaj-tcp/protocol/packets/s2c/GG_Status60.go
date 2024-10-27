@@ -40,7 +40,7 @@ func (p *GG_Status60) PrettyPrint() []string {
 		fmt.Sprintf("Version: %d", p.Version),
 		fmt.Sprintf("ImageSize: %d", p.ImageSize),
 		fmt.Sprintf("Unknown1: 0x%x", p.Unknown1),
-		fmt.Sprintf("Description: 0x%s", p.Description),
+		fmt.Sprintf("Description: %s", p.Description),
 	}
 	return s
 }
