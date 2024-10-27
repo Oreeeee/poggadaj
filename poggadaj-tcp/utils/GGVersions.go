@@ -5,5 +5,5 @@ var GGVersions = map[uint32]string{
 	1073741860: "Gadu-Gadu 6.1 (build 158)",
 	1073741863: "Gadu-Gadu 7.0/7.1",
 	3254779944: "Gadu-Gadu 7.5 (build 2201)",
-	3254911018: "Gadu-Gadu 7.7 (build 3746)",
+	1073872938: "Gadu-Gadu 7.7 (build 3746)",
 }

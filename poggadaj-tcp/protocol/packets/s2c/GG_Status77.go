@@ -7,7 +7,7 @@ import (
 	"poggadaj-tcp/utils"
 )
 
-type GG_Status60 struct {
+type GG_Status77 struct {
 	UIN         uint32
 	Status      uint8
 	RemoteIP    uint32
@@ -15,10 +15,11 @@ type GG_Status60 struct {
 	Version     uint8
 	ImageSize   uint8
 	Unknown1    uint8
+	Unknown2    uint32
 	Description []byte
 }
 
-func (p *GG_Status60) Serialize() []byte {
+func (p *GG_Status77) Serialize() []byte {
 	buf := new(bytes.Buffer)
 	binary.Write(buf, binary.LittleEndian, p.UIN)
 	binary.Write(buf, binary.LittleEndian, p.Status)
@@ -27,11 +28,12 @@ func (p *GG_Status60) Serialize() []byte {
 	binary.Write(buf, binary.LittleEndian, p.Version)
 	binary.Write(buf, binary.LittleEndian, p.ImageSize)
 	binary.Write(buf, binary.LittleEndian, p.Unknown1)
+	binary.Write(buf, binary.LittleEndian, p.Unknown2)
 	binary.Write(buf, binary.LittleEndian, p.Description)
 	return buf.Bytes()
 }
 
-func (p *GG_Status60) PrettyPrint() []string {
+func (p *GG_Status77) PrettyPrint() []string {
 	s := []string{
 		fmt.Sprintf("UIN: %d", p.UIN),
 		fmt.Sprintf("Status: 0x%x", p.Status),
@@ -40,6 +42,7 @@ func (p *GG_Status60) PrettyPrint() []string {
 		fmt.Sprintf("Version: %d", p.Version),
 		fmt.Sprintf("ImageSize: %d", p.ImageSize),
 		fmt.Sprintf("Unknown1: 0x%x", p.Unknown1),
+		fmt.Sprintf("Unknown2: 0x%x", p.Unknown2),
 		fmt.Sprintf("Description: 0x%s", p.Description),
 	}
 	return s

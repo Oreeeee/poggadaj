@@ -179,6 +179,14 @@ func (c *GGClient) SendLoginFail() {
 }
 
 func (c *GGClient) SendStatus(statusChange uv.StatusChangeMsg) {
+	if c.ProtocolLevel == 77 {
+		c.SendStatus77(statusChange)
+	} else {
+		c.SendStatus60(statusChange)
+	}
+}
+
+func (c *GGClient) SendStatus60(statusChange uv.StatusChangeMsg) {
 	p := s2c.GG_Status60{
 		UIN:         statusChange.UIN,
 		Status:      uint8(statusChange.Status),
@@ -186,10 +194,28 @@ func (c *GGClient) SendStatus(statusChange uv.StatusChangeMsg) {
 		RemotePort:  0,
 		Version:     0,
 		ImageSize:   0,
-		Unknown1:    0,
 		Description: statusChange.Description,
 	}
+	log.StructPPrint("GG_STATUS60", p.PrettyPrint())
 	pOut := packets.InitGG_Packet(s2c.GG_STATUS60, p.Serialize())
+	_, err := pOut.Send(c.Conn)
+	if err != nil {
+		log.L.Errorf("Error: %s", err)
+	}
+}
+
+func (c *GGClient) SendStatus77(statusChange uv.StatusChangeMsg) {
+	p := s2c.GG_Status77{
+		UIN:         statusChange.UIN,
+		Status:      uint8(statusChange.Status),
+		RemoteIP:    0,
+		RemotePort:  0,
+		Version:     0,
+		ImageSize:   0,
+		Description: statusChange.Description,
+	}
+	log.StructPPrint("GG_STATUS77", p.PrettyPrint())
+	pOut := packets.InitGG_Packet(s2c.GG_STATUS77, p.Serialize())
 	_, err := pOut.Send(c.Conn)
 	if err != nil {
 		log.L.Errorf("Error: %s", err)

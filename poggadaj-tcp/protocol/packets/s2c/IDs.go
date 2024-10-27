@@ -8,4 +8,5 @@ const (
 	GG_RECV_MSG       = 0x000a
 	GG_STATUS60       = 0x000f
 	GG_NOTIFY_REPLY60 = 0x0011
+	GG_STATUS77       = 0x0017
 )
