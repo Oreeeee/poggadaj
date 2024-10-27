@@ -23,11 +23,13 @@ type GGClient struct {
 	Authenticated bool
 	NotifyList    []uv.GG_NotifyContact
 	Version       uint32
+	ProtocolLevel uint8
 }
 
 func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool {
 	switch packetType {
 	case c2s.GG_LOGIN60:
+		c.ProtocolLevel = 60
 		p := c2s.GG_Login60{}
 		p.Deserialize(pRecv.Data)
 		log.StructPPrint("GG_LOGIN60", p.PrettyPrint())
@@ -59,6 +61,7 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool 
 		}
 		return false
 	case c2s.GG_LOGIN70:
+		c.ProtocolLevel = 70
 		p := c2s.GG_Login70{}
 		p.Deserialize(pRecv.Data)
 		log.StructPPrint("GG_LOGIN70", p.PrettyPrint())
