@@ -84,6 +84,9 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool 
 			})
 
 			c.Version = p.Version
+			if utils.IsGG77(p.Version) {
+				c.ProtocolLevel = 77
+			}
 
 			return true
 		} else {
