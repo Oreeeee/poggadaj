@@ -1,16 +1,15 @@
 package main
 
 import (
+	"poggadaj-tcp/clients"
 	"poggadaj-tcp/database"
-	"poggadaj-tcp/generichandlers"
 	"poggadaj-tcp/logging"
-	"poggadaj-tcp/structs"
 	"poggadaj-tcp/universal"
 )
 
-func MsgChannel(c generichandlers.GGClient, cI *structs.ClientInfo, run *bool) {
+func MsgChannel(c *clients.GGClient, run *bool) {
 	defer logging.L.Debugf("Quitting message channel")
-	pubsub := database.GetMessageChannel(cI.UIN)
+	pubsub := database.GetMessageChannel(c.UIN)
 	for *run {
 		msg := database.RecvMessageChannel(pubsub)
 		if !*run {
@@ -18,12 +17,12 @@ func MsgChannel(c generichandlers.GGClient, cI *structs.ClientInfo, run *bool) {
 			continue
 		}
 
-		logging.L.Debugf("%d received a message!", cI.UIN)
+		logging.L.Debugf("%d received a message!", c.UIN)
 		c.SendRecvMsg(msg)
 	}
 }
 
-func StatusChannel(c generichandlers.GGClient, cI *structs.ClientInfo, run *bool) {
+func StatusChannel(c *clients.GGClient, run *bool) {
 	defer logging.L.Debugf("Quitting status channel")
 	pubsub := database.GetStatusChannel()
 	for *run {
@@ -34,9 +33,9 @@ func StatusChannel(c generichandlers.GGClient, cI *structs.ClientInfo, run *bool
 		}
 
 		// Check if the status change is applicable for this connection
-		for _, e := range cI.NotifyList {
+		for _, e := range c.NotifyList {
 			if e.UIN == statusChange.UIN {
-				logging.L.Debugf("%d's status change is relevant for %d", statusChange.UIN, cI.UIN)
+				logging.L.Debugf("%d's status change is relevant for %d", statusChange.UIN, c.UIN)
 
 				switch statusChange.Status {
 				case universal.GG_STATUS_INVISIBLE:

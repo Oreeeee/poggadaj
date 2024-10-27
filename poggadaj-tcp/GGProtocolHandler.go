@@ -3,9 +3,6 @@ package main
 import (
 	"net"
 	"poggadaj-tcp/clients"
-	"poggadaj-tcp/generichandlers"
-	"poggadaj-tcp/gg60"
-	"poggadaj-tcp/gg70"
 	"poggadaj-tcp/logging"
 	"poggadaj-tcp/protocol/packets"
 	"poggadaj-tcp/protocol/packets/c2s"
@@ -33,23 +30,20 @@ func HandleConnection(conn net.Conn) {
 		return
 	}
 
-	var client generichandlers.GGClient
+	client := clients.GGClient{}
 	switch pRecv.PacketType {
-	case gg60.GG_LOGIN60:
+	case c2s.GG_LOGIN60:
 		logging.L.Infof("Gadu-Gadu 6.0 protocol detected")
-		client = &clients.GG60Client{}
-	case gg70.GG_LOGIN70:
+	case c2s.GG_LOGIN70:
 		logging.L.Infof("Gadu-Gadu 7.0 protocol detected")
-		client = &clients.GG70Client{}
 	default:
 		logging.L.Infof("Unknown protocol version!")
 	}
 
-	clientInfo := client.GetClientInfoPtr()
-	clientInfo.Conn = conn
-	client.HandleLogin(pRecv)
+	client.Conn = conn
+	client.HandleLogin(pRecv.PacketType, pRecv)
 
-	if !clientInfo.Authenticated {
+	if !client.Authenticated {
 		return
 	}
 
@@ -58,15 +52,15 @@ func HandleConnection(conn net.Conn) {
 	// Start send channels
 	runMsgChannel := true
 	runStatusChannel := true
-	go MsgChannel(client, clientInfo, &runMsgChannel)
-	go StatusChannel(client, clientInfo, &runStatusChannel)
+	go MsgChannel(&client, &runMsgChannel)
+	go StatusChannel(&client, &runStatusChannel)
 	defer utils.CloseChannel(&runMsgChannel)
 	defer utils.CloseChannel(&runStatusChannel)
 
 	// Connection loop
 	for {
 		pRecv := packets.GG_Packet{}
-		err := pRecv.Receive(clientInfo.Conn)
+		err := pRecv.Receive(client.Conn)
 		if err != nil {
 			logging.L.Errorf("Error receiving data, dropping connection!: %s", err)
 			return

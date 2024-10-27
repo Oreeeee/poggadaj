@@ -3,11 +3,12 @@ package universal
 import (
 	"bytes"
 	"encoding/binary"
+	"poggadaj-tcp/constants"
 )
 
 func GG_NotifyContactDeserialize(data []byte, packetSize uint32, contactList *[]GG_NotifyContact) {
 	buf := bytes.NewBuffer(data)
-	contactListLen := int(packetSize / GG_NOTIFYCONTACT_SIZE)
+	contactListLen := int(packetSize / constants.GG_NOTIFYCONTACT_SIZE)
 	for i := 0; i < contactListLen; i++ {
 		contact := GG_NotifyContact{}
 		binary.Read(buf, binary.LittleEndian, &contact.UIN)
