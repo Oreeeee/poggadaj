@@ -224,8 +224,24 @@ func (c *GGClient) SendLoginFail() {
 func (c *GGClient) SendStatus(statusChange uv.StatusChangeMsg) {
 	if c.ProtocolLevel == 77 {
 		c.SendStatus77(statusChange)
-	} else {
+	} else if c.ProtocolLevel >= 60 {
 		c.SendStatus60(statusChange)
+	} else if c.ProtocolLevel == 50 {
+		c.SendStatus50(statusChange)
+	}
+}
+
+func (c *GGClient) SendStatus50(statusChange uv.StatusChangeMsg) {
+	p := s2c.GG_Status{
+		UIN:         statusChange.UIN,
+		Status:      statusChange.Status,
+		Description: statusChange.Description,
+	}
+	log.StructPPrint("GG_STATUS", p.PrettyPrint())
+	pOut := packets.InitGG_Packet(s2c.GG_STATUS, p.Serialize())
+	_, err := pOut.Send(c.Conn)
+	if err != nil {
+		log.L.Errorf("Error: %s", err)
 	}
 }
 
