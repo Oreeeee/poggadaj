@@ -22,6 +22,9 @@ func main() {
 	r.GET("/appsvc/appmsg4.asp",
 		appmsg.AppMSG_Handler,
 	)
+	r.GET("/appsvc/appmsg2.asp",
+		appmsg.AppMSG_Handler,
+	)
 
 	// adserver.gadu-gadu.pl
 	// TODO: Implement different responses depending on the endpoint
