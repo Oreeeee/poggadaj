@@ -32,8 +32,10 @@ func HandleConnection(conn net.Conn) {
 
 	client := clients.GGClient{}
 	switch pRecv.PacketType {
+	case c2s.GG_LOGIN30:
+		logging.L.Infof("Ancient Gadu-Gadu protocol detected")
 	case c2s.GG_LOGIN:
-		logging.L.Infof("Gadu-Gadu pre-6.0 protocol detected")
+		logging.L.Infof("Gadu-Gadu late 4.x - 6.0 protocol detected")
 	case c2s.GG_LOGIN60:
 		logging.L.Infof("Gadu-Gadu 6.0 protocol detected")
 	case c2s.GG_LOGIN70:

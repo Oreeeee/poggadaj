@@ -28,6 +28,31 @@ type GGClient struct {
 
 func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool {
 	switch packetType {
+	case c2s.GG_LOGIN30:
+		c.ProtocolLevel = 30
+		p := c2s.GG_Login30{}
+		p.Deserialize(pRecv.Data)
+		log.StructPPrint("GG_LOGIN30", p.PrettyPrint())
+
+		c.UIN = p.UIN
+
+		log.L.Debugf("Sending login response")
+
+		if p.Hash == 4294834696 {
+			c.Authenticated = true
+			c.Status = p.Status
+
+			log.L.Debugf("Sending GG_LOGIN_OK")
+			c.SendLoginOK()
+
+			db.SetUserStatus(uv.StatusChangeMsg{
+				UIN:    c.UIN,
+				Status: p.Status,
+			})
+
+			return true
+		}
+		return false
 	case c2s.GG_LOGIN:
 		c.ProtocolLevel = 50
 		p := c2s.GG_Login{}
