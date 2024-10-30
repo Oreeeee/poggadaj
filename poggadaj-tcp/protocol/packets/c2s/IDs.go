@@ -4,6 +4,7 @@ const (
 	GG_NEW_STATUS    = 0x0002
 	GG_PING          = 0x0008
 	GG_SEND_MSG      = 0x000b
+	GG_LOGIN         = 0x000c
 	GG_LIST_EMPTY    = 0x0012
 	GG_NOTIFY_FIRST  = 0x000f
 	GG_NOTIFY_LAST   = 0x0010
