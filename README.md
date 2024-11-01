@@ -5,22 +5,22 @@ WIP Open Source reimplementation of Gadu-Gadu backend
 
 ### Client features
 
-| Feature                                 | Gadu-Gadu 6.x | Gadu-Gadu 7.0-7.1 | Gadu-Gadu 7.5-7.6 | Gadu-Gadu 7.7 |
-|:----------------------------------------|:-------------:|:-----------------:|:-----------------:|:-------------:|
-| Logging in                              |       ✅       |         ✅         |         ✅         |       ✅       |
-| Getting statuses on log in              |       ✅       |         ✅         |         ✅         |       ✅       |
-| Adding contacts (in the same session)   |       ✅       |         ✅         |         ✅         |       ✅       |
-| Removing contacts (in the same session) |       ✅       |         ✅         |         ✅         |       ✅       |
-| Saving contacts on the server           |       ❌       |         ❌         |         ❌         |       ❌       |
-| Realtime status updates                 |       ✅       |         ✅         |         ✅         |       ✅       |
-| Simple statuses                         |       ✅       |         ✅         |         ✅         |       ✅       |
-| Statuses with descriptions              |       ✅       |         ✅         |         ✅         |       ✅       |
-| Status masks                            |      N/A      |         ❌         |         ❌         |       ❌       |
-| Sending messages                        |       ✅       |         ✅         |         ✅         |       ✅       |
-| Receiving messages                      |       ✅       |         ✅         |         ✅         |       ✅       |
-| P2P                                     |       ❌       |         ❌         |         ❌         |       ❌       |
-| P2P over a relay                        |       ❌       |         ❌         |         ❌         |       ❌       |
-| Public directory                        |       ❌       |         ❌         |         ❌         |       ❌       |
+| Feature                                 | Gadu-Gadu 3.x | Gadu-Gadu 6.x | Gadu-Gadu 7.0-7.1 | Gadu-Gadu 7.5-7.6 | Gadu-Gadu 7.7 |
+|:----------------------------------------|:-------------:|:-------------:|:-----------------:|:-----------------:|:-------------:|
+| Logging in                              |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
+| Getting statuses on log in              |       ?       |       ✅       |         ✅         |         ✅         |       ✅       |
+| Adding contacts (in the same session)   |       ?       |       ✅       |         ✅         |         ✅         |       ✅       |
+| Removing contacts (in the same session) |       ?       |       ✅       |         ✅         |         ✅         |       ✅       |
+| Saving contacts on the server           |       ❌       |       ❌       |         ❌         |         ❌         |       ❌       |
+| Realtime status updates                 |       ~       |       ✅       |         ✅         |         ✅         |       ✅       |
+| Simple statuses                         |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
+| Statuses with descriptions              |      N/A      |       ✅       |         ✅         |         ✅         |       ✅       |
+| Status masks                            |      N/A      |       ❌       |         ❌         |         ❌         |       ❌       |
+| Sending messages                        |       ❌       |       ✅       |         ✅         |         ✅         |       ✅       |
+| Receiving messages                      |       ❌       |       ✅       |         ✅         |         ✅         |       ✅       |
+| P2P                                     |       ❌       |       ❌       |         ❌         |         ❌         |       ❌       |
+| P2P over a relay                        |       ❌       |       ❌       |         ❌         |         ❌         |       ❌       |
+| Public directory                        |       ❌       |       ❌       |         ❌         |         ❌         |       ❌       |
 
 ### HTTP features
 
