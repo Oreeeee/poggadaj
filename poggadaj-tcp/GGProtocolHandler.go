@@ -71,6 +71,9 @@ func HandleConnection(conn net.Conn) {
 		}
 
 		switch pRecv.PacketType {
+		case c2s.GG_NOTIFY30:
+			logging.L.Debugf("Received GG_NOTIFY30")
+			client.HandleNotify30(pRecv)
 		case c2s.GG_NOTIFY_FIRST:
 			logging.L.Debugf("Received GG_NOTIFY_FIRST")
 			client.HandleNotifyFirst(pRecv)

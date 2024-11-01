@@ -158,6 +158,19 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool 
 	}
 }
 
+func (c *GGClient) HandleNotify30(pRecv packets.GG_Packet) {
+	p := c2s.GG_Notify30{}
+	p.Deserialize(pRecv.Data, pRecv.Length)
+	log.StructPPrint("GG_NOTIFY30", p.PrettyPrint())
+	for _, uin := range p.UINs {
+		contact := uv.GG_NotifyContact{
+			UIN:  uin,
+			Type: 0x03,
+		}
+		c.NotifyList = append(c.NotifyList, contact)
+	}
+}
+
 func (c *GGClient) HandleNotifyFirst(pRecv packets.GG_Packet) {
 	uv.GG_NotifyContactDeserialize(pRecv.Data, pRecv.Length, &c.NotifyList)
 }
@@ -251,7 +264,7 @@ func (c *GGClient) SendStatus(statusChange uv.StatusChangeMsg) {
 		c.SendStatus77(statusChange)
 	} else if c.ProtocolLevel >= 60 {
 		c.SendStatus60(statusChange)
-	} else if c.ProtocolLevel == 50 {
+	} else if c.ProtocolLevel <= 50 {
 		c.SendStatus50(statusChange)
 	}
 }
