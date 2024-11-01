@@ -22,18 +22,34 @@ func GetDBConn() (*pgxpool.Pool, error) {
 	)
 }
 
-func CreateUser(name string, password string) (int, error) {
+func CreateUser(regBody RegisterRequest) (int, error) {
+	//var GGAncientHash uint32
+	var GG32Hash uint32
+	var GGSHA1Hash string
+
 	// Hash the password
-	pwdHash, err := HashPassword(password)
+	pwdHash, err := HashPassword(regBody.Password)
 	if err != nil {
 		return 0, err
 	}
 
+	//if regBody.GGAncientPassword != "" {
+	//	GGAncientHash = GG32LoginHash(regBody.GGAncientPassword, GetSeed())
+	//}
+	if regBody.GG32Password != "" {
+		GG32Hash = GG32LoginHash(regBody.GG32Password, GetSeed())
+	}
+	if regBody.GGSHA1Password != "" {
+		GGSHA1Hash = ""
+	}
+
 	// Create the user
-	query := "INSERT INTO gguser (name, password) VALUES (@name, @password)"
+	query := "INSERT INTO gguser (name, password, password_gg32, password_sha1) VALUES (@name, @password, @password_gg32, @password_sha1)"
 	args := pgx.NamedArgs{
-		"name":     name,
-		"password": pwdHash,
+		"name":          regBody.Username,
+		"password":      pwdHash,
+		"password_gg32": GG32Hash,
+		"password_sha1": GGSHA1Hash,
 	}
 	_, err2 := DatabaseConn.Exec(context.Background(), query, args)
 	if err2 != nil {
@@ -43,7 +59,7 @@ func CreateUser(name string, password string) (int, error) {
 	// Allocate a new UIN for the user
 	var newUserUIN int
 	query = "UPDATE gguser SET uin=nextval('uin_seq') WHERE name=$1 RETURNING uin"
-	err3 := DatabaseConn.QueryRow(context.Background(), query, name).Scan(&newUserUIN)
+	err3 := DatabaseConn.QueryRow(context.Background(), query, regBody.Username).Scan(&newUserUIN)
 	if err3 != nil {
 		return 0, err3
 	}

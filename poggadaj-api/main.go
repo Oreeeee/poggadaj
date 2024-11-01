@@ -1,26 +1,26 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
 	"os"
-	"strconv"
 )
 
 var DatabaseConn *pgxpool.Pool
 var Sessions []AuthorizedSession
 
 func registerUser(c echo.Context) error {
-	name := c.FormValue("name")
-	password := c.FormValue("password")
-
-	if !PasswordFitsRestrictions(password) {
-		return c.JSON(http.StatusBadRequest, &RegisterResponse{Error: "Password doesn't fit constraints"})
+	regBody := RegisterRequest{}
+	bodyErr := json.NewDecoder(c.Request().Body).Decode(&regBody)
+	if bodyErr != nil {
+		return c.JSON(http.StatusBadRequest, &RegisterResponse{Error: "Failed to unmarshal register request"})
 	}
-	uin, err := CreateUser(name, password)
+
+	uin, err := CreateUser(regBody)
 	if err != nil {
 		fmt.Println(err)
 		return c.JSON(http.StatusBadRequest, &RegisterResponse{Error: "Unknown error when creating user"})
@@ -70,8 +70,7 @@ func gg32ChangePassword(c echo.Context) error {
 	if !PasswordFitsRestrictions(password) {
 		return c.String(http.StatusBadRequest, "Password doesn't fit constraints")
 	}
-	seed64, _ := strconv.ParseUint(os.Getenv("GG_SEED"), 10, 32)
-	seed := uint32(seed64)
+	seed := GetSeed()
 	if UpdateUserGG32(username, password, seed) != nil {
 		return c.String(http.StatusInternalServerError, "")
 	}
@@ -112,7 +111,7 @@ func main() {
 	r.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
-	r.GET("/api/v1/register", registerUser)
+	r.POST("/api/v1/register", registerUser)
 	r.GET("/api/v1/login", loginUser)
 	r.GET("/api/v1/gg32-changepwd", gg32ChangePassword)
 	r.GET("/api/v1/is-authenticated", isAuthenticated)

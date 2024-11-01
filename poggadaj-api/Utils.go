@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 func GetCookieSafe(c echo.Context, name string) *http.Cookie {
@@ -18,4 +20,9 @@ func PasswordFitsRestrictions(password string) bool {
 		return false
 	}
 	return true
+}
+
+func GetSeed() uint32 {
+	seed64, _ := strconv.ParseUint(os.Getenv("GG_SEED"), 10, 32)
+	return uint32(seed64)
 }
