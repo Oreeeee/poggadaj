@@ -41,7 +41,7 @@ func CreateUser(regBody RegisterRequest) (int, error) {
 
 	if regBody.GGAncientPassword != "" {
 		GGAncientHash = GGAncientLoginHash(regBody.GGAncientPassword, GetSeed())
-		dbArgs["password_gg_ancient_hash"] = GGAncientHash
+		dbArgs["password_gg_ancient"] = GGAncientHash
 	}
 	if regBody.GG32Password != "" {
 		GG32Hash = GG32LoginHash(regBody.GG32Password, GetSeed())
