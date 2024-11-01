@@ -80,39 +80,53 @@ func GetUserPasswordHash(name string) (string, error) {
 	return passwordHash, nil
 }
 
+func UpdateWebsitePassword(name string, password string) error {
+	hashedPassword, err := HashPassword(password)
+	if err != nil {
+		return err
+	}
+	query := "UPDATE gguser SET password=$1 WHERE name=$2"
+	_, err2 := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
+	return err2
+}
+
+func UpdateAncientPassword(name string, password string) error {
+	hashedPassword := GGAncientLoginHash(password, GetSeed())
+	query := "UPDATE gguser SET password_gg_ancient=$1 WHERE name=$2"
+	_, err := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
+	return err
+}
+
+func UpdateGG32Password(name string, password string) error {
+	hashedPassword := GG32LoginHash(password, GetSeed())
+	query := "UPDATE gguser SET password_gg32=$1 WHERE name=$2"
+	_, err := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
+	return err
+}
+
+func UpdateSHA1Password(name string, password string) error {
+	hashedPassword := GGSHA1LoginHash(password, GetSeed())
+	query := "UPDATE gguser SET password_sha1=$1 WHERE name=$2"
+	_, err := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
+	return err
+}
+
 func UpdateUserPassword(name string, chgreq ChangePasswordRequest) error {
 	switch chgreq.PasswordType {
 	case 0:
 		// Website password
-		hashedPassword, err := HashPassword(chgreq.Password)
-		if err != nil {
-			return err
-		}
-		query := "UPDATE gguser SET password=$1 WHERE name=$2"
-		_, err2 := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
-		return err2
+		return UpdateWebsitePassword(name, chgreq.Password)
 	case 1:
 		// Ancient password
-		hashedPassword := GGAncientLoginHash(chgreq.Password, GetSeed())
-		query := "UPDATE gguser SET password_gg_ancient=$1 WHERE name=$2"
-		_, err := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
-		return err
+		return UpdateAncientPassword(name, chgreq.Password)
 	case 2:
 		// GG32 password
-		hashedPassword := GG32LoginHash(chgreq.Password, GetSeed())
-		query := "UPDATE gguser SET password_gg32=$1 WHERE name=$2"
-		_, err := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
-		return err
+		return UpdateGG32Password(name, chgreq.Password)
 	case 3:
-		// SHA1 password
-		hashedPassword := GGSHA1LoginHash(chgreq.Password, GetSeed())
-		query := "UPDATE gguser SET password_sha1=$1 WHERE name=$2"
-		_, err := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
-		return err
+		return UpdateSHA1Password(name, chgreq.Password)
 	default:
 		return errs.WrongPasswordType{PasswordType: chgreq.PasswordType}
 	}
-	return nil
 }
 
 func GetUserData(name string) (int, time.Time, error) {
