@@ -86,6 +86,34 @@ func changePassword(c echo.Context) error {
 	return c.String(http.StatusOK, "")
 }
 
+func changeClientsPassword(c echo.Context) error {
+	sessionValid, username := ValidateSession(c)
+	if !sessionValid {
+		return c.String(http.StatusUnauthorized, "")
+	}
+
+	body := ChangePasswordRequest{}
+	bodyErr := json.NewDecoder(c.Request().Body).Decode(&body)
+	if bodyErr != nil {
+		return c.String(http.StatusBadRequest, "Failed to unmarshal ChangePasswordRequest")
+	}
+
+	err1 := UpdateAncientPassword(username, body.Password)
+	if err1 != nil {
+		return c.String(http.StatusInternalServerError, "")
+	}
+	err2 := UpdateGG32Password(username, body.Password)
+	if err2 != nil {
+		return c.String(http.StatusInternalServerError, "")
+	}
+	err3 := UpdateSHA1Password(username, body.Password)
+	if err3 != nil {
+		return c.String(http.StatusInternalServerError, "")
+	}
+
+	return c.String(http.StatusOK, "")
+}
+
 func isAuthenticated(c echo.Context) error {
 	sessionValid, _ := ValidateSession(c)
 	if !sessionValid {
@@ -123,6 +151,7 @@ func main() {
 	r.POST("/api/v1/register", registerUser)
 	r.GET("/api/v1/login", loginUser)
 	r.POST("/api/v1/changepassword", changePassword)
+	r.POST("/api/v1/chgclpwd", changeClientsPassword)
 	r.GET("/api/v1/is-authenticated", isAuthenticated)
 	r.GET("/api/v1/user-data", userData)
 	r.Logger.Fatal(
