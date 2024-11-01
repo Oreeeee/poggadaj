@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
 	"os"
+	"strings"
 )
 
 var DatabaseConn *pgxpool.Pool
@@ -23,6 +24,9 @@ func registerUser(c echo.Context) error {
 	uin, err := CreateUser(regBody)
 	if err != nil {
 		fmt.Println(err)
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint \"gguser_name_key\"") {
+			return c.JSON(http.StatusBadRequest, &RegisterResponse{Error: "User with this name already exists"})
+		}
 		return c.JSON(http.StatusBadRequest, &RegisterResponse{Error: "Unknown error when creating user"})
 	}
 
