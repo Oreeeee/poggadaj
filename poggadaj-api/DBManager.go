@@ -23,7 +23,7 @@ func GetDBConn() (*pgxpool.Pool, error) {
 }
 
 func CreateUser(regBody RegisterRequest) (int, error) {
-	//var GGAncientHash uint32
+	var GGAncientHash uint32
 	var GG32Hash uint32
 	var GGSHA1Hash string
 
@@ -33,25 +33,27 @@ func CreateUser(regBody RegisterRequest) (int, error) {
 		return 0, err
 	}
 
-	//if regBody.GGAncientPassword != "" {
-	//	GGAncientHash = GG32LoginHash(regBody.GGAncientPassword, GetSeed())
-	//}
+	dbArgs := pgx.NamedArgs{
+		"name":     regBody.Username,
+		"password": pwdHash,
+	}
+
+	if regBody.GGAncientPassword != "" {
+		GGAncientHash = GGAncientLoginHash(regBody.GGAncientPassword, GetSeed())
+		dbArgs["password_gg_ancient_hash"] = GGAncientHash
+	}
 	if regBody.GG32Password != "" {
 		GG32Hash = GG32LoginHash(regBody.GG32Password, GetSeed())
+		dbArgs["password_gg32"] = GG32Hash
 	}
 	if regBody.GGSHA1Password != "" {
-		GGSHA1Hash = ""
+		GGSHA1Hash = GGSHA1LoginHash(regBody.GGSHA1Password, GetSeed())
+		dbArgs["password_sha1"] = GGSHA1Hash
 	}
 
 	// Create the user
-	query := "INSERT INTO gguser (name, password, password_gg32, password_sha1) VALUES (@name, @password, @password_gg32, @password_sha1)"
-	args := pgx.NamedArgs{
-		"name":          regBody.Username,
-		"password":      pwdHash,
-		"password_gg32": GG32Hash,
-		"password_sha1": GGSHA1Hash,
-	}
-	_, err2 := DatabaseConn.Exec(context.Background(), query, args)
+	query := "INSERT INTO gguser (name, password, password_gg_ancient, password_gg32, password_sha1) VALUES (@name, @password, @password_gg_ancient, @password_gg32, @password_sha1)"
+	_, err2 := DatabaseConn.Exec(context.Background(), query, dbArgs)
 	if err2 != nil {
 		return 0, err2
 	}
