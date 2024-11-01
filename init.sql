@@ -8,6 +8,7 @@ AS INT;
 CREATE TABLE gguser (
     id SERIAL PRIMARY KEY,
     uin INT UNIQUE,
+    password_gg_ancient BIGINT,
     password_gg32 BIGINT,
     password_sha1 VARCHAR(40),
     name TEXT UNIQUE NOT NULL,
