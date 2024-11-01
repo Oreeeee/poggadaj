@@ -7,3 +7,8 @@ type RegisterRequest struct {
 	GG32Password      string `json:"gg32_password"`
 	GGSHA1Password    string `json:"gg_sha1_password"`
 }
+
+type ChangePasswordRequest struct {
+	PasswordType int    `json:"password_type"`
+	Password     string `json:"password"`
+}

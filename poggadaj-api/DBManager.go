@@ -6,6 +6,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"os"
+	"poggadaj-api/errs"
 	"time"
 )
 
@@ -79,11 +80,39 @@ func GetUserPasswordHash(name string) (string, error) {
 	return passwordHash, nil
 }
 
-func UpdateUserGG32(name string, password string, seed uint32) error {
-	hashedPassword := GG32LoginHash(password, seed)
-	query := "UPDATE gguser SET password_gg32=$1 WHERE name=$2"
-	_, err := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
-	return err
+func UpdateUserPassword(name string, chgreq ChangePasswordRequest) error {
+	switch chgreq.PasswordType {
+	case 0:
+		// Website password
+		hashedPassword, err := HashPassword(chgreq.Password)
+		if err != nil {
+			return err
+		}
+		query := "UPDATE gguser SET password=$1 WHERE name=$2"
+		_, err2 := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
+		return err2
+	case 1:
+		// Ancient password
+		hashedPassword := GGAncientLoginHash(chgreq.Password, GetSeed())
+		query := "UPDATE gguser SET password_gg_ancient=$1 WHERE name=$2"
+		_, err := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
+		return err
+	case 2:
+		// GG32 password
+		hashedPassword := GG32LoginHash(chgreq.Password, GetSeed())
+		query := "UPDATE gguser SET password_gg32=$1 WHERE name=$2"
+		_, err := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
+		return err
+	case 3:
+		// SHA1 password
+		hashedPassword := GGSHA1LoginHash(chgreq.Password, GetSeed())
+		query := "UPDATE gguser SET password_sha1=$1 WHERE name=$2"
+		_, err := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
+		return err
+	default:
+		return errs.WrongPasswordType{PasswordType: chgreq.PasswordType}
+	}
+	return nil
 }
 
 func GetUserData(name string) (int, time.Time, error) {

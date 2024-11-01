@@ -64,18 +64,23 @@ func loginUser(c echo.Context) error {
 	return c.String(http.StatusUnauthorized, "")
 }
 
-func gg32ChangePassword(c echo.Context) error {
+func changePassword(c echo.Context) error {
 	sessionValid, username := ValidateSession(c)
 	if !sessionValid {
 		return c.String(http.StatusUnauthorized, "")
 	}
 
-	password := c.FormValue("password")
-	if !PasswordFitsRestrictions(password) {
-		return c.String(http.StatusBadRequest, "Password doesn't fit constraints")
+	body := ChangePasswordRequest{}
+	bodyErr := json.NewDecoder(c.Request().Body).Decode(&body)
+	if bodyErr != nil {
+		return c.String(http.StatusBadRequest, "Failed to unmarshal ChangePasswordRequest")
 	}
-	seed := GetSeed()
-	if UpdateUserGG32(username, password, seed) != nil {
+
+	err := UpdateUserPassword(username, body)
+	if err != nil {
+		if strings.Contains(err.Error(), "Wrong password type") {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
 		return c.String(http.StatusInternalServerError, "")
 	}
 	return c.String(http.StatusOK, "")
@@ -117,7 +122,7 @@ func main() {
 	})
 	r.POST("/api/v1/register", registerUser)
 	r.GET("/api/v1/login", loginUser)
-	r.GET("/api/v1/gg32-changepwd", gg32ChangePassword)
+	r.POST("/api/v1/changepassword", changePassword)
 	r.GET("/api/v1/is-authenticated", isAuthenticated)
 	r.GET("/api/v1/user-data", userData)
 	r.Logger.Fatal(
