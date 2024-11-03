@@ -3,6 +3,7 @@ package s2c
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 )
 
 type GG_Recv_MSG struct {
@@ -23,4 +24,15 @@ func (p *GG_Recv_MSG) Serialize() []byte {
 	binary.Write(buf, binary.LittleEndian, p.Content)
 
 	return buf.Bytes()
+}
+
+func (p *GG_Recv_MSG) PrettyPrint() []string {
+	s := []string{
+		fmt.Sprintf("Sender: %d", p.Sender),
+		fmt.Sprintf("Seq: %d", p.Seq),
+		fmt.Sprintf("Time: %d", p.Time),
+		fmt.Sprintf("MsgClass: 0x%x", p.MsgClass),
+		fmt.Sprintf("Content: %x", p.Content),
+	}
+	return s
 }

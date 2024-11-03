@@ -240,6 +240,7 @@ func (c *GGClient) HandleNewStatus(pRecv packets.GG_Packet) {
 func (c *GGClient) HandleSendMsg(pRecv packets.GG_Packet) {
 	p := c2s.GG_Send_MSG{}
 	p.Deserialize(pRecv.Data, pRecv.Length)
+	log.StructPPrint("GG_SEND_MSG", p.PrettyPrint())
 	db.PublishMessageChannel(p.Recipient, structs.Message{c.UIN, p.Content})
 }
 
@@ -327,6 +328,7 @@ func (c *GGClient) SendRecvMsg(msg structs.Message) {
 		MsgClass: 0x08,
 		Content:  msg.Content,
 	}
+	log.StructPPrint("GG_RECV_MSG", pS.PrettyPrint())
 	pOut := packets.InitGG_Packet(s2c.GG_RECV_MSG, pS.Serialize())
 	_, err := pOut.Send(c.Conn)
 	if err != nil {

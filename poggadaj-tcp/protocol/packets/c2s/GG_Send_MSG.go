@@ -3,6 +3,7 @@ package c2s
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 )
 
 type GG_Send_MSG struct {
@@ -21,4 +22,14 @@ func (p *GG_Send_MSG) Deserialize(data []byte, packetSize uint32) {
 	binary.Read(buf, binary.LittleEndian, &p.MsgClass)
 	p.Content = make([]byte, msgSize)
 	buf.Read(p.Content)
+}
+
+func (p *GG_Send_MSG) PrettyPrint() []string {
+	s := []string{
+		fmt.Sprintf("Recipient: %d", p.Recipient),
+		fmt.Sprintf("Seq: %d", p.Seq),
+		fmt.Sprintf("MsgClass: 0x%x", p.MsgClass),
+		fmt.Sprintf("Content: %x", p.Content),
+	}
+	return s
 }
