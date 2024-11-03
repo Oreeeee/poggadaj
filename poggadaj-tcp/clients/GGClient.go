@@ -37,8 +37,8 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool 
 		c.UIN = p.UIN
 
 		log.L.Debugf("Sending login response")
-
-		if p.Hash == 4294834696 {
+		passHash, _ := db.GetAncientHash(c.UIN)
+		if p.Hash == passHash {
 			c.Authenticated = true
 			c.Status = p.Status
 
