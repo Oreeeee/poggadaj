@@ -94,6 +94,9 @@ func HandleConnection(conn net.Conn) {
 		case c2s.GG_SEND_MSG:
 			logging.L.Debugf("Client is sending a message...")
 			client.HandleSendMsg(pRecv)
+		case c2s.GG_USERLIST_REQUEST:
+			logging.L.Debugf("Received GG_USERLIST_REQUEST")
+			client.HandleUserlistReq(pRecv)
 		case c2s.GG_PING:
 			logging.L.Debugf("Received GG_PING")
 			client.SendPong()

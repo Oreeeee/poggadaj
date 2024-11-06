@@ -36,39 +36,31 @@ func (l *UserListRequest) Read(data string) error {
 	l.LastName = splittedData[1]
 	l.Pseudonym = splittedData[2]
 	l.DisplayName = splittedData[3]
-	mobileNumberTmp, err := strconv.ParseUint(splittedData[4], 10, 32)
-	if err != nil {
-		return err
-	}
+
+	mobileNumberTmp, _ := strconv.ParseUint(splittedData[4], 10, 32)
 	l.MobileNumber = uint32(mobileNumberTmp)
+
 	l.Group = splittedData[5]
-	uinTmp, err := strconv.ParseUint(splittedData[6], 10, 32)
-	if err != nil {
-		return err
-	}
+
+	uinTmp, _ := strconv.ParseUint(splittedData[6], 10, 32)
 	l.UIN = uint32(uinTmp)
+
 	l.Email = splittedData[7]
-	availSoundTmp, err := strconv.ParseUint(splittedData[8], 10, 8)
-	if err != nil {
-		return err
-	}
+
+	availSoundTmp, _ := strconv.ParseUint(splittedData[8], 10, 8)
 	l.AvailSound = uint8(availSoundTmp)
+
 	l.AvailPath = splittedData[9]
-	msgSoundTmp, err := strconv.ParseUint(splittedData[10], 10, 8)
-	if err != nil {
-		return err
-	}
+
+	msgSoundTmp, _ := strconv.ParseUint(splittedData[10], 10, 8)
 	l.MsgSound = uint8(msgSoundTmp)
+	
 	l.MsgPath = splittedData[11]
-	hidden, err := strconv.ParseBool(splittedData[12])
-	if err != nil {
-		return err
-	}
+
+	hidden, _ := strconv.ParseBool(splittedData[12])
 	l.Hidden = hidden
-	landlineNumberTmp, err := strconv.ParseUint(splittedData[13], 10, 32)
-	if err != nil {
-		return err
-	}
+
+	landlineNumberTmp, _ := strconv.ParseUint(splittedData[13], 10, 32)
 	l.LandlineNumber = uint32(landlineNumberTmp)
 
 	return nil

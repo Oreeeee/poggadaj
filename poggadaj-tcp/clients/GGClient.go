@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
+	"poggadaj-tcp/constants"
 	db "poggadaj-tcp/database"
 	log "poggadaj-tcp/logging"
 	"poggadaj-tcp/protocol/packets"
@@ -13,6 +14,7 @@ import (
 	"poggadaj-tcp/structs"
 	uv "poggadaj-tcp/universal"
 	"poggadaj-tcp/utils"
+	"strings"
 	"time"
 )
 
@@ -242,6 +244,26 @@ func (c *GGClient) HandleSendMsg(pRecv packets.GG_Packet) {
 	p.Deserialize(pRecv.Data, pRecv.Length)
 	log.StructPPrint("GG_SEND_MSG", p.PrettyPrint())
 	db.PublishMessageChannel(p.Recipient, structs.Message{c.UIN, p.MsgClass, p.Content})
+}
+
+func (c *GGClient) HandleUserlistReq(pRecv packets.GG_Packet) {
+	p := c2s.GG_Userlist_Request{}
+	p.Deserialize(pRecv.Data, pRecv.Length)
+	log.StructPPrint("GG_USERLIST_REQUEST", p.PrettyPrint())
+
+	if p.Type == constants.GG_USERLIST_PUT {
+		userlistStr := strings.Split(string(p.Request), "\r\n")
+		userlist := new([]structs.UserListRequest)
+		for _, str := range userlistStr {
+			user := structs.UserListRequest{}
+			err := user.Read(str)
+			if err != nil {
+				//log.L.Errorf("gowno sie zjebalo: %v", err)
+			}
+			*userlist = append(*userlist, user)
+		}
+		log.L.Debugf("Received userlist put: %v", userlist)
+	}
 }
 
 func (c *GGClient) SendLoginOK() {
