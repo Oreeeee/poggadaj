@@ -14,5 +14,24 @@ CREATE TABLE ggcontact (
     msg_sound SMALLINT,
     msg_path TEXT,
     hidden BOOLEAN,
-    landline_number BIGINT
+    landline_number BIGINT,
+
+    -- Make sure not to store duplicate contacts
+    UNIQUE (
+        owner_uin,
+        firstname,
+        lastname,
+        pseudonym,
+        display_name,
+        mobile_number,
+        grp,
+        uin,
+        email,
+        avail_sound,
+        avail_path,
+        msg_sound,
+        msg_path,
+        hidden,
+        landline_number
+    )
 );

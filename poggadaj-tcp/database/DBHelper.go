@@ -74,7 +74,7 @@ func PutUserList(userList []structs.UserListRequest, uin uint32) {
 			"hidden":          user.Hidden,
 			"landline_number": user.LandlineNumber,
 		}
-		batch.Queue("INSERT INTO ggcontact (owner_uin, firstname, lastname, pseudonym, display_name, mobile_number, grp, uin, email, avail_sound, avail_path, msg_sound, msg_path, hidden, landline_number) VALUES (@owner_uin, @firstname, @lastname, @pseudonym, @display_name, @mobile_number, @grp, @uin, @email, @avail_sound, @avail_path, @msg_sound, @msg_path, @hidden, @landline_number)", dbArgs)
+		batch.Queue("INSERT INTO ggcontact (owner_uin, firstname, lastname, pseudonym, display_name, mobile_number, grp, uin, email, avail_sound, avail_path, msg_sound, msg_path, hidden, landline_number) VALUES (@owner_uin, @firstname, @lastname, @pseudonym, @display_name, @mobile_number, @grp, @uin, @email, @avail_sound, @avail_path, @msg_sound, @msg_path, @hidden, @landline_number) ON CONFLICT (owner_uin, firstname, lastname, pseudonym, display_name, mobile_number, grp, uin, email, avail_sound, avail_path, msg_sound, msg_path, hidden, landline_number) DO NOTHING", dbArgs)
 	}
 	res := DatabaseConn.SendBatch(context.Background(), batch)
 
