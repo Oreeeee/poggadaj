@@ -15,7 +15,7 @@ func (p *GG_Userlist_Request) Deserialize(data []byte, packetSize uint32) {
 	buf := bytes.NewBuffer(data)
 
 	binary.Read(buf, binary.LittleEndian, &p.Type)
-	p.Request = make([]byte, packetSize-9) // 9 = packet type + packet length + userlist type
+	p.Request = make([]byte, packetSize-1) // idk what the one means but it fixes the reading issue
 	binary.Read(buf, binary.LittleEndian, &p.Request)
 }
 
