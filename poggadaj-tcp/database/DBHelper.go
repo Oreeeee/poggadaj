@@ -91,4 +91,28 @@ func PutUserList(userList []structs.UserListRequest, uin uint32) {
 	}
 }
 
+func GetUserList(uin uint32) []structs.UserListRequest {
+	rows, err := DatabaseConn.Query(context.Background(), "SELECT firstname, lastname, pseudonym, display_name, mobile_number, grp, uin, email, avail_sound, avail_path, msg_sound, msg_path, hidden, landline_number FROM ggcontact WHERE owner_uin=$1", uin)
+	if err != nil {
+		log.L.Errorf("Failed to execute query: %v\n", err)
+	}
+	defer rows.Close()
+
+	var userList []structs.UserListRequest
+	for rows.Next() {
+		var user structs.UserListRequest
+		err := rows.Scan(&user.FirstName, &user.LastName, &user.Pseudonym, &user.DisplayName, &user.MobileNumber, &user.Group, &user.UIN, &user.Email, &user.AvailSound, &user.AvailPath, &user.MsgSound, &user.MsgPath, &user.Hidden, &user.LandlineNumber)
+		if err != nil {
+			log.L.Errorf("Failed to scan row: %v\n", err)
+		}
+		userList = append(userList, user)
+	}
+
+	if rows.Err() != nil {
+		log.L.Errorf("Failed to execute query: %v\n", rows.Err())
+	}
+
+	return userList
+}
+
 var DatabaseConn *pgxpool.Pool
