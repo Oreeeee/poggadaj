@@ -3,8 +3,11 @@ package database
 import (
 	"context"
 	"fmt"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"os"
+	log "poggadaj-tcp/logging"
+	"poggadaj-tcp/structs"
 )
 
 func GetDBConn() (*pgxpool.Pool, error) {
@@ -48,6 +51,44 @@ func GetSHA1Hash(uin uint32) (string, error) {
 		uin,
 	).Scan(&SHA1)
 	return SHA1, err
+}
+
+func PutUserList(userList []structs.UserListRequest, uin uint32) {
+	// TODO: Clean up
+	batch := &pgx.Batch{}
+	for _, user := range userList {
+		dbArgs := pgx.NamedArgs{
+			"owner_uin":       uin,
+			"firstname":       user.FirstName,
+			"lastname":        user.LastName,
+			"pseudonym":       user.Pseudonym,
+			"display_name":    user.DisplayName,
+			"mobile_number":   user.MobileNumber,
+			"grp":             user.Group,
+			"uin":             user.UIN,
+			"email":           user.Email,
+			"avail_sound":     user.AvailSound,
+			"avail_path":      user.AvailPath,
+			"msg_sound":       user.MsgSound,
+			"msg_path":        user.MsgPath,
+			"hidden":          user.Hidden,
+			"landline_number": user.LandlineNumber,
+		}
+		batch.Queue("INSERT INTO ggcontact (owner_uin, firstname, lastname, pseudonym, display_name, mobile_number, grp, uin, email, avail_sound, avail_path, msg_sound, msg_path, hidden, landline_number) VALUES (@owner_uin, @firstname, @lastname, @pseudonym, @display_name, @mobile_number, @grp, @uin, @email, @avail_sound, @avail_path, @msg_sound, @msg_path, @hidden, @landline_number)", dbArgs)
+	}
+	res := DatabaseConn.SendBatch(context.Background(), batch)
+
+	for i := 0; i < len(userList); i++ {
+		_, err := res.Exec()
+		if err != nil {
+			log.L.Errorf("Failed to execute batch insert: %v\n", err)
+		}
+	}
+
+	err := res.Close()
+	if err != nil {
+		log.L.Errorf("Failed to close batch results: %v\n", err)
+	}
 }
 
 var DatabaseConn *pgxpool.Pool

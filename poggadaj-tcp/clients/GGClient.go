@@ -266,6 +266,7 @@ func (c *GGClient) HandleUserlistReq(pRecv packets.GG_Packet) {
 			userlist = append(userlist, user)
 		}
 		log.L.Debugf("Received userlist put: %v", userlist)
+		db.PutUserList(userlist, c.UIN)
 	}
 }
 
