@@ -1,6 +1,7 @@
 package structs
 
 import (
+	"errors"
 	"fmt"
 	"poggadaj-tcp/utils"
 	"strconv"
@@ -28,8 +29,7 @@ func (l *UserListRequest) Read(data string) error {
 	splittedData := strings.Split(data, ";")
 
 	if len(splittedData) != 14 {
-		// TODO: Add a custom error
-		return nil
+		return errors.New("len(splittedData) != 14")
 	}
 
 	l.FirstName = splittedData[0]
@@ -54,7 +54,7 @@ func (l *UserListRequest) Read(data string) error {
 
 	msgSoundTmp, _ := strconv.ParseUint(splittedData[10], 10, 8)
 	l.MsgSound = uint8(msgSoundTmp)
-	
+
 	l.MsgPath = splittedData[11]
 
 	hidden, _ := strconv.ParseBool(splittedData[12])

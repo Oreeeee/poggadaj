@@ -14,6 +14,7 @@ import (
 	"poggadaj-tcp/structs"
 	uv "poggadaj-tcp/universal"
 	"poggadaj-tcp/utils"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -253,14 +254,16 @@ func (c *GGClient) HandleUserlistReq(pRecv packets.GG_Packet) {
 
 	if p.Type == constants.GG_USERLIST_PUT {
 		userlistStr := strings.Split(string(p.Request), "\r\n")
-		userlist := new([]structs.UserListRequest)
+		userlistStr = userlistStr[:len(userlistStr)-1] // Remove the last (empty) index
+		var userlist []structs.UserListRequest
 		for _, str := range userlistStr {
+			log.L.Debugf("Read userlist: %s", strconv.Quote(str))
 			user := structs.UserListRequest{}
 			err := user.Read(str)
 			if err != nil {
-				//log.L.Errorf("gowno sie zjebalo: %v", err)
+				log.L.Errorf("Error parsing userlist line: %v", err)
 			}
-			*userlist = append(*userlist, user)
+			userlist = append(userlist, user)
 		}
 		log.L.Debugf("Received userlist put: %v", userlist)
 	}

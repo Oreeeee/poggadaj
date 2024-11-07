@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"strconv"
 )
 
 type GG_Userlist_Request struct {
@@ -22,7 +23,7 @@ func (p *GG_Userlist_Request) Deserialize(data []byte, packetSize uint32) {
 func (p *GG_Userlist_Request) PrettyPrint() []string {
 	s := []string{
 		fmt.Sprintf("Type: 0x%x", p.Type),
-		fmt.Sprintf("Request: %s", p.Request),
+		fmt.Sprintf("Request: %s", strconv.Quote(string(p.Request))),
 	}
 	return s
 }
