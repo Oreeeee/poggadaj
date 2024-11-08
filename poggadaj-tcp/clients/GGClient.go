@@ -269,6 +269,18 @@ func (c *GGClient) HandleUserlistReq(pRecv packets.GG_Packet) {
 		log.L.Debugf("Received userlist put: %v", userlist)
 		log.L.Debugf("Putting userlist into the database")
 		db.PutUserList(userlist, c.UIN)
+
+		// Send acknowledgement that the server received the list
+		p := s2c.GG_Userlist_Reply{
+			Type:    constants.GG_USERLIST_PUT_REPLY,
+			Request: p.Request,
+		}
+		log.StructPPrint("GG_USERLIST_REPLY", p.PrettyPrint())
+		pOut := packets.InitGG_Packet(s2c.GG_USERLIST_REPLY, p.Serialize())
+		_, err := pOut.Send(c.Conn)
+		if err != nil {
+			log.L.Errorf("Error: %s", err)
+		}
 	case constants.GG_USERLIST_GET:
 		log.L.Debugf("Fetching contact list for UIN %d", c.UIN)
 		userList := db.GetUserList(c.UIN)

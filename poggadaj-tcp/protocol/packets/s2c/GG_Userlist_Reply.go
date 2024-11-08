@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"strconv"
 )
 
 type GG_Userlist_Reply struct {
@@ -21,7 +22,7 @@ func (p *GG_Userlist_Reply) Serialize() []byte {
 func (p *GG_Userlist_Reply) PrettyPrint() []string {
 	s := []string{
 		fmt.Sprintf("Type: 0x%x", p.Type),
-		fmt.Sprintf("Request: %s", p.Request),
+		fmt.Sprintf("Request: %s", strconv.Quote(string(p.Request))),
 	}
 	return s
 }
