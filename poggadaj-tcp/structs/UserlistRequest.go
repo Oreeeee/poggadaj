@@ -13,7 +13,7 @@ type UserListRequest struct {
 	LastName       string
 	Pseudonym      string
 	DisplayName    string
-	MobileNumber   uint32
+	MobileNumber   string
 	Group          string
 	UIN            uint32
 	Email          string
@@ -22,7 +22,7 @@ type UserListRequest struct {
 	MsgSound       uint8
 	MsgPath        string
 	Hidden         bool
-	LandlineNumber uint32
+	LandlineNumber string
 }
 
 func (l *UserListRequest) Read(data string) error {
@@ -36,9 +36,7 @@ func (l *UserListRequest) Read(data string) error {
 	l.LastName = splittedData[1]
 	l.Pseudonym = splittedData[2]
 	l.DisplayName = splittedData[3]
-
-	mobileNumberTmp, _ := strconv.ParseUint(splittedData[4], 10, 32)
-	l.MobileNumber = uint32(mobileNumberTmp)
+	l.MobileNumber = splittedData[4]
 
 	l.Group = splittedData[5]
 
@@ -60,15 +58,14 @@ func (l *UserListRequest) Read(data string) error {
 	hidden, _ := strconv.ParseBool(splittedData[12])
 	l.Hidden = hidden
 
-	landlineNumberTmp, _ := strconv.ParseUint(splittedData[13], 10, 32)
-	l.LandlineNumber = uint32(landlineNumberTmp)
+	l.LandlineNumber = splittedData[13]
 
 	return nil
 }
 
 func (l *UserListRequest) Write() string {
 	return fmt.Sprintf(
-		"%s;%s;%s;%s;%d;%s;%d;%s;%d;%s;%d;%s;%d;%d",
+		"%s;%s;%s;%s;%s;%s;%d;%s;%d;%s;%d;%s;%d;%s",
 		l.FirstName,
 		l.LastName,
 		l.Pseudonym,

@@ -5,7 +5,7 @@ CREATE TABLE ggcontact (
     lastname TEXT,
     pseudonym TEXT,
     display_name TEXT,
-    mobile_number BIGINT,
+    mobile_number TEXT,
     grp TEXT,
     uin INT,
     email TEXT,
@@ -14,7 +14,7 @@ CREATE TABLE ggcontact (
     msg_sound SMALLINT,
     msg_path TEXT,
     hidden BOOLEAN,
-    landline_number BIGINT,
+    landline_number TEXT,
 
     -- Make sure not to store duplicate contacts
     UNIQUE (
