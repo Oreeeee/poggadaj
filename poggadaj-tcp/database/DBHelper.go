@@ -115,4 +115,9 @@ func GetUserList(uin uint32) []structs.UserListRequest {
 	return userList
 }
 
+func DeleteUserList(uin uint32) error {
+	_, err := DatabaseConn.Exec(context.Background(), "DELETE FROM ggcontact WHERE owner_uin=$1", uin)
+	return err
+}
+
 var DatabaseConn *pgxpool.Pool

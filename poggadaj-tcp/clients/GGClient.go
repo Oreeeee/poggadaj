@@ -278,6 +278,11 @@ func (c *GGClient) HandleUserlistReq(pRecv packets.GG_Packet) {
 }
 
 func (c *GGClient) PutUserList() {
+	err := db.DeleteUserList(c.UIN) // Delete user's contact list, as we are writing to the list and not appending to it
+	if err != nil {
+		log.L.Errorf("Failed to delete user list: %s", err)
+	}
+
 	userListStr := strings.Join(c.UserListBuf, "")                   // Combine the buffer into one string
 	userListSeparated := strings.Split(userListStr, "\r\n")          // Separate the request lines
 	userListSeparated = userListSeparated[:len(userListSeparated)-1] // Remove the last (empty) index
