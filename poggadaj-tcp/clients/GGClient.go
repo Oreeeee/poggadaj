@@ -255,6 +255,25 @@ func (c *GGClient) HandleUserlistReq(pRecv packets.GG_Packet) {
 
 	switch p.Type {
 	case constants.GG_USERLIST_PUT, constants.GG_USERLIST_PUT_MORE:
+		if pRecv.Length == 1 {
+			// Client sends 1-sized userlist on userlist delete
+			err := db.DeleteUserList(c.UIN)
+			if err != nil {
+				log.L.Errorf("Failed to delete userlist: %s", err)
+				return
+			}
+
+			p := s2c.GG_Userlist_Reply{
+				Type:    constants.GG_USERLIST_PUT_REPLY,
+				Request: p.Request,
+			}
+			log.StructPPrint("GG_USERLIST_REPLY", p.PrettyPrint())
+			pOut := packets.InitGG_Packet(s2c.GG_USERLIST_REPLY, p.Serialize())
+			_, err = pOut.Send(c.Conn)
+			if err != nil {
+				log.L.Errorf("Error: %s", err)
+			}
+		}
 		c.UserListBuf = append(c.UserListBuf, string(p.Request))
 		if pRecv.Length == 2048 {
 			// We've got a multipart list, we need to add it to the buf and wait until
