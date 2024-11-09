@@ -273,16 +273,7 @@ func (c *GGClient) HandleUserlistReq(pRecv packets.GG_Packet) {
 		log.L.Debugf("Generated userlist: %s", strconv.Quote(userListBuf))
 		log.L.Debugf("Sending userlist back to the client...")
 
-		p := s2c.GG_Userlist_Reply{
-			Type:    constants.GG_USERLIST_GET_REPLY,
-			Request: []byte(userListBuf),
-		}
-		log.StructPPrint("GG_USERLIST_REPLY", p.PrettyPrint())
-		pOut := packets.InitGG_Packet(s2c.GG_USERLIST_REPLY, p.Serialize())
-		_, err := pOut.Send(c.Conn)
-		if err != nil {
-			log.L.Errorf("Error: %s", err)
-		}
+		c.SendGetUserListResp(userListBuf)
 	}
 }
 
@@ -333,6 +324,28 @@ func (c *GGClient) SendPutUserListAck(i int) {
 	_, err := pOut.Send(c.Conn)
 	if err != nil {
 		log.L.Errorf("Error: %s", err)
+	}
+}
+
+func (c *GGClient) SendGetUserListResp(userListBuf string) {
+	chunkedList := utils.ChunkString(userListBuf, 2048)
+	lastIndex := len(chunkedList) - 1
+	for i, str := range chunkedList {
+		replyType := constants.GG_USERLIST_GET_MORE_REPLY
+		if i == lastIndex {
+			// The last part of a list import is type GG_USERLIST_GET_REPLY
+			replyType = constants.GG_USERLIST_GET_REPLY
+		}
+		p := s2c.GG_Userlist_Reply{
+			Type:    uint8(replyType),
+			Request: []byte(str),
+		}
+		log.StructPPrint("GG_USERLIST_REPLY", p.PrettyPrint())
+		pOut := packets.InitGG_Packet(s2c.GG_USERLIST_REPLY, p.Serialize())
+		_, err := pOut.Send(c.Conn)
+		if err != nil {
+			log.L.Errorf("Error: %s", err)
+		}
 	}
 }
 
