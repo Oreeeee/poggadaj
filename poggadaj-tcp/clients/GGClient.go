@@ -27,6 +27,7 @@ type GGClient struct {
 	NotifyList    []uv.GG_NotifyContact
 	Version       uint32
 	ProtocolLevel uint8
+	UserListBuf   []string
 }
 
 func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool {
@@ -253,34 +254,15 @@ func (c *GGClient) HandleUserlistReq(pRecv packets.GG_Packet) {
 	log.StructPPrint("GG_USERLIST_REQUEST", p.PrettyPrint())
 
 	switch p.Type {
-	case constants.GG_USERLIST_PUT:
-		userlistStr := strings.Split(string(p.Request), "\r\n")
-		userlistStr = userlistStr[:len(userlistStr)-1] // Remove the last (empty) index
-		var userlist []structs.UserListRequest
-		for _, str := range userlistStr {
-			log.L.Debugf("Read userlist: %s", strconv.Quote(str))
-			user := structs.UserListRequest{}
-			err := user.Read(str)
-			if err != nil {
-				log.L.Errorf("Error parsing userlist line: %v", err)
-			}
-			userlist = append(userlist, user)
+	case constants.GG_USERLIST_PUT, constants.GG_USERLIST_PUT_MORE:
+		c.UserListBuf = append(c.UserListBuf, string(p.Request))
+		if pRecv.Length == 2048 {
+			// We've got a multipart list, we need to add it to the buf and wait until
+			// the client sends the final GG_USERLIST_PUT_MORE request
+			return
 		}
-		log.L.Debugf("Received userlist put: %v", userlist)
-		log.L.Debugf("Putting userlist into the database")
-		db.PutUserList(userlist, c.UIN)
-
-		// Send acknowledgement that the server received the list
-		p := s2c.GG_Userlist_Reply{
-			Type:    constants.GG_USERLIST_PUT_REPLY,
-			Request: p.Request,
-		}
-		log.StructPPrint("GG_USERLIST_REPLY", p.PrettyPrint())
-		pOut := packets.InitGG_Packet(s2c.GG_USERLIST_REPLY, p.Serialize())
-		_, err := pOut.Send(c.Conn)
-		if err != nil {
-			log.L.Errorf("Error: %s", err)
-		}
+		// The client has sent the final part of the request, we can now process this
+		c.PutUserList()
 	case constants.GG_USERLIST_GET:
 		log.L.Debugf("Fetching contact list for UIN %d", c.UIN)
 		userList := db.GetUserList(c.UIN)
@@ -301,6 +283,56 @@ func (c *GGClient) HandleUserlistReq(pRecv packets.GG_Packet) {
 		if err != nil {
 			log.L.Errorf("Error: %s", err)
 		}
+	}
+}
+
+func (c *GGClient) PutUserList() {
+	userListStr := strings.Join(c.UserListBuf, "")                   // Combine the buffer into one string
+	userListSeparated := strings.Split(userListStr, "\r\n")          // Separate the request lines
+	userListSeparated = userListSeparated[:len(userListSeparated)-1] // Remove the last (empty) index
+
+	// Convert all the strings to UserListRequest objects
+	var userlist []structs.UserListRequest
+	for _, str := range userListSeparated {
+		log.L.Debugf("Read userlist: %s", strconv.Quote(str))
+		user := structs.UserListRequest{}
+		err := user.Read(str)
+		if err != nil {
+			log.L.Errorf("Error parsing userlist line: %v", err)
+		}
+		userlist = append(userlist, user)
+	}
+
+	log.L.Debugf("Received userlist put: %v", userlist)
+	log.L.Debugf("Putting userlist into the database")
+	db.PutUserList(userlist, c.UIN)
+
+	// Send acknowledgement that the server received the list
+	for i, _ := range c.UserListBuf {
+		c.SendPutUserListAck(i)
+	}
+
+	// Clear the buffer
+	c.UserListBuf = []string{}
+}
+
+func (c *GGClient) SendPutUserListAck(i int) {
+	var reqType uint8
+	if i == 0 {
+		reqType = constants.GG_USERLIST_PUT_REPLY
+	} else {
+		reqType = constants.GG_USERLIST_PUT_MORE_REPLY
+	}
+
+	p := s2c.GG_Userlist_Reply{
+		Type:    reqType,
+		Request: []byte(c.UserListBuf[i]),
+	}
+	log.StructPPrint("GG_USERLIST_REPLY", p.PrettyPrint())
+	pOut := packets.InitGG_Packet(s2c.GG_USERLIST_REPLY, p.Serialize())
+	_, err := pOut.Send(c.Conn)
+	if err != nil {
+		log.L.Errorf("Error: %s", err)
 	}
 }
 
