@@ -25,7 +25,8 @@ type GGClient struct {
 	Status        uint32
 	Authenticated bool
 	NotifyList    []uv.GG_NotifyContact
-	Version       uint32
+	Version       uint8
+	VOIP          bool
 	ProtocolLevel uint8
 	UserListBuf   []string
 }
@@ -58,7 +59,6 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool 
 		}
 		return false
 	case c2s.GG_LOGIN:
-		c.ProtocolLevel = 50
 		p := c2s.GG_Login{}
 		p.Deserialize(pRecv.Data)
 		log.StructPPrint("GG_LOGIN", p.PrettyPrint())
@@ -80,7 +80,7 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool 
 				Status: p.Status,
 			})
 
-			c.Version = p.Version
+			c.Version, c.VOIP = utils.GetVersionAndVOIP(p.Version)
 
 			return true
 		} else {
@@ -90,7 +90,6 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool 
 		}
 		return false
 	case c2s.GG_LOGIN60:
-		c.ProtocolLevel = 60
 		p := c2s.GG_Login60{}
 		p.Deserialize(pRecv.Data)
 		log.StructPPrint("GG_LOGIN60", p.PrettyPrint())
@@ -112,7 +111,7 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool 
 				Status: p.Status,
 			})
 
-			c.Version = p.Version
+			c.Version, c.VOIP = utils.GetVersionAndVOIP(p.Version)
 
 			return true
 		} else {
@@ -122,7 +121,6 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool 
 		}
 		return false
 	case c2s.GG_LOGIN70:
-		c.ProtocolLevel = 70
 		p := c2s.GG_Login70{}
 		p.Deserialize(pRecv.Data)
 		log.StructPPrint("GG_LOGIN70", p.PrettyPrint())
@@ -144,10 +142,7 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool 
 				Status: p.Status,
 			})
 
-			c.Version = p.Version
-			if utils.IsGG77(p.Version) {
-				c.ProtocolLevel = 77
-			}
+			c.Version, c.VOIP = utils.GetVersionAndVOIP(p.Version)
 
 			return true
 		} else {
@@ -187,7 +182,7 @@ func (c *GGClient) HandleNotifyLast(pRecv packets.GG_Packet) {
 	buf := bytes.NewBuffer(response)
 	for _, notifyContact := range c.NotifyList {
 		statusChange := db.FetchUserStatus(notifyContact.UIN)
-		if c.ProtocolLevel == 77 {
+		if c.Version >= 0x2a {
 			notifyReply := s2c.GG_Notify_Reply77{
 				UIN:         statusChange.UIN,
 				Status:      uint8(statusChange.Status),
@@ -390,11 +385,11 @@ func (c *GGClient) SendLoginFail() {
 }
 
 func (c *GGClient) SendStatus(statusChange uv.StatusChangeMsg) {
-	if c.ProtocolLevel == 77 {
+	if c.Version >= 0x2a {
 		c.SendStatus77(statusChange)
-	} else if c.ProtocolLevel >= 60 {
+	} else if c.Version >= 0x20 {
 		c.SendStatus60(statusChange)
-	} else if c.ProtocolLevel <= 50 {
+	} else if c.Version <= 0x18 {
 		c.SendStatus50(statusChange)
 	}
 }
@@ -467,7 +462,7 @@ func (c *GGClient) SendRecvMsg(msg structs.Message) {
 
 func (c *GGClient) SendNotifyReply(data []byte) {
 	var pOut *packets.GG_Packet
-	if c.ProtocolLevel == 77 {
+	if c.Version >= 0x2a {
 		pOut = packets.InitGG_Packet(s2c.GG_NOTIFY_REPLY77, data)
 	} else {
 		pOut = packets.InitGG_Packet(s2c.GG_NOTIFY_REPLY60, data)
