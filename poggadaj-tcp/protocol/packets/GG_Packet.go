@@ -21,18 +21,23 @@ func InitGG_Packet(packetType uint32, data []byte) *GG_Packet {
 }
 
 func (p *GG_Packet) Receive(conn net.Conn) error {
-	recvBuf := make([]byte, 4096)
+	// Read PacketType + Length
+	recvBuf := make([]byte, 8) // PacketType + Length
 	_, err := conn.Read(recvBuf)
 	if err != nil {
 		return err
 	}
 
 	buf := bytes.NewBuffer(recvBuf)
-
 	binary.Read(buf, binary.LittleEndian, &p.PacketType)
 	binary.Read(buf, binary.LittleEndian, &p.Length)
+
+	// Read the rest
 	p.Data = make([]byte, p.Length)
-	buf.Read(p.Data)
+	_, err = conn.Read(p.Data)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
