@@ -11,7 +11,7 @@ WIP Open Source reimplementation of Gadu-Gadu backend
 | Getting statuses on log in              |       ?       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Adding contacts (in the same session)   |       ?       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Removing contacts (in the same session) |       ?       |       ✅       |         ✅         |         ✅         |       ✅       |
-| Saving contacts on the server           |       ❌       |       ❌       |         ❌         |         ❌         |       ❌       |
+| Saving contacts on the server           |       ?       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Realtime status updates                 |       ~       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Simple statuses                         |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Statuses with descriptions              |      N/A      |       ✅       |         ✅         |         ✅         |       ✅       |
