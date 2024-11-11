@@ -3,6 +3,7 @@ package packets
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"net"
 )
 
@@ -31,6 +32,12 @@ func (p *GG_Packet) Receive(conn net.Conn) error {
 	buf := bytes.NewBuffer(recvBuf)
 	binary.Read(buf, binary.LittleEndian, &p.PacketType)
 	binary.Read(buf, binary.LittleEndian, &p.Length)
+
+	if p.Length > 0xFFFF {
+		// Basic "protection" against crashing the server
+		// TODO: Check if this is necessary?
+		return errors.New("p.Length > 0xFFFF")
+	}
 
 	// Read the rest
 	p.Data = make([]byte, p.Length)
