@@ -224,7 +224,7 @@ func (c *GGClient) HandleRemoveNotify(pRecv packets.GG_Packet) {
 }
 
 func (c *GGClient) HandleNewStatus(pRecv packets.GG_Packet) {
-	p := uv.GG_New_Status{}
+	p := c2s.GG_New_Status{}
 	p.Deserialize(pRecv.Data, pRecv.Length)
 
 	db.SetUserStatus(uv.StatusChangeMsg{
