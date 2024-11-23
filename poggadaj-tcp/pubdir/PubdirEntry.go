@@ -77,7 +77,13 @@ func (p *PubdirEntry) Write() []byte {
 	var resultBuilder bytes.Buffer
 
 	structFields := reflect.VisibleFields(reflect.TypeOf(p))
+	currStruct := reflect.ValueOf(p)
 	for _, field := range structFields {
+		// Don't serialize empty fields
+		if currStruct.FieldByName(field.Name).IsNil() {
+			continue
+		}
+
 		switch field.Name {
 		case "UIN":
 			resultBuilder.WriteString(fmt.Sprintf("FmNumber\x00%d", p.UIN))
