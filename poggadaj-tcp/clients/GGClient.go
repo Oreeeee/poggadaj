@@ -291,6 +291,13 @@ func (c *GGClient) HandleUserlistReq(pRecv packets.GG_Packet) {
 	}
 }
 
+func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
+	p := c2s.GG_Pubdir50_Request{}
+	p.Deserialize(pRecv.Data)
+	log.StructPPrint("GG_PUBDIR50_REQUEST", p.PrettyPrint())
+	c.SendPubdirResp(p.Type, p.Seq)
+}
+
 func (c *GGClient) PutUserList() {
 	err := db.DeleteUserList(c.UIN) // Delete user's contact list, as we are writing to the list and not appending to it
 	if err != nil {
@@ -324,6 +331,21 @@ func (c *GGClient) PutUserList() {
 
 	// Clear the buffer
 	c.UserListBuf = []string{}
+}
+
+func (c *GGClient) SendPubdirResp(Type uint8, seq uint32) {
+	reply := []byte("firstname\x00Adam\x00nickname\x00Janek\x00birthyear\x001979\x00city\x00Wzdow\x00") // Placeholder
+	p := s2c.GG_Pubdir50_Reply{
+		Type:  0x03, // Placeholder
+		Seq:   seq,
+		Reply: reply,
+	}
+	log.StructPPrint("GG_PUBDIR50_REPLY", p.PrettyPrint())
+	pOut := packets.InitGG_Packet(s2c.GG_PUBDIR50_REPLY, p.Serialize())
+	_, err := pOut.Send(c.Conn)
+	if err != nil {
+		log.L.Errorf("Error: %s", err)
+	}
 }
 
 func (c *GGClient) SendPutUserListAck(i int) {
