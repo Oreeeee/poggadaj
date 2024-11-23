@@ -295,7 +295,17 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 	p := c2s.GG_Pubdir50_Request{}
 	p.Deserialize(pRecv.Data)
 	log.StructPPrint("GG_PUBDIR50_REQUEST", p.PrettyPrint())
-	c.SendPubdirResp(p.Type, p.Seq)
+
+	switch p.Type {
+	case constants.GG_PUBDIR50_READ:
+		// Placeholder response
+		// TODO: Return actual pubdir stuffs
+		c.SendPubdirResp(
+			constants.GG_PUBDIR50_SEARCH,
+			p.Seq,
+			[]byte("firstname\x00Adam\x00nickname\x00Janek\x00birthyear\x001979\x00city\x00Wzdow\x00"),
+		)
+	}
 }
 
 func (c *GGClient) PutUserList() {
@@ -333,12 +343,11 @@ func (c *GGClient) PutUserList() {
 	c.UserListBuf = []string{}
 }
 
-func (c *GGClient) SendPubdirResp(Type uint8, seq uint32) {
-	reply := []byte("firstname\x00Adam\x00nickname\x00Janek\x00birthyear\x001979\x00city\x00Wzdow\x00") // Placeholder
+func (c *GGClient) SendPubdirResp(Type uint8, seq uint32, contents []byte) {
 	p := s2c.GG_Pubdir50_Reply{
-		Type:  0x03, // Placeholder
+		Type:  Type,
 		Seq:   seq,
-		Reply: reply,
+		Reply: contents,
 	}
 	log.StructPPrint("GG_PUBDIR50_REPLY", p.PrettyPrint())
 	pOut := packets.InitGG_Packet(s2c.GG_PUBDIR50_REPLY, p.Serialize())
