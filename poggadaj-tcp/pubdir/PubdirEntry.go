@@ -76,8 +76,8 @@ func (p *PubdirEntry) Read(data []byte) error {
 func (p *PubdirEntry) Write() []byte {
 	var resultBuilder bytes.Buffer
 
-	structFields := reflect.VisibleFields(reflect.TypeOf(p))
-	currStruct := reflect.ValueOf(p)
+	structFields := reflect.VisibleFields(reflect.TypeOf(*p))
+	currStruct := reflect.ValueOf(*p)
 	for _, field := range structFields {
 		// Don't serialize empty fields
 		if currStruct.FieldByName(field.Name).IsNil() {

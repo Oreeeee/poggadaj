@@ -11,6 +11,7 @@ import (
 	"poggadaj-tcp/protocol/packets"
 	"poggadaj-tcp/protocol/packets/c2s"
 	"poggadaj-tcp/protocol/packets/s2c"
+	"poggadaj-tcp/pubdir"
 	"poggadaj-tcp/structs"
 	uv "poggadaj-tcp/universal"
 	"poggadaj-tcp/utils"
@@ -300,10 +301,15 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 	case constants.GG_PUBDIR50_READ:
 		// Placeholder response
 		// TODO: Return actual pubdir stuffs
+		resp := pubdir.PubdirEntry{
+			Firstname: "Foo",
+			Lastname:  "Bar",
+			Birthyear: 2069,
+		}
 		c.SendPubdirResp(
 			constants.GG_PUBDIR50_SEARCH,
 			p.Seq,
-			[]byte("firstname\x00Adam\x00nickname\x00Janek\x00birthyear\x001979\x00city\x00Wzdow\x00"),
+			resp.Write(),
 		)
 	}
 }
