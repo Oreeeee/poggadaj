@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
 	"os"
+	"poggadaj-shared/security/argon2"
 	"strings"
 )
 
@@ -37,7 +38,7 @@ func loginUser(c echo.Context) error {
 	name := c.FormValue("name")
 	password := c.FormValue("password")
 	passwordHash, _ := GetUserPasswordHash(name)
-	passwordMatch, _ := ComparePasswords(password, passwordHash)
+	passwordMatch, _ := argon2.ComparePasswords(password, passwordHash)
 	if passwordMatch {
 		// Add the session to the authorized session list
 		authSession := GenerateAuthorizedSession(name)

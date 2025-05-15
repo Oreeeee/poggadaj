@@ -1,4 +1,4 @@
-package main
+package gg
 
 import (
 	"crypto/sha1"
