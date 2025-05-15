@@ -3,6 +3,7 @@ FROM golang:1.23 AS build
 
 WORKDIR /app
 
+COPY ./shared ./shared
 COPY go.mod go.sum ./
 RUN go mod download
 

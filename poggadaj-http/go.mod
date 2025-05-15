@@ -2,10 +2,14 @@ module poggadaj_http
 
 go 1.23.2
 
+replace poggadaj-shared => ./shared
+
 require (
 	github.com/jackc/pgx/v5 v5.7.4
 	github.com/labstack/echo/v4 v4.13.3
 )
+
+require poggadaj-shared v0.0.0
 
 require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
