@@ -6,7 +6,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"os"
-	log "poggadaj-tcp/logging"
+	log "poggadaj-shared/logging"
 	"poggadaj-tcp/structs"
 )
 

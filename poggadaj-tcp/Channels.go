@@ -1,9 +1,9 @@
 package main
 
 import (
+	"poggadaj-shared/logging"
 	"poggadaj-tcp/clients"
 	"poggadaj-tcp/database"
-	"poggadaj-tcp/logging"
 	"poggadaj-tcp/universal"
 )
 

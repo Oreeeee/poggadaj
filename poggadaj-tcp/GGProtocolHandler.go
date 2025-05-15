@@ -2,8 +2,8 @@ package main
 
 import (
 	"net"
+	"poggadaj-shared/logging"
 	"poggadaj-tcp/clients"
-	"poggadaj-tcp/logging"
 	"poggadaj-tcp/protocol/packets"
 	"poggadaj-tcp/protocol/packets/c2s"
 	"poggadaj-tcp/protocol/packets/s2c"

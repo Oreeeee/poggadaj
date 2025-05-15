@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	log "poggadaj-tcp/logging"
+	log "poggadaj-shared/logging"
 )
 
 type GG_Notify30 struct {

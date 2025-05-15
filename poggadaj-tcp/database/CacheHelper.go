@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"os"
-	"poggadaj-tcp/logging"
+	"poggadaj-shared/logging"
 	"poggadaj-tcp/structs"
 	"poggadaj-tcp/universal"
 )

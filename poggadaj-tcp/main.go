@@ -6,8 +6,8 @@ import (
 	"net"
 	"os"
 	poggadaj_shared "poggadaj-shared"
+	"poggadaj-shared/logging"
 	"poggadaj-tcp/database"
-	"poggadaj-tcp/logging"
 	"time"
 )
 

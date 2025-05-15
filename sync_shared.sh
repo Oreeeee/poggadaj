@@ -7,7 +7,7 @@ for service in "${Services[@]}"
 do
   echo "Updating shared module for $service"
   rm -r "$service"/shared/*
-  cp poggadaj-shared/* "$service"/shared/
+  cp -r poggadaj-shared/* "$service"/shared/
 done
 
 echo "Updated"
