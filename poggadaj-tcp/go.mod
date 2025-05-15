@@ -1,5 +1,7 @@
 module poggadaj-tcp
 
+replace poggadaj-shared => ./shared
+
 go 1.23.2
 
 require (
@@ -7,6 +9,8 @@ require (
 	github.com/jackc/pgx/v5 v5.7.4
 	github.com/redis/go-redis/v9 v9.8.0
 )
+
+require poggadaj-shared v0.0.0
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect

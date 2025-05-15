@@ -5,12 +5,14 @@ import (
 	"github.com/charmbracelet/log"
 	"net"
 	"os"
+	poggadaj_shared "poggadaj-shared"
 	"poggadaj-tcp/database"
 	"poggadaj-tcp/logging"
 	"time"
 )
 
 func main() {
+	poggadaj_shared.SharedPrint()
 	dbconn, err := database.GetDBConn()
 	database.DatabaseConn = dbconn
 
