@@ -1,4 +1,4 @@
-package universal
+package statuses
 
 const (
 	GG_STATUS_NOT_AVAIL       = 0x0001

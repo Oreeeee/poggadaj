@@ -5,18 +5,17 @@ import (
 	"github.com/charmbracelet/log"
 	"net"
 	"os"
-	poggadaj_shared "poggadaj-shared"
+	"poggadaj-shared/cache"
 	"poggadaj-shared/logging"
 	"poggadaj-tcp/database"
 	"time"
 )
 
 func main() {
-	poggadaj_shared.SharedPrint()
 	dbconn, err := database.GetDBConn()
 	database.DatabaseConn = dbconn
 
-	database.CacheConn = database.GetCacheConn()
+	cache.CacheConn = cache.GetCacheConn()
 
 	logging.L = log.NewWithOptions(os.Stdout, log.Options{
 		ReportCaller:    true,

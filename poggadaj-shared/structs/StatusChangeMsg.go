@@ -1,4 +1,4 @@
-package universal
+package structs
 
 type StatusChangeMsg struct {
 	UIN         uint32 `json:"uin"`
