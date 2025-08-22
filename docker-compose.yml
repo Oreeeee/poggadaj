@@ -62,7 +62,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
 
   cache:
-    image: valkey/valkey:8.0-alpine
+    image: valkey/valkey:8.1-alpine
     restart: always
     ports:
       - "127.0.0.1:6379:6379"
