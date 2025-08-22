@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.23 AS build
+FROM golang:1.24.6-alpine AS build
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o poggadaj-tcp
 
 # Runtime stage
-FROM alpine:3.20
+FROM alpine:3.22
 
 WORKDIR /app
 
