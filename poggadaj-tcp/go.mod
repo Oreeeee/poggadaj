@@ -7,7 +7,7 @@ go 1.24.6
 require (
 	github.com/charmbracelet/log v0.4.2
 	github.com/jackc/pgx/v5 v5.7.5
-	github.com/redis/go-redis/v9 v9.12.1
+	github.com/redis/go-redis/v9 v9.12.1 // indirect
 )
 
 require poggadaj-shared v0.0.0
