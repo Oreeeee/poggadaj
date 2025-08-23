@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024-2025 Oreeeee
+
 package main
 
 import (
@@ -5,8 +8,9 @@ import (
 	"github.com/charmbracelet/log"
 	"net"
 	"os"
+	"poggadaj-shared/cache"
+	"poggadaj-shared/logging"
 	"poggadaj-tcp/database"
-	"poggadaj-tcp/logging"
 	"time"
 )
 
@@ -14,7 +18,7 @@ func main() {
 	dbconn, err := database.GetDBConn()
 	database.DatabaseConn = dbconn
 
-	database.CacheConn = database.GetCacheConn()
+	cache.CacheConn = cache.GetCacheConn()
 
 	logging.L = log.NewWithOptions(os.Stdout, log.Options{
 		ReportCaller:    true,

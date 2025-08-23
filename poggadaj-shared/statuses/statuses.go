@@ -1,4 +1,7 @@
-package universal
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024-2025 Oreeeee
+
+package statuses
 
 const (
 	GG_STATUS_NOT_AVAIL       = 0x0001

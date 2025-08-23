@@ -1,10 +1,13 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024-2025 Oreeeee
+
 package c2s
 
 import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	log "poggadaj-tcp/logging"
+	log "poggadaj-shared/logging"
 )
 
 type GG_Notify30 struct {

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024-2025 Oreeeee
+
 package main
 
 import (
@@ -7,6 +10,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"os"
 	"poggadaj-api/errs"
+	"poggadaj-shared/security/argon2"
+	"poggadaj-shared/security/gg"
 	"time"
 )
 
@@ -29,7 +34,7 @@ func CreateUser(regBody RegisterRequest) (int, error) {
 	var GGSHA1Hash string
 
 	// Hash the password
-	pwdHash, err := HashPassword(regBody.Password)
+	pwdHash, err := argon2.HashPassword(regBody.Password)
 	if err != nil {
 		return 0, err
 	}
@@ -40,15 +45,15 @@ func CreateUser(regBody RegisterRequest) (int, error) {
 	}
 
 	if regBody.GGAncientPassword != "" {
-		GGAncientHash = GGAncientLoginHash(regBody.GGAncientPassword, GetSeed())
+		GGAncientHash = gg.GGAncientLoginHash(regBody.GGAncientPassword, GetSeed())
 		dbArgs["password_gg_ancient"] = GGAncientHash
 	}
 	if regBody.GG32Password != "" {
-		GG32Hash = GG32LoginHash(regBody.GG32Password, GetSeed())
+		GG32Hash = gg.GG32LoginHash(regBody.GG32Password, GetSeed())
 		dbArgs["password_gg32"] = GG32Hash
 	}
 	if regBody.GGSHA1Password != "" {
-		GGSHA1Hash = GGSHA1LoginHash(regBody.GGSHA1Password, GetSeed())
+		GGSHA1Hash = gg.GGSHA1LoginHash(regBody.GGSHA1Password, GetSeed())
 		dbArgs["password_sha1"] = GGSHA1Hash
 	}
 
@@ -81,7 +86,7 @@ func GetUserPasswordHash(name string) (string, error) {
 }
 
 func UpdateWebsitePassword(name string, password string) error {
-	hashedPassword, err := HashPassword(password)
+	hashedPassword, err := argon2.HashPassword(password)
 	if err != nil {
 		return err
 	}
@@ -91,21 +96,21 @@ func UpdateWebsitePassword(name string, password string) error {
 }
 
 func UpdateAncientPassword(name string, password string) error {
-	hashedPassword := GGAncientLoginHash(password, GetSeed())
+	hashedPassword := gg.GGAncientLoginHash(password, GetSeed())
 	query := "UPDATE gguser SET password_gg_ancient=$1 WHERE name=$2"
 	_, err := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
 	return err
 }
 
 func UpdateGG32Password(name string, password string) error {
-	hashedPassword := GG32LoginHash(password, GetSeed())
+	hashedPassword := gg.GG32LoginHash(password, GetSeed())
 	query := "UPDATE gguser SET password_gg32=$1 WHERE name=$2"
 	_, err := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
 	return err
 }
 
 func UpdateSHA1Password(name string, password string) error {
-	hashedPassword := GGSHA1LoginHash(password, GetSeed())
+	hashedPassword := gg.GGSHA1LoginHash(password, GetSeed())
 	query := "UPDATE gguser SET password_sha1=$1 WHERE name=$2"
 	_, err := DatabaseConn.Exec(context.Background(), query, hashedPassword, name)
 	return err

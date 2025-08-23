@@ -1,4 +1,7 @@
-package database
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024-2025 Oreeeee
+
+package cache
 
 import (
 	"context"
@@ -6,9 +9,9 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"os"
-	"poggadaj-tcp/logging"
-	"poggadaj-tcp/structs"
-	"poggadaj-tcp/universal"
+	"poggadaj-shared/logging"
+	"poggadaj-shared/statuses"
+	"poggadaj-shared/structs"
 )
 
 func GetCacheConn() *redis.Client {
@@ -19,7 +22,7 @@ func GetCacheConn() *redis.Client {
 	})
 }
 
-func SetUserStatus(statusChange universal.StatusChangeMsg) {
+func SetUserStatus(statusChange structs.StatusChangeMsg) {
 	// Marshal the status change
 	payload, err2 := json.Marshal(statusChange)
 	if err2 != nil {
@@ -48,8 +51,8 @@ func GetStatusChannel() *redis.PubSub {
 	return CacheConn.Subscribe(context.Background(), "ggstatus")
 }
 
-func RecvStatusChannel(pubsub *redis.PubSub) universal.StatusChangeMsg {
-	statusChange := universal.StatusChangeMsg{}
+func RecvStatusChannel(pubsub *redis.PubSub) structs.StatusChangeMsg {
+	statusChange := structs.StatusChangeMsg{}
 	msg, err := pubsub.ReceiveMessage(context.Background())
 
 	if err != nil {
@@ -103,10 +106,10 @@ func RecvMessageChannel(pubsub *redis.PubSub) structs.Message {
 	return message
 }
 
-func FetchUserStatus(uin uint32) universal.StatusChangeMsg {
-	statusFinal := universal.StatusChangeMsg{
+func FetchUserStatus(uin uint32) structs.StatusChangeMsg {
+	statusFinal := structs.StatusChangeMsg{
 		UIN:    uin,
-		Status: universal.GG_STATUS_NOT_AVAIL,
+		Status: statuses.GG_STATUS_NOT_AVAIL,
 	}
 
 	status, err := CacheConn.Get(context.Background(), fmt.Sprintf("ggstatus:%d", uin)).Result()

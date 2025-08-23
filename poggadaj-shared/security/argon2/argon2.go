@@ -1,4 +1,7 @@
-package main
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024-2025 Oreeeee
+
+package argon2
 
 import (
 	"crypto/rand"
@@ -8,14 +11,6 @@ import (
 	"fmt"
 	"golang.org/x/crypto/argon2"
 	"strings"
-)
-
-const (
-	ARGON2_TIME     = 1
-	ARGON2_MEMORY   = 64 * 1024
-	ARGON2_THREADS  = 4
-	ARGON2_KEY_LEN  = 128
-	ARGON2_SALT_LEN = 128
 )
 
 func HashPassword(password string) (string, error) {

@@ -1,9 +1,12 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024-2025 Oreeeee
+
 package main
 
 import (
 	"net"
+	"poggadaj-shared/logging"
 	"poggadaj-tcp/clients"
-	"poggadaj-tcp/logging"
 	"poggadaj-tcp/protocol/packets"
 	"poggadaj-tcp/protocol/packets/c2s"
 	"poggadaj-tcp/protocol/packets/s2c"

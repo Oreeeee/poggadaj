@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024-2025 Oreeeee
+
 package database
 
 import (
@@ -6,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"os"
-	log "poggadaj-tcp/logging"
+	log "poggadaj-shared/logging"
 	"poggadaj-tcp/structs"
 )
 

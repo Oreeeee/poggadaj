@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024-2025 Oreeeee
+
+package argon2
+
+const (
+	ARGON2_TIME     = 1
+	ARGON2_MEMORY   = 64 * 1024
+	ARGON2_THREADS  = 4
+	ARGON2_KEY_LEN  = 32
+	ARGON2_SALT_LEN = 16
+)

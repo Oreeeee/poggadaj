@@ -1,10 +1,13 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024-2025 Oreeeee
+
 package s2c
 
 import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"poggadaj-tcp/universal"
+	"poggadaj-shared/statuses"
 	"poggadaj-tcp/utils"
 )
 
@@ -26,9 +29,9 @@ func (p *GG_Notify_Reply77) Serialize() []byte {
 
 	// Don't serialize if user not online or invisible
 	switch p.Status {
-	case universal.GG_STATUS_NOT_AVAIL:
+	case statuses.GG_STATUS_NOT_AVAIL:
 		return make([]byte, 0)
-	case universal.GG_STATUS_INVISIBLE:
+	case statuses.GG_STATUS_INVISIBLE:
 		return make([]byte, 0)
 	}
 

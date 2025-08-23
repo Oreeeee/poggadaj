@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024-2025 Oreeeee
+
 package clients
 
 import (
@@ -5,9 +8,12 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
+	"poggadaj-shared/cache"
+	log "poggadaj-shared/logging"
+	"poggadaj-shared/statuses"
+	sharedstructs "poggadaj-shared/structs"
 	"poggadaj-tcp/constants"
 	db "poggadaj-tcp/database"
-	log "poggadaj-tcp/logging"
 	"poggadaj-tcp/protocol/packets"
 	"poggadaj-tcp/protocol/packets/c2s"
 	"poggadaj-tcp/protocol/packets/s2c"
@@ -51,7 +57,7 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool 
 			log.L.Debugf("Sending GG_LOGIN_OK")
 			c.SendLoginOK()
 
-			db.SetUserStatus(uv.StatusChangeMsg{
+			cache.SetUserStatus(sharedstructs.StatusChangeMsg{
 				UIN:    c.UIN,
 				Status: p.Status,
 			})
@@ -76,7 +82,7 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool 
 			c.SendLoginOK()
 
 			// Set user's status
-			db.SetUserStatus(uv.StatusChangeMsg{
+			cache.SetUserStatus(sharedstructs.StatusChangeMsg{
 				UIN:    c.UIN,
 				Status: p.Status,
 			})
@@ -107,7 +113,7 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool 
 			c.SendLoginOK()
 
 			// Set user's status
-			db.SetUserStatus(uv.StatusChangeMsg{
+			cache.SetUserStatus(sharedstructs.StatusChangeMsg{
 				UIN:    c.UIN,
 				Status: p.Status,
 			})
@@ -138,7 +144,7 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv packets.GG_Packet) bool 
 			c.SendLoginOK()
 
 			// Set user's status
-			db.SetUserStatus(uv.StatusChangeMsg{
+			cache.SetUserStatus(sharedstructs.StatusChangeMsg{
 				UIN:    c.UIN,
 				Status: p.Status,
 			})
@@ -182,7 +188,7 @@ func (c *GGClient) HandleNotifyLast(pRecv packets.GG_Packet) {
 	response := make([]byte, 0)
 	buf := bytes.NewBuffer(response)
 	for _, notifyContact := range c.NotifyList {
-		statusChange := db.FetchUserStatus(notifyContact.UIN)
+		statusChange := cache.FetchUserStatus(notifyContact.UIN)
 		if c.Version >= 0x2a {
 			notifyReply := s2c.GG_Notify_Reply77{
 				UIN:         statusChange.UIN,
@@ -207,7 +213,7 @@ func (c *GGClient) HandleNotifyLast(pRecv packets.GG_Packet) {
 
 func (c *GGClient) HandleAddNotify(pRecv packets.GG_Packet) {
 	contact := uv.GG_AddNotify(pRecv.Data, &c.NotifyList)
-	c.SendStatus(db.FetchUserStatus(contact.UIN))
+	c.SendStatus(cache.FetchUserStatus(contact.UIN))
 }
 
 func (c *GGClient) HandleRemoveNotify(pRecv packets.GG_Packet) {
@@ -228,7 +234,7 @@ func (c *GGClient) HandleNewStatus(pRecv packets.GG_Packet) {
 	p := c2s.GG_New_Status{}
 	p.Deserialize(pRecv.Data, pRecv.Length)
 
-	db.SetUserStatus(uv.StatusChangeMsg{
+	cache.SetUserStatus(sharedstructs.StatusChangeMsg{
 		UIN:         c.UIN,
 		Status:      p.Status,
 		Description: p.Description,
@@ -241,7 +247,7 @@ func (c *GGClient) HandleSendMsg(pRecv packets.GG_Packet) {
 	p := c2s.GG_Send_MSG{}
 	p.Deserialize(pRecv.Data, pRecv.Length)
 	log.StructPPrint("GG_SEND_MSG", p.PrettyPrint())
-	db.PublishMessageChannel(p.Recipient, structs.Message{c.UIN, p.MsgClass, p.Content})
+	cache.PublishMessageChannel(p.Recipient, sharedstructs.Message{c.UIN, p.MsgClass, p.Content})
 }
 
 func (c *GGClient) HandleUserlistReq(pRecv packets.GG_Packet) {
@@ -421,7 +427,7 @@ func (c *GGClient) SendLoginFail() {
 	}
 }
 
-func (c *GGClient) SendStatus(statusChange uv.StatusChangeMsg) {
+func (c *GGClient) SendStatus(statusChange sharedstructs.StatusChangeMsg) {
 	if c.Version >= 0x2a {
 		c.SendStatus77(statusChange)
 	} else if c.Version >= 0x20 {
@@ -431,7 +437,7 @@ func (c *GGClient) SendStatus(statusChange uv.StatusChangeMsg) {
 	}
 }
 
-func (c *GGClient) SendStatus50(statusChange uv.StatusChangeMsg) {
+func (c *GGClient) SendStatus50(statusChange sharedstructs.StatusChangeMsg) {
 	p := s2c.GG_Status{
 		UIN:         statusChange.UIN,
 		Status:      statusChange.Status,
@@ -445,7 +451,7 @@ func (c *GGClient) SendStatus50(statusChange uv.StatusChangeMsg) {
 	}
 }
 
-func (c *GGClient) SendStatus60(statusChange uv.StatusChangeMsg) {
+func (c *GGClient) SendStatus60(statusChange sharedstructs.StatusChangeMsg) {
 	p := s2c.GG_Status60{
 		UIN:         statusChange.UIN,
 		Status:      uint8(statusChange.Status),
@@ -463,7 +469,7 @@ func (c *GGClient) SendStatus60(statusChange uv.StatusChangeMsg) {
 	}
 }
 
-func (c *GGClient) SendStatus77(statusChange uv.StatusChangeMsg) {
+func (c *GGClient) SendStatus77(statusChange sharedstructs.StatusChangeMsg) {
 	p := s2c.GG_Status77{
 		UIN:         statusChange.UIN,
 		Status:      uint8(statusChange.Status),
@@ -481,7 +487,7 @@ func (c *GGClient) SendStatus77(statusChange uv.StatusChangeMsg) {
 	}
 }
 
-func (c *GGClient) SendRecvMsg(msg structs.Message) {
+func (c *GGClient) SendRecvMsg(msg sharedstructs.Message) {
 	pS := s2c.GG_Recv_MSG{
 		Sender:   msg.From,
 		Seq:      0,
@@ -520,8 +526,8 @@ func (c *GGClient) SendPong() {
 
 func (c *GGClient) Clean() {
 	// Change user's status to not available
-	db.SetUserStatus(uv.StatusChangeMsg{
+	cache.SetUserStatus(sharedstructs.StatusChangeMsg{
 		UIN:    c.UIN,
-		Status: uv.GG_STATUS_NOT_AVAIL,
+		Status: statuses.GG_STATUS_NOT_AVAIL,
 	})
 }

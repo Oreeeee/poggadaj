@@ -50,7 +50,7 @@ services:
       - GG_SEED=${GG_SEED}
 
   db:
-    image: postgres:17
+    image: postgres:17-alpine
     restart: always
     volumes:
       - ./db:/var/lib/postgresql/data
@@ -62,7 +62,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
 
   cache:
-    image: valkey/valkey:8.0-alpine
+    image: valkey/valkey:8.1-alpine
     restart: always
     ports:
       - "127.0.0.1:6379:6379"
