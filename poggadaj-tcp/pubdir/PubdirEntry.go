@@ -80,7 +80,7 @@ func (p *PubdirEntry) Write() []byte {
 	currStruct := reflect.ValueOf(*p)
 	for _, field := range structFields {
 		// Don't serialize empty fields
-		if currStruct.FieldByName(field.Name).IsNil() {
+		if currStruct.FieldByName(field.Name).IsZero() {
 			continue
 		}
 
