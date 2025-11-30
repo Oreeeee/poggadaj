@@ -304,6 +304,20 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 	log.StructPPrint("GG_PUBDIR50_REQUEST", p.PrettyPrint())
 
 	switch p.Type {
+	case constants.GG_PUBDIR50_SEARCH:
+		req := pubdir.PubdirEntry{}
+		err := req.Read(p.Request)
+		if err != nil {
+			log.L.Errorf("Failed to read pubdir entry: %s", err)
+			return
+		}
+		log.L.Debugf("Received pubdir entry: %+v", req)
+
+		c.SendPubdirResp(
+			constants.GG_PUBDIR50_SEARCH_REPLY,
+			p.Seq,
+			req.Write(),
+		)
 	case constants.GG_PUBDIR50_READ:
 		// Placeholder response
 		// TODO: Return actual pubdir stuffs
