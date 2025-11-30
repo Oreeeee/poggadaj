@@ -2,7 +2,6 @@ package pubdir
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"poggadaj-tcp/utils"
 	"reflect"
@@ -29,12 +28,13 @@ func (p *PubdirEntry) Read(data []byte) error {
 	splitData := strings.Split(strData, "\x00")
 
 	// Pubdir strings are key-value pairs, length of them should be even
-	if len(splitData)%2 != 0 {
-		return errors.New("length of string is not even")
-	}
+	//if len(splitData)%2 != 0 {
+	//	return errors.New("length of string is not even")
+	//}
 
 	// Parse the key-value pairs, as seen in the documentation
-	for i := 0; i < len(splitData); i += 2 {
+	// Gadu-Gadu client writes an additional 0x00 at the end, and it would cause index out of range panics, hence the -1
+	for i := 0; i < len(splitData)-1; i += 2 {
 		v := splitData[i+1]
 		switch splitData[i] {
 		case "FmNumber":
