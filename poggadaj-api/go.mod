@@ -1,6 +1,6 @@
 module poggadaj-api
 
-go 1.24.6
+go 1.25
 
 replace poggadaj-shared => ./shared
 

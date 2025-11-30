@@ -2,7 +2,7 @@ module poggadaj-tcp
 
 replace poggadaj-shared => ./shared
 
-go 1.24.6
+go 1.25
 
 require (
 	github.com/charmbracelet/log v0.4.2
