@@ -317,6 +317,22 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 			p.Seq,
 			resp.Write(),
 		)
+	case constants.GG_PUBDIR50_WRITE:
+		req := pubdir.PubdirEntry{}
+		err := req.Read(p.Request)
+		if err != nil {
+			log.L.Errorf("Failed to read pubdir entry: %s", err)
+			return
+		}
+		log.L.Debugf("Received pubdir entry: %+v", req)
+
+		// Loopback the updated data back to the client
+		// TODO: Not sure what's the correct way to send ack to the client
+		c.SendPubdirResp(
+			0x00,
+			p.Seq,
+			req.Write(),
+		)
 	}
 }
 
