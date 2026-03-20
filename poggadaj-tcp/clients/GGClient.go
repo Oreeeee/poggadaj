@@ -340,10 +340,12 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 		}
 		log.L.Debugf("Received pubdir entry: %+v", req)
 
-		// Loopback the updated data back to the client
-		// TODO: Not sure what's the correct way to send ack to the client
+		// Acknowledge that the server received the data.
+		// The fact that the correct type is 0x01 was not documented by libgadu.
+		// Not sure if the data loopback is required though.
+		// For future reference, the function that shows the correct message is FUN_00429cc1 in GG 6.1
 		c.SendPubdirResp(
-			0x00,
+			0x01,
 			p.Seq,
 			req.Write(),
 		)
