@@ -1,3 +1,0 @@
-ALTER TABLE gguser
-ALTER COLUMN password_sha1
-TYPE VARCHAR(40);

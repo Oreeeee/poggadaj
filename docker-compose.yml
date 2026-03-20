@@ -13,6 +13,9 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - GG_SERVICE_IP=${GG_SERVICE_IP}
       - GG_SERVICE_PORT=${GG_SERVICE_PORT}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
 
   nginx:
     build: poggadaj-nginx
@@ -25,6 +28,9 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
 
   api:
     build: poggadaj-api
@@ -36,6 +42,9 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - CACHE_ADDRESS=cache
       - GG_SEED=${GG_SEED}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
 
   tcp:
     build: poggadaj-tcp
@@ -48,21 +57,45 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - CACHE_ADDRESS=cache
       - GG_SEED=${GG_SEED}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
 
   db:
     image: postgres:17-alpine
     restart: always
     volumes:
       - ./db:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "127.0.0.1:5432:5432"
     environment:
       - POSTGRES_USER=poggadaj
       - POSTGRES_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
 
   cache:
     image: valkey/valkey:9.0-alpine
     restart: always
     ports:
       - "127.0.0.1:6379:6379"
+
+  migrate:
+    image: migrate/migrate
+    restart: no
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/migrations
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://poggadaj:${DB_PASSWORD}@db:5432/poggadaj?sslmode=disable",
+        "up",
+      ]
