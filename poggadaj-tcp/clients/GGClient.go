@@ -314,12 +314,24 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 			log.L.Errorf("Failed to read pubdir entry: %s", err)
 			return
 		}
-		log.L.Debugf("Received pubdir entry: %+v", req)
+		log.L.Debugf("Received pubdir query: %+v", req)
+
+		resp, err := db.SearchInPubdir(&req)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			logging.L.Errorf("Failed to search through the pubdir: %v", err)
+			c.SendPubdirResp(
+				constants.GG_PUBDIR50_ERROR,
+				p.Seq,
+				nil,
+			)
+			return
+		}
+		logging.L.Debugf("Pubdir lookup returned %d rows", len(resp))
 
 		c.SendPubdirResp(
 			constants.GG_PUBDIR50_SEARCH_REPLY,
 			p.Seq,
-			req.Write(),
+			pubdir.PubdirWriteRange(resp), // TODO: Client (GG 6.1) seems to add a few weird rows after the results
 		)
 	case constants.GG_PUBDIR50_READ:
 		resp, err := db.GetPubdirDataByUin(c.UIN)
