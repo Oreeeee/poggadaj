@@ -17,9 +17,10 @@ const (
 	GG_USERLIST_GET_MORE_REPLY = 0x04
 	GG_USERLIST_GET_REPLY      = 0x06
 
-	GG_PUBDIR50_WRITE        = 0x01
+	GG_PUBDIR50_WRITE        = 0x01 // When sent in response to a write, it marks success
 	GG_PUBDIR50_READ         = 0x02
 	GG_PUBDIR50_SEARCH       = 0x03
+	GG_PUBDIR50_ERROR        = 0x04 // Server to Client only
 	GG_PUBDIR50_SEARCH_REPLY = 0x05
 
 	GG_HAS_AUDIO_MASK = 0x40000000

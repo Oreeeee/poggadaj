@@ -330,7 +330,7 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 		} else if err != nil {
 			logging.L.Errorf("Failed to retreive pubdir data for UIN %d: %v", c.UIN, err)
 			c.SendPubdirResp(
-				0x04,
+				constants.GG_PUBDIR50_ERROR,
 				p.Seq,
 				nil,
 			)
@@ -355,7 +355,7 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 		if err != nil {
 			log.L.Errorf("Failed to update pubdir data for %d: %v", c.UIN, err)
 			c.SendPubdirResp(
-				0x04,
+				constants.GG_PUBDIR50_ERROR,
 				p.Seq,
 				nil,
 			)
@@ -367,7 +367,7 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 		// Not sure if the data loopback is required though.
 		// For future reference, the function that shows the correct message is FUN_00429cc1 in GG 6.1
 		c.SendPubdirResp(
-			0x01,
+			constants.GG_PUBDIR50_WRITE,
 			p.Seq,
 			req.Write(),
 		)
