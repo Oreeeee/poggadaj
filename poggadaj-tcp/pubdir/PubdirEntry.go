@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"poggadaj-tcp/utils"
-	"reflect"
 	"strconv"
 	"strings"
 )
@@ -76,42 +75,17 @@ func (p *PubdirEntry) Read(data []byte) error {
 func (p *PubdirEntry) Write() []byte {
 	var resultBuilder bytes.Buffer
 
-	structFields := reflect.VisibleFields(reflect.TypeOf(*p))
-	currStruct := reflect.ValueOf(*p)
-	for _, field := range structFields {
-		// Don't serialize empty fields
-		if currStruct.FieldByName(field.Name).IsZero() {
-			continue
-		}
-
-		switch field.Name {
-		case "UIN":
-			resultBuilder.WriteString(fmt.Sprintf("FmNumber\x00%d", p.UIN))
-		case "Firstname":
-			resultBuilder.WriteString("firstname\x00" + p.Firstname)
-		case "Lastname":
-			resultBuilder.WriteString("lastname\x00" + p.Lastname)
-		case "Nickname":
-			resultBuilder.WriteString("nickname\x00" + p.Nickname)
-		case "Birthyear":
-			resultBuilder.WriteString(fmt.Sprintf("birthyear\x00%d", p.Birthyear))
-		case "City":
-			resultBuilder.WriteString("city\x00" + p.City)
-		case "gender":
-			resultBuilder.WriteString(fmt.Sprintf("gender\x00%d", p.Gender))
-		case "ActiveOnly":
-			resultBuilder.WriteString(fmt.Sprintf("ActiveOnly\x00%d", utils.BoolToInt(p.ActiveOnly)))
-		case "FamilyName":
-			resultBuilder.WriteString("familyname\x00" + p.FamilyName)
-		case "FamilyCity":
-			resultBuilder.WriteString("familycity\x00" + p.FamilyCity)
-		case "FmStatus":
-			resultBuilder.WriteString(fmt.Sprintf("FmStatus\x00%d", p.Status))
-		}
-
-		// Append null byte at the end
-		resultBuilder.WriteByte(0x00)
-	}
+	fmt.Fprintf(&resultBuilder, "FmNumber\x00%d\x00", p.UIN)
+	fmt.Fprintf(&resultBuilder, "firstname\x00%s\x00", p.Firstname)
+	fmt.Fprintf(&resultBuilder, "lastname\x00%s\x00", p.Lastname)
+	fmt.Fprintf(&resultBuilder, "nickname\x00%s\x00", p.Nickname)
+	fmt.Fprintf(&resultBuilder, "birthyear\x00%d\x00", p.Birthyear)
+	fmt.Fprintf(&resultBuilder, "city\x00%s\x00", p.City)
+	fmt.Fprintf(&resultBuilder, "gender\x00%d\x00", p.Gender)
+	fmt.Fprintf(&resultBuilder, "ActiveOnly\x00%d\x00", utils.BoolToInt(p.ActiveOnly))
+	fmt.Fprintf(&resultBuilder, "familyname\x00%s\x00", p.FamilyName)
+	fmt.Fprintf(&resultBuilder, "familycity\x00%s\x00", p.FamilyCity)
+	fmt.Fprintf(&resultBuilder, "FmStatus\x00%d\x00", p.Status)
 
 	return resultBuilder.Bytes()
 }
