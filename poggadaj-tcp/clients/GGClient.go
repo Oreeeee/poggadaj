@@ -331,7 +331,7 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 		c.SendPubdirResp(
 			constants.GG_PUBDIR50_SEARCH_REPLY,
 			p.Seq,
-			pubdir.PubdirWriteRange(resp), // TODO: Client (GG 6.1) seems to add a few weird rows after the results
+			pubdir.PubdirWriteRange(resp),
 		)
 	case constants.GG_PUBDIR50_READ:
 		resp, err := db.GetPubdirDataByUin(c.UIN)

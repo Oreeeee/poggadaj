@@ -102,19 +102,28 @@ func (p *PubdirEntry) Read(data []byte) error {
 func (p *PubdirEntry) Write() []byte {
 	var resultBuilder bytes.Buffer
 
-	fmt.Fprintf(&resultBuilder, "FmNumber\x00%d\x00", p.UIN)
-	fmt.Fprintf(&resultBuilder, "firstname\x00%s\x00", p.Firstname)
-	fmt.Fprintf(&resultBuilder, "lastname\x00%s\x00", p.Lastname)
-	fmt.Fprintf(&resultBuilder, "nickname\x00%s\x00", p.Nickname)
-	fmt.Fprintf(&resultBuilder, "birthyear\x00%d\x00", p.Birthyear)
-	fmt.Fprintf(&resultBuilder, "city\x00%s\x00", p.City)
-	fmt.Fprintf(&resultBuilder, "gender\x00%d\x00", p.Gender)
-	fmt.Fprintf(&resultBuilder, "ActiveOnly\x00%d\x00", utils.BoolToInt(p.ActiveOnly))
-	fmt.Fprintf(&resultBuilder, "familyname\x00%s\x00", p.FamilyName)
-	fmt.Fprintf(&resultBuilder, "familycity\x00%s\x00", p.FamilyCity)
-	fmt.Fprintf(&resultBuilder, "FmStatus\x00%d\x00", p.Status)
+	writeSingleParam(&resultBuilder, "FmNumber", p.UIN)
+	writeSingleParam(&resultBuilder, "firstname", p.Firstname)
+	writeSingleParam(&resultBuilder, "lastname", p.Lastname)
+	writeSingleParam(&resultBuilder, "nickname", p.Nickname)
+	writeSingleParam(&resultBuilder, "birthyear", p.Birthyear)
+	writeSingleParam(&resultBuilder, "city", p.City)
+	writeSingleParam(&resultBuilder, "gender", p.Gender)
+	writeSingleParam(&resultBuilder, "ActiveOnly", utils.BoolToInt(p.ActiveOnly))
+	writeSingleParam(&resultBuilder, "familyname", p.FamilyName)
+	writeSingleParam(&resultBuilder, "familycity", p.FamilyCity)
+	writeSingleParam(&resultBuilder, "FmStatus", p.Status)
 
 	return resultBuilder.Bytes()
+}
+
+// writeSingleParam writes a param in PubdirEntry while skipping empty strings
+func writeSingleParam(builder *bytes.Buffer, key string, value any) {
+	if value == "" {
+		return
+	}
+
+	fmt.Fprintf(builder, "%s\x00%v\x00", key, value)
 }
 
 // PubdirWriteRange serializes a slice of PubdirEntries
