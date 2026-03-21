@@ -5,10 +5,13 @@ package clients
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"net"
 	"poggadaj-shared/cache"
+	"poggadaj-shared/logging"
 	log "poggadaj-shared/logging"
 	"poggadaj-shared/statuses"
 	sharedstructs "poggadaj-shared/structs"
@@ -319,13 +322,21 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 			req.Write(),
 		)
 	case constants.GG_PUBDIR50_READ:
-		// Placeholder response
-		// TODO: Return actual pubdir stuffs
-		resp := pubdir.PubdirEntry{
-			Firstname: "Foo",
-			Lastname:  "Bar",
-			Birthyear: 2069,
+		resp, err := db.GetPubdirDataByUin(c.UIN)
+		if errors.Is(err, sql.ErrNoRows) {
+			logging.L.Infof("Creating empty pubdir entry for UIN %d", c.UIN)
+			resp := pubdir.PubdirEntry{}
+			db.WritePubdirData(c.UIN, &resp)
+		} else if err != nil {
+			logging.L.Errorf("Failed to retreive pubdir data for UIN %d: %v", c.UIN, err)
+			c.SendPubdirResp(
+				0x04,
+				p.Seq,
+				nil,
+			)
+			return
 		}
+
 		c.SendPubdirResp(
 			constants.GG_PUBDIR50_SEARCH,
 			p.Seq,
@@ -339,6 +350,17 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 			return
 		}
 		log.L.Debugf("Received pubdir entry: %+v", req)
+
+		err = db.WritePubdirData(c.UIN, &req)
+		if err != nil {
+			log.L.Errorf("Failed to update pubdir data for %d: %v", c.UIN, err)
+			c.SendPubdirResp(
+				0x04,
+				p.Seq,
+				nil,
+			)
+			return
+		}
 
 		// Acknowledge that the server received the data.
 		// The fact that the correct type is 0x01 was not documented by libgadu.
