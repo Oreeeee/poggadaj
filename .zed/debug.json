@@ -1,0 +1,49 @@
+// Project-local debug tasks
+//
+// For more documentation on how to configure debug tasks,
+// see: https://zed.dev/docs/debugger
+[
+  {
+    "label": "Debug poggadaj-tcp",
+    "adapter": "Delve",
+    "program": ".",
+    "cwd": "${ZED_WORKTREE_ROOT}/poggadaj-tcp",
+    "request": "launch",
+    "mode": "debug",
+    "envFile": "${ZED_WORKTREE_ROOT}/.env",
+    "env": {
+      "LISTEN_ADDRESS": "0.0.0.0",
+      "DB_ADDRESS": "127.0.0.1",
+      "CACHE_ADDRESS": "127.0.0.1",
+    },
+  },
+  {
+    "label": "Debug poggadaj-http",
+    "adapter": "Delve",
+    "program": ".",
+    "cwd": "${ZED_WORKTREE_ROOT}/poggadaj-http",
+    "request": "launch",
+    "mode": "debug",
+    "envFile": "${ZED_WORKTREE_ROOT}/.env",
+    "env": {
+      "LISTEN_ADDRESS": "0.0.0.0",
+      "LISTEN_PORT": "8080",
+      "DB_ADDRESS": "127.0.0.1",
+    },
+  },
+  {
+    "label": "Debug poggadaj-api",
+    "adapter": "Delve",
+    "program": ".",
+    "cwd": "${ZED_WORKTREE_ROOT}/poggadaj-api",
+    "request": "launch",
+    "mode": "debug",
+    "envFile": "${ZED_WORKTREE_ROOT}/.env",
+    "env": {
+      "LISTEN_ADDRESS": "0.0.0.0",
+      "LISTEN_PORT": "8080",
+      "DB_ADDRESS": "127.0.0.1",
+      "CACHE_ADDRESS": "127.0.0.1",
+    },
+  },
+]
