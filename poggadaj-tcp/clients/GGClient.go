@@ -316,7 +316,7 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 		}
 		log.L.Debugf("Received pubdir query: %+v", req)
 
-		resp, err := db.SearchInPubdir(&req)
+		resp, nextStart, err := db.SearchInPubdir(&req)
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			logging.L.Errorf("Failed to search through the pubdir: %v", err)
 			c.SendPubdirResp(
@@ -328,10 +328,14 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 		}
 		logging.L.Debugf("Pubdir lookup returned %d rows", len(resp))
 
+		var respBuilder bytes.Buffer
+		respBuilder.Write(pubdir.PubdirWriteRange(resp)) // TODO: make that use stream directly?
+		pubdir.WriteSingleParam(&respBuilder, "\x00nextstart", nextStart)
+
 		c.SendPubdirResp(
 			constants.GG_PUBDIR50_SEARCH_REPLY,
 			p.Seq,
-			pubdir.PubdirWriteRange(resp),
+			respBuilder.Bytes(),
 		)
 	case constants.GG_PUBDIR50_READ:
 		resp, err := db.GetPubdirDataByUin(c.UIN)

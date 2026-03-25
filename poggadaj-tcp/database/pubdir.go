@@ -45,7 +45,7 @@ func WritePubdirData(uin uint32, entry *pubdir.PubdirEntry) error {
 	return err
 }
 
-func SearchInPubdir(query *pubdir.PubdirEntry) ([]pubdir.PubdirEntry, error) {
+func SearchInPubdir(query *pubdir.PubdirEntry) ([]pubdir.PubdirEntry, uint32, error) {
 	// TODO: Add support for age ranges
 	// TODO: Add support for only-online option
 	// TODO: Add support for pagination
@@ -63,6 +63,7 @@ func SearchInPubdir(query *pubdir.PubdirEntry) ([]pubdir.PubdirEntry, error) {
 		"min_birthyear": query.MinBirthyear,
 		"max_birthyear": query.Birthyear,
 		"city":          query.City,
+		"start":         query.Start,
 	}
 
 	if query.Firstname != "" {
@@ -103,9 +104,16 @@ func SearchInPubdir(query *pubdir.PubdirEntry) ([]pubdir.PubdirEntry, error) {
 		}
 	}
 
+	if query.Start != 0 {
+		// Continue the search
+		fmt.Fprintf(&stmtBuilder, " AND uin > @start")
+	}
+
+	fmt.Fprintf(&stmtBuilder, " ORDER BY uin ASC LIMIT 20")
+
 	rows, err := DatabaseConn.Query(context.Background(), stmtBuilder.String(), dbArgs)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -113,11 +121,13 @@ func SearchInPubdir(query *pubdir.PubdirEntry) ([]pubdir.PubdirEntry, error) {
 		result := pubdir.PubdirEntry{}
 		err = rows.Scan(&result.UIN, &result.Firstname, &result.Lastname, &result.Birthyear, &result.City)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		results = append(results, result)
 	}
 
-	return results, nil
+	nextStart := results[len(results)-1].UIN
+
+	return results, nextStart, nil
 }

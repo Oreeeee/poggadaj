@@ -23,6 +23,7 @@ type PubdirEntry struct {
 	FamilyName   string
 	FamilyCity   string
 	Status       uint8
+	Start        uint32
 }
 
 func (p *PubdirEntry) Read(data []byte) error {
@@ -93,6 +94,9 @@ func (p *PubdirEntry) Read(data []byte) error {
 		case "FmStatus":
 			status, _ := strconv.ParseUint(v, 10, 8)
 			p.Status = uint8(status)
+		case "fmstart":
+			start, _ := strconv.ParseUint(v, 10, 32)
+			p.Start = uint32(start)
 		}
 	}
 
@@ -102,23 +106,23 @@ func (p *PubdirEntry) Read(data []byte) error {
 func (p *PubdirEntry) Write() []byte {
 	var resultBuilder bytes.Buffer
 
-	writeSingleParam(&resultBuilder, "FmNumber", p.UIN)
-	writeSingleParam(&resultBuilder, "firstname", p.Firstname)
-	writeSingleParam(&resultBuilder, "lastname", p.Lastname)
-	writeSingleParam(&resultBuilder, "nickname", p.Nickname)
-	writeSingleParam(&resultBuilder, "birthyear", p.Birthyear)
-	writeSingleParam(&resultBuilder, "city", p.City)
-	writeSingleParam(&resultBuilder, "gender", p.Gender)
-	writeSingleParam(&resultBuilder, "ActiveOnly", utils.BoolToInt(p.ActiveOnly))
-	writeSingleParam(&resultBuilder, "familyname", p.FamilyName)
-	writeSingleParam(&resultBuilder, "familycity", p.FamilyCity)
-	writeSingleParam(&resultBuilder, "FmStatus", p.Status)
+	WriteSingleParam(&resultBuilder, "FmNumber", p.UIN)
+	WriteSingleParam(&resultBuilder, "firstname", p.Firstname)
+	WriteSingleParam(&resultBuilder, "lastname", p.Lastname)
+	WriteSingleParam(&resultBuilder, "nickname", p.Nickname)
+	WriteSingleParam(&resultBuilder, "birthyear", p.Birthyear)
+	WriteSingleParam(&resultBuilder, "city", p.City)
+	WriteSingleParam(&resultBuilder, "gender", p.Gender)
+	WriteSingleParam(&resultBuilder, "ActiveOnly", utils.BoolToInt(p.ActiveOnly))
+	WriteSingleParam(&resultBuilder, "familyname", p.FamilyName)
+	WriteSingleParam(&resultBuilder, "familycity", p.FamilyCity)
+	WriteSingleParam(&resultBuilder, "FmStatus", p.Status)
 
 	return resultBuilder.Bytes()
 }
 
-// writeSingleParam writes a param in PubdirEntry while skipping empty strings
-func writeSingleParam(builder *bytes.Buffer, key string, value any) {
+// WriteSingleParam writes a param in PubdirEntry while skipping empty strings
+func WriteSingleParam(builder *bytes.Buffer, key string, value any) {
 	if value == "" {
 		return
 	}
