@@ -7,6 +7,9 @@ import (
 	"poggadaj-tcp/utils"
 	"strconv"
 	"strings"
+
+	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/transform"
 )
 
 type PubdirEntry struct {
@@ -106,23 +109,26 @@ func (p *PubdirEntry) Read(data []byte) error {
 func (p *PubdirEntry) Write() []byte {
 	var resultBuilder bytes.Buffer
 
-	WriteSingleParam(&resultBuilder, "FmNumber", p.UIN)
-	WriteSingleParam(&resultBuilder, "firstname", p.Firstname)
-	WriteSingleParam(&resultBuilder, "lastname", p.Lastname)
-	WriteSingleParam(&resultBuilder, "nickname", p.Nickname)
-	WriteSingleParam(&resultBuilder, "birthyear", p.Birthyear)
-	WriteSingleParam(&resultBuilder, "city", p.City)
-	WriteSingleParam(&resultBuilder, "gender", p.Gender)
-	WriteSingleParam(&resultBuilder, "ActiveOnly", utils.BoolToInt(p.ActiveOnly))
-	WriteSingleParam(&resultBuilder, "familyname", p.FamilyName)
-	WriteSingleParam(&resultBuilder, "familycity", p.FamilyCity)
-	WriteSingleParam(&resultBuilder, "FmStatus", p.Status)
+	writer := transform.NewWriter(&resultBuilder, charmap.Windows1250.NewEncoder())
+	defer writer.Close()
+
+	WriteSingleParam(writer, "FmNumber", p.UIN)
+	WriteSingleParam(writer, "firstname", p.Firstname)
+	WriteSingleParam(writer, "lastname", p.Lastname)
+	WriteSingleParam(writer, "nickname", p.Nickname)
+	WriteSingleParam(writer, "birthyear", p.Birthyear)
+	WriteSingleParam(writer, "city", p.City)
+	WriteSingleParam(writer, "gender", p.Gender)
+	WriteSingleParam(writer, "ActiveOnly", utils.BoolToInt(p.ActiveOnly))
+	WriteSingleParam(writer, "familyname", p.FamilyName)
+	WriteSingleParam(writer, "familycity", p.FamilyCity)
+	WriteSingleParam(writer, "FmStatus", p.Status)
 
 	return resultBuilder.Bytes()
 }
 
 // WriteSingleParam writes a param in PubdirEntry while skipping empty strings
-func WriteSingleParam(builder *bytes.Buffer, key string, value any) {
+func WriteSingleParam(builder *transform.Writer, key string, value any) {
 	if value == "" {
 		return
 	}

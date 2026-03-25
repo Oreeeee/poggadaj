@@ -27,6 +27,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/transform"
 )
 
 type GGClient struct {
@@ -329,8 +332,12 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 		logging.L.Debugf("Pubdir lookup returned %d rows", len(resp))
 
 		var respBuilder bytes.Buffer
+
+		writer := transform.NewWriter(&respBuilder, charmap.Windows1250.NewEncoder())
+		defer writer.Close()
+
 		respBuilder.Write(pubdir.PubdirWriteRange(resp)) // TODO: make that use stream directly?
-		pubdir.WriteSingleParam(&respBuilder, "\x00nextstart", nextStart)
+		pubdir.WriteSingleParam(writer, "\x00nextstart", nextStart)
 
 		c.SendPubdirResp(
 			constants.GG_PUBDIR50_SEARCH_REPLY,
