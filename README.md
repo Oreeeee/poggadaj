@@ -20,7 +20,9 @@ Open Source reimplementation of the Gadu-Gadu backend services written in Go
 | Receiving messages                      |       ❌       |       ✅       |         ✅         |         ✅         |       ✅       |
 | P2P                                     |       ❌       |       ❌       |         ❌         |         ❌         |       ❌       |
 | P2P over a relay                        |       ❌       |       ❌       |         ❌         |         ❌         |       ❌       |
-| Public directory                        |       ❌       |       ❌       |         ❌         |         ❌         |       ❌       |
+| Public directory                        |       ❌       |       ✅[^1]       |         ✅[^1]         |         ✅[^1]         |       ✅[^1]       |
+
+[^1]: Statuses are not displayed correctly. Everything else works.
 
 ### HTTP features
 
