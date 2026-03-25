@@ -331,6 +331,15 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 		}
 		logging.L.Debugf("Pubdir lookup returned %d rows", len(resp))
 
+		if len(resp) == 0 {
+			c.SendPubdirResp(
+				constants.GG_PUBDIR50_SEARCH_REPLY,
+				p.Seq,
+				nil,
+			)
+			return
+		}
+
 		var respBuilder bytes.Buffer
 
 		writer := transform.NewWriter(&respBuilder, charmap.Windows1250.NewEncoder())

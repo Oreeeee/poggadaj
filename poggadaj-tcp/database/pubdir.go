@@ -46,9 +46,7 @@ func WritePubdirData(uin uint32, entry *pubdir.PubdirEntry) error {
 }
 
 func SearchInPubdir(query *pubdir.PubdirEntry) ([]pubdir.PubdirEntry, uint32, error) {
-	// TODO: Add support for age ranges
 	// TODO: Add support for only-online option
-	// TODO: Add support for pagination
 
 	results := []pubdir.PubdirEntry{}
 
@@ -87,9 +85,8 @@ func SearchInPubdir(query *pubdir.PubdirEntry) ([]pubdir.PubdirEntry, uint32, er
 	}
 
 	var stmtBuilder bytes.Buffer
-	fmt.Fprint(&stmtBuilder, "SELECT uin, firstname, lastname, birthyear, city FROM pubdir")
+	fmt.Fprint(&stmtBuilder, "SELECT uin, firstname, lastname, birthyear, city FROM pubdir WHERE ")
 	if len(dbColumns) != 0 {
-		fmt.Fprint(&stmtBuilder, " WHERE ")
 		lastIndexInColumns := len(dbColumns) - 1
 
 		// Build the query with the specified columns.
@@ -102,11 +99,18 @@ func SearchInPubdir(query *pubdir.PubdirEntry) ([]pubdir.PubdirEntry, uint32, er
 				fmt.Fprintf(&stmtBuilder, " AND ")
 			}
 		}
+	} else {
+		// Put a neutral statement for later things
+		fmt.Fprintf(&stmtBuilder, "TRUE")
 	}
 
 	if query.Start != 0 {
 		// Continue the search
 		fmt.Fprintf(&stmtBuilder, " AND uin > @start")
+	}
+
+	if query.YearIsRange {
+		fmt.Fprintf(&stmtBuilder, " AND birthyear BETWEEN @min_birthyear AND @max_birthyear")
 	}
 
 	fmt.Fprintf(&stmtBuilder, " ORDER BY uin ASC LIMIT 20")
@@ -127,7 +131,10 @@ func SearchInPubdir(query *pubdir.PubdirEntry) ([]pubdir.PubdirEntry, uint32, er
 		results = append(results, result)
 	}
 
-	nextStart := results[len(results)-1].UIN
+	nextStart := uint32(0)
+	if len(results) > 0 {
+		nextStart = results[len(results)-1].UIN
+	}
 
 	return results, nextStart, nil
 }
