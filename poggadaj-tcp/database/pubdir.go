@@ -85,7 +85,7 @@ func SearchInPubdir(query *pubdir.PubdirEntry) ([]pubdir.PubdirEntry, uint32, er
 	}
 
 	var stmtBuilder bytes.Buffer
-	fmt.Fprint(&stmtBuilder, "SELECT uin, firstname, lastname, birthyear, city FROM pubdir WHERE ")
+	fmt.Fprint(&stmtBuilder, "SELECT uin, firstname, lastname, birthyear, city, gender FROM pubdir WHERE ")
 	if len(dbColumns) != 0 {
 		lastIndexInColumns := len(dbColumns) - 1
 
@@ -129,7 +129,7 @@ func SearchInPubdir(query *pubdir.PubdirEntry) ([]pubdir.PubdirEntry, uint32, er
 
 	for rows.Next() {
 		result := pubdir.PubdirEntry{}
-		err = rows.Scan(&result.UIN, &result.Firstname, &result.Lastname, &result.Birthyear, &result.City)
+		err = rows.Scan(&result.UIN, &result.Firstname, &result.Lastname, &result.Birthyear, &result.City, &result.Gender)
 		if err != nil {
 			return nil, 0, err
 		}
