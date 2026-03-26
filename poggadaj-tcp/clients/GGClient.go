@@ -357,8 +357,8 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 		resp, err := db.GetPubdirDataByUin(c.UIN)
 		if errors.Is(err, sql.ErrNoRows) {
 			logging.L.Infof("Creating empty pubdir entry for UIN %d", c.UIN)
-			resp := pubdir.PubdirEntry{}
-			db.WritePubdirData(c.UIN, &resp)
+			resp = &pubdir.PubdirEntry{}
+			db.WritePubdirData(c.UIN, resp)
 		} else if err != nil {
 			logging.L.Errorf("Failed to retreive pubdir data for UIN %d: %v", c.UIN, err)
 			c.SendPubdirResp(
@@ -367,6 +367,14 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 				nil,
 			)
 			return
+		}
+
+		// Swap the gender
+		switch resp.Gender {
+		case 1:
+			resp.Gender = 2
+		case 2:
+			resp.Gender = 1
 		}
 
 		c.SendPubdirResp(
@@ -382,6 +390,14 @@ func (c *GGClient) HandlePubdirReq(pRecv packets.GG_Packet) {
 			return
 		}
 		log.L.Debugf("Received pubdir entry: %+v", req)
+
+		// Swap the gender
+		switch req.Gender {
+		case 1:
+			req.Gender = 2
+		case 2:
+			req.Gender = 1
+		}
 
 		err = db.WritePubdirData(c.UIN, &req)
 		if err != nil {
