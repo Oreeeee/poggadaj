@@ -92,7 +92,13 @@ func SearchInPubdir(query *pubdir.PubdirEntry) ([]pubdir.PubdirEntry, uint32, er
 		// Build the query with the specified columns.
 		// Named args are used here to prevent injection
 		for idx, v := range dbColumns {
-			fmt.Fprintf(&stmtBuilder, "%s = @%s", v, v)
+			switch dbArgs[v].(type) {
+			case string:
+				// Do case insensitivity, allow any string before and after the search arg
+				fmt.Fprintf(&stmtBuilder, "%s ILIKE '%%' || @%s || '%%'", v, v)
+			default:
+				fmt.Fprintf(&stmtBuilder, "%s = @%s", v, v)
+			}
 
 			if idx != lastIndexInColumns {
 				// Only add the AND when the current arg isn't last
