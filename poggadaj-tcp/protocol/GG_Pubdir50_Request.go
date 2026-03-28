@@ -4,9 +4,8 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
+	"poggadaj-tcp/utils"
 )
 
 type GG_Pubdir50_Request struct {
@@ -15,13 +14,10 @@ type GG_Pubdir50_Request struct {
 	Request []byte
 }
 
-func (p *GG_Pubdir50_Request) Deserialize(data []byte) {
-	buf := bytes.NewBuffer(data)
-
-	binary.Read(buf, binary.LittleEndian, &p.Type)
-	binary.Read(buf, binary.LittleEndian, &p.Seq)
-	p.Request = make([]byte, len(data)-5)
-	buf.Read(p.Request)
+func (p *GG_Pubdir50_Request) Deserialize(stream *utils.IOStream) {
+	p.Type = stream.ReadU8()
+	p.Seq = stream.ReadU32()
+	p.Request = stream.ReadAll()
 }
 
 func (p *GG_Pubdir50_Request) PrettyPrint() []string {

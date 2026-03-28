@@ -4,8 +4,6 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
 	"poggadaj-tcp/utils"
 )
@@ -25,21 +23,19 @@ type GG_Login70 struct {
 	Unknown2     byte
 }
 
-func (p *GG_Login70) Deserialize(data []byte) {
-	buf := bytes.NewBuffer(data)
-
-	binary.Read(buf, binary.LittleEndian, &p.UIN)
-	binary.Read(buf, binary.LittleEndian, &p.HashType)
-	binary.Read(buf, binary.LittleEndian, &p.Hash)
-	binary.Read(buf, binary.LittleEndian, &p.Status)
-	binary.Read(buf, binary.LittleEndian, &p.Version)
-	binary.Read(buf, binary.LittleEndian, &p.Unknown1)
-	binary.Read(buf, binary.LittleEndian, &p.LocalIP)
-	binary.Read(buf, binary.LittleEndian, &p.LocalPort)
-	binary.Read(buf, binary.LittleEndian, &p.ExternalIP)
-	binary.Read(buf, binary.LittleEndian, &p.ExternalPort)
-	binary.Read(buf, binary.LittleEndian, &p.ImageSize)
-	binary.Read(buf, binary.LittleEndian, &p.Unknown2)
+func (p *GG_Login70) Deserialize(stream *utils.IOStream) {
+	p.UIN = stream.ReadU32()
+	p.HashType = stream.ReadU8()
+	p.Hash = [64]byte(stream.Read(64))
+	p.Status = stream.ReadU32()
+	p.Version = stream.ReadU32()
+	p.Unknown1 = stream.ReadU8()
+	p.LocalIP = stream.ReadU32()
+	p.LocalPort = stream.ReadU16()
+	p.ExternalIP = stream.ReadU32()
+	p.ExternalPort = stream.ReadU16()
+	p.ImageSize = stream.ReadU8()
+	p.Unknown2 = stream.ReadU8()
 }
 
 func (p *GG_Login70) PrettyPrint() []string {

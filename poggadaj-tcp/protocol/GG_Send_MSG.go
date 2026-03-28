@@ -4,27 +4,22 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
+	"poggadaj-tcp/utils"
 )
 
 type GG_Send_MSG struct {
 	Recipient uint32
 	Seq       uint32
 	MsgClass  uint32
-	Content   []byte
+	Content   string
 }
 
-func (p *GG_Send_MSG) Deserialize(data []byte, packetSize uint32) {
-	buf := bytes.NewBuffer(data)
-	msgSize := packetSize - 8
-
-	binary.Read(buf, binary.LittleEndian, &p.Recipient)
-	binary.Read(buf, binary.LittleEndian, &p.Seq)
-	binary.Read(buf, binary.LittleEndian, &p.MsgClass)
-	p.Content = make([]byte, msgSize)
-	buf.Read(p.Content)
+func (p *GG_Send_MSG) Deserialize(stream *utils.IOStream) {
+	p.Recipient = stream.ReadU32()
+	p.Seq = stream.ReadU32()
+	p.MsgClass = stream.ReadU32()
+	p.Content = stream.ReadString(-1)
 }
 
 func (p *GG_Send_MSG) PrettyPrint() []string {

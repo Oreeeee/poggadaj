@@ -4,8 +4,6 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
 	"poggadaj-tcp/utils"
 )
@@ -22,18 +20,16 @@ type GG_Status77 struct {
 	Description []byte
 }
 
-func (p *GG_Status77) Serialize() []byte {
-	buf := new(bytes.Buffer)
-	binary.Write(buf, binary.LittleEndian, p.UIN)
-	binary.Write(buf, binary.LittleEndian, p.Status)
-	binary.Write(buf, binary.LittleEndian, p.RemoteIP)
-	binary.Write(buf, binary.LittleEndian, p.RemotePort)
-	binary.Write(buf, binary.LittleEndian, p.Version)
-	binary.Write(buf, binary.LittleEndian, p.ImageSize)
-	binary.Write(buf, binary.LittleEndian, p.Unknown1)
-	binary.Write(buf, binary.LittleEndian, p.Unknown2)
-	binary.Write(buf, binary.LittleEndian, p.Description)
-	return buf.Bytes()
+func (p *GG_Status77) Serialize(stream *utils.IOStream) {
+	stream.WriteU32(p.UIN)
+	stream.WriteU8(p.Status)
+	stream.WriteU32(p.RemoteIP)
+	stream.WriteU16(p.RemotePort)
+	stream.WriteU8(p.Version)
+	stream.WriteU8(p.ImageSize)
+	stream.WriteU8(p.Unknown1)
+	stream.WriteU32(p.Unknown2)
+	stream.Write(p.Description)
 }
 
 func (p *GG_Status77) PrettyPrint() []string {

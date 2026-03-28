@@ -168,9 +168,9 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv protocol.GG_Packet) bool
 	}
 }
 
-func (c *GGClient) HandleNotify30(pRecv protocol.GG_Packet) {
+func (c *GGClient) HandleNotify30(pRecv *utils.IOStream) {
 	p := protocol.GG_Notify30{}
-	p.Deserialize(pRecv.Data, pRecv.Length)
+	p.Deserialize(pRecv)
 	log.StructPPrint("GG_NOTIFY30", p.PrettyPrint())
 	for _, uin := range p.UINs {
 		contact := uv.GG_NotifyContact{
@@ -181,16 +181,15 @@ func (c *GGClient) HandleNotify30(pRecv protocol.GG_Packet) {
 	}
 }
 
-func (c *GGClient) HandleNotifyFirst(pRecv protocol.GG_Packet) {
-	uv.GG_NotifyContactDeserialize(pRecv.Data, pRecv.Length, &c.NotifyList)
+func (c *GGClient) HandleNotifyFirst(pRecv *utils.IOStream) {
+	uv.GG_NotifyContactDeserialize(pRecv, &c.NotifyList)
 }
 
-func (c *GGClient) HandleNotifyLast(pRecv protocol.GG_Packet) {
-	uv.GG_NotifyContactDeserialize(pRecv.Data, pRecv.Length, &c.NotifyList)
+func (c *GGClient) HandleNotifyLast(pRecv *utils.IOStream) {
+	uv.GG_NotifyContactDeserialize(pRecv, &c.NotifyList)
 
 	// Respond with GG_NOTIFY_REPLY
-	response := make([]byte, 0)
-	buf := bytes.NewBuffer(response)
+	responseStream := utils.NewIOStream([]byte{}, binary.LittleEndian, charmap.Windows1250)
 	for _, notifyContact := range c.NotifyList {
 		statusChange := cache.FetchUserStatus(notifyContact.UIN)
 		if c.Version >= 0x2a {
@@ -200,7 +199,7 @@ func (c *GGClient) HandleNotifyLast(pRecv protocol.GG_Packet) {
 				Description: statusChange.Description,
 			}
 			log.StructPPrint("GG_NOTIFY_REPLY77", notifyReply.PrettyPrint())
-			binary.Write(buf, binary.LittleEndian, notifyReply.Serialize())
+			notifyReply.Serialize(responseStream)
 		} else {
 			notifyReply := protocol.GG_Notify_Reply60{
 				UIN:         statusChange.UIN,
@@ -208,21 +207,21 @@ func (c *GGClient) HandleNotifyLast(pRecv protocol.GG_Packet) {
 				Description: statusChange.Description,
 			}
 			log.StructPPrint("GG_NOTIFY_REPLY60", notifyReply.PrettyPrint())
-			binary.Write(buf, binary.LittleEndian, notifyReply.Serialize())
+			notifyReply.Serialize(responseStream)
 		}
 	}
 
 	c.SendNotifyReply(buf.Bytes())
 }
 
-func (c *GGClient) HandleAddNotify(pRecv protocol.GG_Packet) {
-	contact := uv.GG_AddNotify(pRecv.Data, &c.NotifyList)
+func (c *GGClient) HandleAddNotify(pRecv *utils.IOStream) {
+	contact := uv.GG_AddNotify(pRecv, &c.NotifyList)
 	c.SendStatus(cache.FetchUserStatus(contact.UIN))
 }
 
-func (c *GGClient) HandleRemoveNotify(pRecv protocol.GG_Packet) {
+func (c *GGClient) HandleRemoveNotify(pRecv *utils.IOStream) {
 	p := protocol.GG_Remove_Notify{}
-	p.Deserialize(pRecv.Data)
+	p.Deserialize(pRecv)
 
 	// Look for the contact that matches
 	for i, notify := range c.NotifyList {
@@ -234,9 +233,9 @@ func (c *GGClient) HandleRemoveNotify(pRecv protocol.GG_Packet) {
 	}
 }
 
-func (c *GGClient) HandleNewStatus(pRecv protocol.GG_Packet) {
+func (c *GGClient) HandleNewStatus(pRecv *utils.IOStream) {
 	p := protocol.GG_New_Status{}
-	p.Deserialize(pRecv.Data, pRecv.Length)
+	p.Deserialize(pRecv)
 
 	cache.SetUserStatus(sharedstructs.StatusChangeMsg{
 		UIN:         c.UIN,
@@ -247,16 +246,16 @@ func (c *GGClient) HandleNewStatus(pRecv protocol.GG_Packet) {
 	log.L.Debugf("New status: 0x00%x, Description: %s", p.Status, p.Description)
 }
 
-func (c *GGClient) HandleSendMsg(pRecv protocol.GG_Packet) {
+func (c *GGClient) HandleSendMsg(pRecv *utils.IOStream) {
 	p := protocol.GG_Send_MSG{}
-	p.Deserialize(pRecv.Data, pRecv.Length)
+	p.Deserialize(pRecv)
 	log.StructPPrint("GG_SEND_MSG", p.PrettyPrint())
 	cache.PublishMessageChannel(p.Recipient, sharedstructs.Message{c.UIN, p.MsgClass, p.Content})
 }
 
-func (c *GGClient) HandleUserlistReq(pRecv protocol.GG_Packet) {
+func (c *GGClient) HandleUserlistReq(pRecv *utils.IOStream) {
 	p := protocol.GG_Userlist_Request{}
-	p.Deserialize(pRecv.Data, pRecv.Length)
+	p.Deserialize(pRecv)
 	log.StructPPrint("GG_USERLIST_REQUEST", p.PrettyPrint())
 
 	switch p.Type {
@@ -302,9 +301,9 @@ func (c *GGClient) HandleUserlistReq(pRecv protocol.GG_Packet) {
 	}
 }
 
-func (c *GGClient) HandlePubdirReq(pRecv protocol.GG_Packet) {
+func (c *GGClient) HandlePubdirReq(pRecv *utils.IOStream) {
 	p := protocol.GG_Pubdir50_Request{}
-	p.Deserialize(pRecv.Data)
+	p.Deserialize(pRecv)
 	log.StructPPrint("GG_PUBDIR50_REQUEST", p.PrettyPrint())
 
 	switch p.Type {

@@ -4,8 +4,6 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
 	"poggadaj-tcp/utils"
 )
@@ -19,15 +17,13 @@ type GG_Login struct {
 	LocalPort uint16
 }
 
-func (p *GG_Login) Deserialize(data []byte) {
-	buf := bytes.NewBuffer(data)
-
-	binary.Read(buf, binary.LittleEndian, &p.UIN)
-	binary.Read(buf, binary.LittleEndian, &p.Hash)
-	binary.Read(buf, binary.LittleEndian, &p.Status)
-	binary.Read(buf, binary.LittleEndian, &p.Version)
-	binary.Read(buf, binary.LittleEndian, &p.LocalIP)
-	binary.Read(buf, binary.LittleEndian, &p.LocalPort)
+func (p *GG_Login) Deserialize(stream *utils.IOStream) {
+	p.UIN = stream.ReadU32()
+	p.Hash = stream.ReadU32()
+	p.Status = stream.ReadU32()
+	p.Version = stream.ReadU32()
+	p.LocalIP = stream.ReadU32()
+	p.LocalPort = stream.ReadU16()
 }
 
 func (p *GG_Login) PrettyPrint() []string {

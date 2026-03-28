@@ -4,21 +4,20 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
-	log "poggadaj-shared/logging"
+	"poggadaj-tcp/utils"
 )
 
 type GG_Notify30 struct {
 	UINs []uint32
 }
 
-func (p *GG_Notify30) Deserialize(data []byte, packetSize uint32) {
-	log.L.Debugf("GG_NOTIFY30 contents: %x", data)
-	buf := bytes.NewBuffer(data)
-	p.UINs = make([]uint32, packetSize/4)
-	binary.Read(buf, binary.LittleEndian, &p.UINs)
+func (p *GG_Notify30) Deserialize(stream *utils.IOStream) {
+	contactCount := stream.Available() / 4
+	p.UINs = make([]uint32, contactCount)
+	for i, _ := range p.UINs {
+		p.UINs[i] = stream.ReadU32()
+	}
 }
 
 func (p *GG_Notify30) PrettyPrint() []string {

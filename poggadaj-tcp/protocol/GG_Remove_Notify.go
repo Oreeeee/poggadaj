@@ -4,8 +4,7 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
+	"poggadaj-tcp/utils"
 )
 
 type GG_Remove_Notify struct {
@@ -13,8 +12,7 @@ type GG_Remove_Notify struct {
 	Type byte
 }
 
-func (p *GG_Remove_Notify) Deserialize(data []byte) {
-	buf := bytes.NewBuffer(data)
-	binary.Read(buf, binary.LittleEndian, &p.UIN)
-	binary.Read(buf, binary.LittleEndian, &p.Type)
+func (p *GG_Remove_Notify) Deserialize(stream *utils.IOStream) {
+	p.UIN = stream.ReadU32()
+	p.Type = stream.ReadU8()
 }

@@ -4,9 +4,8 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
+	"poggadaj-tcp/utils"
 	"strconv"
 )
 
@@ -15,12 +14,9 @@ type GG_Userlist_Request struct {
 	Request []byte
 }
 
-func (p *GG_Userlist_Request) Deserialize(data []byte, packetSize uint32) {
-	buf := bytes.NewBuffer(data)
-
-	binary.Read(buf, binary.LittleEndian, &p.Type)
-	p.Request = make([]byte, packetSize-1) // idk what the one means but it fixes the reading issue
-	binary.Read(buf, binary.LittleEndian, &p.Request)
+func (p *GG_Userlist_Request) Deserialize(stream *utils.IOStream) {
+	p.Type = stream.ReadU8()
+	p.Request = stream.ReadAll()
 }
 
 func (p *GG_Userlist_Request) PrettyPrint() []string {

@@ -4,11 +4,14 @@
 package main
 
 import (
+	"encoding/binary"
 	"net"
 	"poggadaj-shared/logging"
 	"poggadaj-tcp/clients"
 	"poggadaj-tcp/protocol"
 	"poggadaj-tcp/utils"
+
+	"golang.org/x/text/encoding/charmap"
 )
 
 func HandleConnection(conn net.Conn) {
@@ -71,36 +74,38 @@ func HandleConnection(conn net.Conn) {
 			return
 		}
 
+		stream := utils.NewIOStream(pRecv.Data, binary.LittleEndian, charmap.Windows1250)
+
 		switch pRecv.PacketType {
 		case protocol.GG_NOTIFY30:
 			logging.L.Debugf("Received GG_NOTIFY30")
-			client.HandleNotify30(pRecv)
+			client.HandleNotify30(stream)
 		case protocol.GG_NOTIFY_FIRST:
 			logging.L.Debugf("Received GG_NOTIFY_FIRST")
-			client.HandleNotifyFirst(pRecv)
+			client.HandleNotifyFirst(stream)
 		case protocol.GG_NOTIFY_LAST:
 			logging.L.Debugf("Received GG_NOTIFY_LAST")
-			client.HandleNotifyLast(pRecv)
+			client.HandleNotifyLast(stream)
 		case protocol.GG_ADD_NOTIFY:
 			logging.L.Debugf("Received GG_ADD_NOTIFY")
-			client.HandleAddNotify(pRecv)
+			client.HandleAddNotify(stream)
 		case protocol.GG_REMOVE_NOTIFY:
 			logging.L.Debugf("Received GG_REMOVE_NOTIFY")
-			client.HandleRemoveNotify(pRecv)
+			client.HandleRemoveNotify(stream)
 		case protocol.GG_LIST_EMPTY:
 			logging.L.Debugf("Received GG_LIST_EMPTY")
 		case protocol.GG_NEW_STATUS:
 			logging.L.Debugf("Received GG_NEW_STATUS")
-			client.HandleNewStatus(pRecv)
+			client.HandleNewStatus(stream)
 		case protocol.GG_SEND_MSG:
 			logging.L.Debugf("Client is sending a message...")
-			client.HandleSendMsg(pRecv)
+			client.HandleSendMsg(stream)
 		case protocol.GG_USERLIST_REQUEST:
 			logging.L.Debugf("Received GG_USERLIST_REQUEST")
-			client.HandleUserlistReq(pRecv)
+			client.HandleUserlistReq(stream)
 		case protocol.GG_PUBDIR50_REQUEST:
 			logging.L.Debugf("Received GG_PUBDIR50_REQUEST")
-			client.HandlePubdirReq(pRecv)
+			client.HandlePubdirReq(stream)
 		case protocol.GG_PING:
 			logging.L.Debugf("Received GG_PING")
 			client.SendPong()

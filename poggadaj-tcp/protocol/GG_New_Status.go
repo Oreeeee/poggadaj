@@ -4,8 +4,7 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
+	"poggadaj-tcp/utils"
 )
 
 type GG_New_Status struct {
@@ -13,11 +12,7 @@ type GG_New_Status struct {
 	Description []byte
 }
 
-func (p *GG_New_Status) Deserialize(data []byte, packetSize uint32) {
-	descriptionLength := packetSize - 4
-	buf := bytes.NewBuffer(data)
-
-	binary.Read(buf, binary.LittleEndian, &p.Status)
-	p.Description = make([]byte, descriptionLength)
-	binary.Read(buf, binary.LittleEndian, &p.Description)
+func (p *GG_New_Status) Deserialize(stream *utils.IOStream) {
+	p.Status = stream.ReadU32()
+	p.Description = stream.ReadAll()
 }

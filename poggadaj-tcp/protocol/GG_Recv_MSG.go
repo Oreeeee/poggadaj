@@ -4,9 +4,8 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
+	"poggadaj-tcp/utils"
 )
 
 type GG_Recv_MSG struct {
@@ -14,19 +13,15 @@ type GG_Recv_MSG struct {
 	Seq      uint32
 	Time     uint32
 	MsgClass uint32
-	Content  []byte
+	Content  string
 }
 
-func (p *GG_Recv_MSG) Serialize() []byte {
-	buf := new(bytes.Buffer)
-
-	binary.Write(buf, binary.LittleEndian, p.Sender)
-	binary.Write(buf, binary.LittleEndian, p.Seq)
-	binary.Write(buf, binary.LittleEndian, p.Time)
-	binary.Write(buf, binary.LittleEndian, p.MsgClass)
-	binary.Write(buf, binary.LittleEndian, p.Content)
-
-	return buf.Bytes()
+func (p *GG_Recv_MSG) Serialize(stream *utils.IOStream) {
+	stream.WriteU32(p.Sender)
+	stream.WriteU32(p.Seq)
+	stream.WriteU32(p.Time)
+	stream.WriteU32(p.MsgClass)
+	stream.Write(stream.SerializeString(p.Content, false))
 }
 
 func (p *GG_Recv_MSG) PrettyPrint() []string {

@@ -4,9 +4,8 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
 	"os"
+	"poggadaj-tcp/utils"
 	"strconv"
 )
 
@@ -19,8 +18,6 @@ func InitGG_Welcome() *GG_Welcome {
 	return &GG_Welcome{seed: uint32(seed64)}
 }
 
-func (g *GG_Welcome) Serialize() []byte {
-	buf := new(bytes.Buffer)
-	binary.Write(buf, binary.LittleEndian, g.seed)
-	return buf.Bytes()
+func (g *GG_Welcome) Serialize(stream *utils.IOStream) {
+	stream.WriteU32(g.seed)
 }
