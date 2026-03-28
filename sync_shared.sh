@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Service directories that use shared module
-Services=("poggadaj-tcp" "poggadaj-http" "poggadaj-api")
+Services=("poggadaj-tcp" "poggadaj-http" "poggadaj-api" "poggadaj-frontend")
 
 for service in "${Services[@]}"
 do

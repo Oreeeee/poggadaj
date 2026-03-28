@@ -24,10 +24,8 @@ services:
       - "8080:8080"
 
   frontend:
-    build: poggadaj-web
+    build: poggadaj-frontend
     restart: always
-    environment:
-      - NODE_ENV=production
     depends_on:
       migrate:
         condition: service_completed_successfully
