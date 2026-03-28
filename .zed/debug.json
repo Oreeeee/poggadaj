@@ -46,4 +46,13 @@
       "CACHE_ADDRESS": "127.0.0.1",
     },
   },
+  {
+    "label": "Debug poggadaj-frontend",
+    "adapter": "Delve",
+    "program": ".",
+    "cwd": "${ZED_WORKTREE_ROOT}/poggadaj-frontend",
+    "request": "launch",
+    "mode": "debug",
+    "envFile": "${ZED_WORKTREE_ROOT}/.env",
+  },
 ]
