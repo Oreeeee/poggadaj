@@ -5,13 +5,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/charmbracelet/log"
 	"net"
 	"os"
 	"poggadaj-shared/cache"
 	"poggadaj-shared/logging"
 	"poggadaj-tcp/database"
 	"time"
+
+	"charm.land/log/v2"
 )
 
 func main() {

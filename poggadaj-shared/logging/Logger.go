@@ -3,6 +3,6 @@
 
 package logging
 
-import "github.com/charmbracelet/log"
+import "charm.land/log/v2"
 
 var L *log.Logger
