@@ -5,11 +5,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
 	"log"
 	"os"
 	"poggadaj_http/appmsg"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/labstack/echo/v5"
 )
 
 var DatabaseConn *pgxpool.Pool
@@ -19,7 +20,6 @@ func main() {
 	DatabaseConn = dbconn
 
 	r := echo.New()
-	r.HideBanner = true
 
 	// appmsg.gadu-gadu.pl
 	r.GET("/appsvc/appmsg4.asp",

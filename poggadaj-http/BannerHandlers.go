@@ -5,9 +5,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"math/rand"
 	"net/http"
+
+	"github.com/labstack/echo/v5"
 )
 
 func buildResponse(bannerType int) string {
@@ -37,14 +38,14 @@ func buildResponse(bannerType int) string {
 	return response
 }
 
-func GetMainBanner(c echo.Context) error {
+func GetMainBanner(c *echo.Context) error {
 	return c.String(http.StatusOK, buildResponse(BANNERTYPE_MAIN))
 }
 
-func GetSmallBanner(c echo.Context) error {
+func GetSmallBanner(c *echo.Context) error {
 	return c.String(http.StatusOK, buildResponse(BANNERTYPE_SMALL))
 }
 
-func GetBanner(c echo.Context) error {
+func GetBanner(c *echo.Context) error {
 	return c.String(http.StatusOK, buildResponse(BANNERTYPE_BANNER))
 }
