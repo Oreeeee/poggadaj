@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"html/template"
 	"io"
 	"net/http"
@@ -10,21 +12,42 @@ import (
 )
 
 type TemplateRenderer struct {
-	templates *template.Template
+	templates map[string]*template.Template
+}
+
+func newTemplateRenderer() (*TemplateRenderer, error) {
+	templates := map[string]*template.Template{}
+	templateNames := []string{"html/home.html"}
+	for _, v := range templateNames {
+		tmpl, err := template.ParseFiles("html/base.html", v)
+		if err != nil {
+			return nil, fmt.Errorf("failed to render template %s: %w", v, err)
+		}
+		templates[v] = tmpl
+	}
+
+	return &TemplateRenderer{templates: templates}, nil
 }
 
 func (t *TemplateRenderer) Render(c *echo.Context, w io.Writer, name string, data any) error {
-	return t.templates.ExecuteTemplate(w, name, data)
+	if tmpl, ok := t.templates[name]; ok {
+		return tmpl.ExecuteTemplate(w, "base.html", data)
+
+	}
+	return errors.New("couldn't find template")
 }
 
 func main() {
 	e := echo.New()
-	e.Renderer = &TemplateRenderer{
-		templates: template.Must(template.ParseGlob("html/*.html")),
+
+	var err error
+	e.Renderer, err = newTemplateRenderer()
+	if err != nil {
+		panic(err)
 	}
 
 	e.GET("/", func(c *echo.Context) error {
-		return c.Render(http.StatusOK, "index.html", nil)
+		return c.Render(http.StatusOK, "html/home.html", nil)
 	})
 
 	if err := e.Start(":3000"); err != nil {
