@@ -46,6 +46,8 @@ func main() {
 		panic(err)
 	}
 
+	e.Static("/static", "static")
+
 	e.GET("/", func(c *echo.Context) error {
 		return c.Render(http.StatusOK, "html/home.html", nil)
 	})

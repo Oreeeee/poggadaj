@@ -2,23 +2,26 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>{{template "title" .}} - poGGadaj</title>
+        <link rel="stylesheet" href="static/style.css" />
     </head>
     <body>
-        <div id="header">
-            <hgroup>
-                <h1>poGGadaj</h1>
-                <h2>header-subtext</h2>
-            </hgroup>
+        <div id="main">
+            <div id="header">
+                <hgroup>
+                    <h1>poGGadaj</h1>
+                    <h2>header-subtext</h2>
+                </hgroup>
 
-            <div>
-                <a href="/"> Home </a>
+                <div>
+                    <a href="/"> Home </a>
 
-                <a href="/download"> Download </a>
+                    <a href="/download"> Download </a>
 
-                <a href="/account"> Account </a>
+                    <a href="/account"> Account </a>
+                </div>
             </div>
-        </div>
 
-        <div id="content">{{template "content" .}}</div>
+            <div id="content">{{template "content" .}}</div>
+        </div>
     </body>
 </html>
