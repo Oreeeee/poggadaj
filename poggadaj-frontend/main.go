@@ -17,7 +17,7 @@ type TemplateRenderer struct {
 
 func newTemplateRenderer() (*TemplateRenderer, error) {
 	templates := map[string]*template.Template{}
-	templateNames := []string{"html/home.html"}
+	templateNames := []string{"html/home.html", "html/downloads.html"}
 	for _, v := range templateNames {
 		tmpl, err := template.ParseFiles("html/base.html", v)
 		if err != nil {
@@ -48,6 +48,10 @@ func main() {
 
 	e.GET("/", func(c *echo.Context) error {
 		return c.Render(http.StatusOK, "html/home.html", nil)
+	})
+
+	e.GET("/download", func(c *echo.Context) error {
+		return c.Render(http.StatusOK, "html/downloads.html", nil)
 	})
 
 	if err := e.Start(":3000"); err != nil {
