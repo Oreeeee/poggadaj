@@ -1,11 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	_ "poggadaj-shared"
 
 	"github.com/labstack/echo/v5"
@@ -13,9 +16,11 @@ import (
 
 type TemplateRenderer struct {
 	templates map[string]*template.Template
+	i18n      map[string]*map[string]string
 }
 
 func newTemplateRenderer() (*TemplateRenderer, error) {
+	// Load templates
 	templates := map[string]*template.Template{}
 	templateNames := []string{"html/home.html", "html/downloads.html"}
 	for _, v := range templateNames {
@@ -26,13 +31,55 @@ func newTemplateRenderer() (*TemplateRenderer, error) {
 		templates[v] = tmpl
 	}
 
-	return &TemplateRenderer{templates: templates}, nil
+	// Load i18n data
+	i18n := map[string]*map[string]string{}
+	files, err := filepath.Glob("i18n/*.json")
+	if err != nil {
+		return nil, fmt.Errorf("failed to load translations: %w", err)
+	}
+
+	for _, v := range files {
+		file, err := os.Open(v)
+		if err != nil {
+			// Ignore for now
+			continue
+		}
+
+		defer file.Close()
+
+		data, err := io.ReadAll(file)
+		if err != nil {
+			continue
+		}
+
+		key := ""
+
+		// TODO: Parse filenames here instead of hardcoding these
+		switch v {
+		case "i18n/en.json":
+			key = "en"
+		case "i18n/pl.json":
+			key = "pl"
+		}
+
+		i18n[key] = &map[string]string{}
+
+		err = json.Unmarshal(data, i18n[key])
+		if err != nil {
+			continue
+		}
+	}
+
+	return &TemplateRenderer{templates: templates, i18n: i18n}, nil
 }
 
-func (t *TemplateRenderer) Render(c *echo.Context, w io.Writer, name string, data any) error {
+func (t *TemplateRenderer) Render(c *echo.Context, w io.Writer, name string, passedData any) error {
 	if tmpl, ok := t.templates[name]; ok {
+		data := map[string]any{
+			"i18n": t.i18n["en"],
+			"data": passedData,
+		}
 		return tmpl.ExecuteTemplate(w, "base.html", data)
-
 	}
 	return errors.New("couldn't find template")
 }

@@ -1,12 +1,12 @@
 {{define "title"}}Main page{{end}} {{define "content"}}
-<h2 id="mainpage-h2">{$_("mainpage-p1")}</h2>
+<h2 id="mainpage-h2">{{index .i18n "mainpage-p1"}}</h2>
 
 <div>
     <div class="column">
         <h4 class="feature-list">{$_("features")}:</h4>
         <ul class="feature-list">
-            <li>{$_("gg6-support")}</li>
-            <li>{$_("no-annoying-ads")}</li>
+            <li>{{index .i18n "gg6-support"}}</li>
+            <li>{{index .i18n "no-annoying-ads"}}</li>
             <li>{$_("easy-installation")}</li>
             <li>
                 <a href="https://codeberg.org/or3e/poggadaj" target="_blank"
