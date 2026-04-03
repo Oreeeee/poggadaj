@@ -1,24 +1,24 @@
 {{define "title"}}Main page{{end}} {{define "content"}}
-<h2 id="mainpage-h2">{{index .i18n "mainpage-p1"}}</h2>
+<h2 id="mainpage-h2">{{translate .i18n "mainpage-p1"}}</h2>
 
 <div>
     <div class="column">
-        <h4 class="feature-list">{$_("features")}:</h4>
+        <h4 class="feature-list">{{translate .i18n "features"}}:</h4>
         <ul class="feature-list">
             <li>{{translate .i18n "gg6-support"}}</li>
             <li>{{translate .i18n "no-annoying-ads"}}</li>
-            <li>{$_("easy-installation")}</li>
+            <li>{{translate .i18n "easy-installation"}}</li>
             <li>
                 <a href="https://codeberg.org/or3e/poggadaj" target="_blank"
-                    >{$_("open-source")}</a
+                    >{{translate .i18n "open-source"}}</a
                 >
-                {$_("open-source-text")}
+                {{translate .i18n "open-source-text"}}
             </li>
-            <li>{$_("bot-compatibility")}</li>
-            <li>{$_("more-clients")}</li>
+            <li>{{translate .i18n "bot-compatibility"}}</li>
+            <li>{{translate .i18n "more-clients"}}</li>
         </ul>
         <br />
-        <h4 class="feature-list">{$_("supported-clients")}:</h4>
+        <h4 class="feature-list">{{translate .i18n "supported-clients"}}:</h4>
         <ul class="feature-list">
             <li>Gadu-Gadu 5.0</li>
             <li>Gadu-Gadu 6.0</li>
