@@ -24,10 +24,20 @@ func newTemplateRenderer() (*TemplateRenderer, error) {
 	templates := map[string]*template.Template{}
 	templateNames := []string{"html/home.html", "html/downloads.html"}
 	for _, v := range templateNames {
-		tmpl, err := template.ParseFiles("html/base.html", v)
+		tmpl, err := template.New("").Funcs(template.FuncMap{
+			"translate": func(m map[string]string, key string) string {
+				// First try to get from selected mapping
+				if val, ok := m[key]; ok {
+					return val
+				}
+				// TODO: fallback to other language
+				return key
+			},
+		}).ParseFiles("html/base.html", v)
 		if err != nil {
 			return nil, fmt.Errorf("failed to render template %s: %w", v, err)
 		}
+
 		templates[v] = tmpl
 	}
 
