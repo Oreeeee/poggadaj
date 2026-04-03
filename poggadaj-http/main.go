@@ -6,6 +6,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"poggadaj_http/appmsg"
 
@@ -29,7 +30,11 @@ func main() {
 		appmsg.AppMSG_Handler,
 	)
 	r.GET("/appsvc/appmsg.asp",
-		appmsg.AppMSG_Handler,
+		func(c *echo.Context) error {
+			ip := os.Getenv("GG_SERVICE_IP")
+			port := os.Getenv("GG_SERVICE_PORT")
+			return c.String(http.StatusOK, fmt.Sprintf("0 1 0 %s:%s %s %s", ip, port, ip, ip))
+		},
 	)
 
 	// adserver.gadu-gadu.pl
