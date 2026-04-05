@@ -48,5 +48,7 @@
   "your-uin": "Twój numer GG",
   "joined-date": "Zarejestrowano",
   "experimental": "eksperymentalne",
-  "client-password": "Hasło do klientów"
+  "client-password": "Hasło do klientów",
+  "avail-clients": "Dostępne klienty",
+  "downloads": "Pobieranie"
 }

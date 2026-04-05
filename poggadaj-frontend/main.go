@@ -110,7 +110,21 @@ func main() {
 	})
 
 	e.GET("/download", func(c *echo.Context) error {
-		return c.Render(http.StatusOK, "html/downloads.html", nil)
+		clients := []HtmlClient{
+			{
+				Name:               "Gadu-Gadu 6.0",
+				DescriptionI18nTag: "gg60-description",
+				ImageUrl:           "../static/gg60.png",
+				DownloadUrl:        "https://example.com",
+			},
+			{
+				Name:               "Gadu-Gadu 7.7",
+				DescriptionI18nTag: "gg77-description",
+				ImageUrl:           "../static/gg77.png",
+				DownloadUrl:        "https://example.com",
+			},
+		}
+		return c.Render(http.StatusOK, "html/downloads.html", map[string]any{"Clients": clients})
 	})
 
 	if err := e.Start(":3000"); err != nil {

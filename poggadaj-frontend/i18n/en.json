@@ -48,5 +48,7 @@
   "your-uin": "Your GG number",
   "joined-date": "Joined",
   "experimental": "experimental",
-  "client-password": "Password for clients"
+  "client-password": "Password for clients",
+  "avail-clients": "Available clients",
+  "downloads": "Downloads"
 }

@@ -1,3 +1,64 @@
-{{define "title"}}Downloads{{end}} {{define "content"}}
-<h1>Download page goes here</h1>
+{{define "title"}}{{translate .i18n "downloads"}}{{end}}
+
+{{define "content"}}
+<h1>{{translate .i18n "avail-clients"}}</h1>
+
+{{range .data.Clients}}
+<div class="client">
+    <h1 class="client-name">{{.Name}}</h1>
+    <div class="column">
+        <p class="client-description">{{.DescriptionI18nTag}}</p>
+
+        <!--
+        {#if noSSL}
+        <Warning wType="serious" message={$_("no-ssl")} />
+        <br>
+        {/if}
+
+        {#if insecureHash}
+        <Warning wType="warn" message={$_("insecure-hash")} />
+        <br>
+        {/if}
+
+        {#if modernWinProblems}
+        <Warning wType="info" message={$_("modern-win-problems")} />
+        {/if}
+        -->
+    </div>
+    <div class="column">
+        <img src={{.ImageUrl}} alt="Screenshot of {{.Name}} connected to poGGadaj">
+    </div>
+    <a href={{.DownloadUrl}}>
+        <button class="dl-button">
+            Download
+        </button>
+    </a>
+</div>
+
+<br>
+{{end}}
+
+<style>
+    .client {
+        padding: 10px;
+        background-color: darkgrey;
+        height: auto;
+        overflow-y: auto;
+        border: 2px solid black;
+    }
+
+    .client-name {
+        text-align: left;
+        font-family: 'JetBrains Mono Medium';
+    }
+
+    .client-description {
+        font-family: 'Lato Regular';
+    }
+
+    .dl-button {
+        width: 100%;
+        height: 30px;
+    }
+</style>
 {{end}}
