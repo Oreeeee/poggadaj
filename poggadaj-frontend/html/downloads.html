@@ -7,7 +7,7 @@
 <div class="client">
     <h1 class="client-name">{{.Name}}</h1>
     <div class="column">
-        <p class="client-description">{{.DescriptionI18nTag}}</p>
+        <p class="client-description">{{translate $.i18n .DescriptionI18nTag }}</p>
 
         <!--
         {#if noSSL}
@@ -30,7 +30,7 @@
     </div>
     <a href={{.DownloadUrl}}>
         <button class="dl-button">
-            Download
+            {{translate $.i18n "download" }}
         </button>
     </a>
 </div>
