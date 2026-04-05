@@ -6,11 +6,16 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
 	_ "poggadaj-shared"
+	"time"
 
+	"poggadaj-shared/logging"
+
+	"charm.land/log/v2"
 	"github.com/labstack/echo/v5"
 )
 
@@ -95,7 +100,15 @@ func (t *TemplateRenderer) Render(c *echo.Context, w io.Writer, name string, pas
 }
 
 func main() {
+	logging.L = log.NewWithOptions(os.Stdout, log.Options{
+		ReportCaller:    true,
+		ReportTimestamp: true,
+		TimeFormat:      time.DateTime,
+		Level:           log.DebugLevel,
+	})
+
 	e := echo.New()
+	e.Logger = slog.New(logging.L)
 
 	var err error
 	e.Renderer, err = newTemplateRenderer()
