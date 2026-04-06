@@ -6,11 +6,13 @@ go 1.26
 
 require poggadaj-shared v0.0.0
 
-require github.com/labstack/echo/v5 v5.0.4
+require (
+	charm.land/log/v2 v2.0.0
+	github.com/labstack/echo/v5 v5.1.0
+)
 
 require (
 	charm.land/lipgloss/v2 v2.0.1 // indirect
-	charm.land/log/v2 v2.0.0 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
 	github.com/charmbracelet/ultraviolet v0.0.0-20251205161215-1948445e3318 // indirect
 	github.com/charmbracelet/x/ansi v0.11.6 // indirect
@@ -28,4 +30,5 @@ require (
 	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/time v0.14.0 // indirect
 )
