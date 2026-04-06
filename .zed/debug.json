@@ -54,5 +54,8 @@
     "request": "launch",
     "mode": "debug",
     "envFile": "${ZED_WORKTREE_ROOT}/.env",
+    "env": {
+      "DB_ADDRESS": "127.0.0.1",
+    },
   },
 ]

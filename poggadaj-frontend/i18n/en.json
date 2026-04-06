@@ -50,5 +50,7 @@
   "experimental": "experimental",
   "client-password": "Password for clients",
   "avail-clients": "Available clients",
-  "downloads": "Downloads"
+  "downloads": "Downloads",
+  "download-installer": "Download installer",
+  "download-extracted": "Download extracted (portable)"
 }

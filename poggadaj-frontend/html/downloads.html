@@ -7,7 +7,9 @@
 <div class="client">
     <h1 class="client-name">{{.Name}}</h1>
     <div class="column">
-        <p class="client-description">{{translate $.i18n .DescriptionI18nTag }}</p>
+        <p class="client-description">
+            {{safeValueAccess .Description $.lang}}
+        </p>
 
         <!--
         {#if noSSL}
@@ -28,9 +30,18 @@
     <div class="column">
         <img src={{.ImageUrl}} alt="Screenshot of {{.Name}} connected to poGGadaj">
     </div>
-    <form action="{{.DownloadUrl}}">
-        <button type="submit" class="dl-button">{{translate $.i18n "download" }}</button>
+
+    {{if .InstallerDownloadUrl}}
+    <form action="{{.InstallerDownloadUrl}}">
+        <button type="submit" class="dl-button">{{translate $.i18n "download-installer" }}</button>
     </form>
+    {{end}}
+
+    {{if .ExtractedDownloadUrl}}
+    <form action="{{.ExtractedDownloadUrl}}">
+        <button type="submit" class="dl-button">{{translate $.i18n "download-extracted" }}</button>
+    </form>
+    {{end}}
 </div>
 
 <br>

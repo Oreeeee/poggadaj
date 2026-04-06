@@ -50,5 +50,7 @@
   "experimental": "eksperymentalne",
   "client-password": "Hasło do klientów",
   "avail-clients": "Dostępne klienty",
-  "downloads": "Pobieranie"
+  "downloads": "Pobieranie",
+  "download-installer": "Pobierz instalator",
+  "download-extracted": "Pobierz wypakowany (przenośny)"
 }

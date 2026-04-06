@@ -40,6 +40,13 @@ func newTemplateRenderer() (*TemplateRenderer, error) {
 				// TODO: fallback to other language
 				return key
 			},
+			"safeValueAccess": func(m map[string]any, key string) any {
+				if val, ok := m[key]; ok {
+					return val
+				}
+
+				return key
+			},
 		}).ParseFiles("html/base.html", v)
 		if err != nil {
 			return nil, fmt.Errorf("failed to render template %s: %w", v, err)
@@ -94,6 +101,7 @@ func (t *TemplateRenderer) Render(c *echo.Context, w io.Writer, name string, pas
 	if tmpl, ok := t.templates[name]; ok {
 		data := map[string]any{
 			"i18n": t.i18n["en"],
+			"lang": "en",
 			"data": passedData,
 		}
 		return tmpl.ExecuteTemplate(w, "base.html", data)
@@ -102,6 +110,12 @@ func (t *TemplateRenderer) Render(c *echo.Context, w io.Writer, name string, pas
 }
 
 func main() {
+	var err error
+	DatabaseConn, err = GetDBConn()
+	if err != nil {
+		panic(err)
+	}
+
 	logging.L = log.NewWithOptions(os.Stdout, log.Options{
 		ReportCaller:    true,
 		ReportTimestamp: true,
@@ -112,7 +126,6 @@ func main() {
 	e := echo.New()
 	e.Logger = slog.New(logging.L)
 
-	var err error
 	e.Renderer, err = newTemplateRenderer()
 	if err != nil {
 		panic(err)
@@ -150,19 +163,10 @@ func main() {
 	})
 
 	e.GET("/download", func(c *echo.Context) error {
-		clients := []HtmlClient{
-			{
-				Name:               "Gadu-Gadu 6.0",
-				DescriptionI18nTag: "gg60-description",
-				ImageUrl:           "../static/gg60.png",
-				DownloadUrl:        "https://example.com",
-			},
-			{
-				Name:               "Gadu-Gadu 7.7",
-				DescriptionI18nTag: "gg77-description",
-				ImageUrl:           "../static/gg77.png",
-				DownloadUrl:        "https://example.com",
-			},
+		clients, err := GetClients()
+		if err != nil {
+			c.Logger().Error("failed to query for clients", "err", err)
+			return c.String(http.StatusInternalServerError, "Unknown server-side error has occured!")
 		}
 		return c.Render(http.StatusOK, "html/downloads.html", map[string]any{"Clients": clients})
 	})
