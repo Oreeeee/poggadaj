@@ -25,7 +25,8 @@ func GetDBConn() (*pgxpool.Pool, error) {
 }
 
 func GetClients() ([]HtmlClient, error) {
-	query := "SELECT name, description, image_url, installer_download_url, extracted_download_url FROM client_downloads"
+	query := `SELECT cd.name, cd.image_url, cd.installer_download_url, cd.extracted_download_url FROM client_downloads AS cd
+	JOIN client_downloads_descriptions AS ds ON ds.`
 	rows, err := DatabaseConn.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
