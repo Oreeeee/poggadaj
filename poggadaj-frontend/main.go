@@ -27,7 +27,7 @@ type TemplateRenderer struct {
 func newTemplateRenderer() (*TemplateRenderer, error) {
 	// Load templates
 	templates := map[string]*template.Template{}
-	templateNames := []string{"html/home.html", "html/downloads.html"}
+	templateNames := []string{"html/home.html", "html/downloads.html", "html/login.html"}
 	for _, v := range templateNames {
 		tmpl, err := template.New("").Funcs(template.FuncMap{
 			"translate": func(m map[string]string, key string) string {
@@ -120,6 +120,10 @@ func main() {
 
 	e.GET("/", func(c *echo.Context) error {
 		return c.Render(http.StatusOK, "html/home.html", nil)
+	})
+
+	e.GET("/login", func(c *echo.Context) error {
+		return c.Render(http.StatusOK, "html/login.html", nil)
 	})
 
 	e.GET("/download", func(c *echo.Context) error {

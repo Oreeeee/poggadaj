@@ -1,0 +1,15 @@
+{{define "title"}}{{translate .i18n "login"}}{{end}}
+
+{{define "content"}}
+<h1>{{translate .i18n "login"}}</h1>
+<form action="/do-login" class="login-form">
+  <label for="username">{{translate .i18n "web-username"}}</label>
+  <input type="text" id="username">
+  <br><br>
+  <label for="password">{{translate .i18n "web-password"}}</label>
+  <input type="password" id="password">
+  <br><br>
+  <input type="submit" value="{{translate .i18n "login"}}">
+</form>
+<p>{{translate .i18n "no-account"}}</p><a href="/register">{{translate .i18n "register"}}!</a>
+{{end}}
