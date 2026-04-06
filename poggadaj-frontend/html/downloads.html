@@ -28,11 +28,9 @@
     <div class="column">
         <img src={{.ImageUrl}} alt="Screenshot of {{.Name}} connected to poGGadaj">
     </div>
-    <a href={{.DownloadUrl}}>
-        <button class="dl-button">
-            {{translate $.i18n "download" }}
-        </button>
-    </a>
+    <form action="{{.DownloadUrl}}">
+        <button type="submit" class="dl-button">{{translate $.i18n "download" }}</button>
+    </form>
 </div>
 
 <br>
