@@ -5,16 +5,16 @@ import (
 	"os"
 
 	"charm.land/log/v2"
+	"codeberg.org/or3e/poggadaj/internal/cache"
 	"codeberg.org/or3e/poggadaj/internal/database"
 	"codeberg.org/or3e/poggadaj/internal/logging"
-	"github.com/redis/go-redis/v9"
 )
 
 type Server struct {
 	ip          string
 	listener    net.Listener
 	db          *database.Database
-	cache       *redis.Conn
+	cache       *cache.Cache
 	logger      *log.Logger
 	connections []*Client
 }
@@ -47,7 +47,7 @@ func (server *Server) Run() error {
 	}
 }
 
-func NewServer(dbCfg *database.DatabaseConfig, ip string) (*Server, error) {
+func NewServer(dbCfg *database.DatabaseConfig, cache *cache.Cache, ip string) (*Server, error) {
 	dbConn, err := database.NewDatabase(dbCfg)
 	if err != nil {
 		return nil, err
@@ -57,6 +57,7 @@ func NewServer(dbCfg *database.DatabaseConfig, ip string) (*Server, error) {
 		ip:     ip,
 		db:     dbConn,
 		logger: logging.L,
+		cache:  cache,
 	}
 
 	return server, nil

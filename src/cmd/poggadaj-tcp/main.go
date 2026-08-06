@@ -23,7 +23,7 @@ func main() {
 		Password: os.Getenv("DB_PASSWORD"),
 	}
 
-	cache.CacheConn = cache.GetCacheConn()
+	cache, _ := cache.NewCache()
 
 	logging.L = log.NewWithOptions(os.Stdout, log.Options{
 		ReportCaller:    true,
@@ -32,7 +32,7 @@ func main() {
 		Level:           log.DebugLevel,
 	})
 
-	server, err := NewServer(dbCfg, fmt.Sprintf("%s:8074", os.Getenv("LISTEN_ADDRESS")))
+	server, err := NewServer(dbCfg, cache, fmt.Sprintf("%s:8074", os.Getenv("LISTEN_ADDRESS")))
 	if err != nil {
 		panic(err)
 	}

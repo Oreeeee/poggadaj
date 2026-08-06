@@ -1,12 +1,10 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-// SPDX-FileCopyrightText: 2024-2026 Oreeeee
-
 package cache
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 
 	"codeberg.org/or3e/poggadaj/internal/logging"
@@ -15,15 +13,24 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func GetCacheConn() *redis.Client {
-	return redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:6379", os.Getenv("CACHE_ADDRESS")),
-		Password: "",
-		DB:       0,
-	})
+type Cache struct {
+	conn   *redis.Client
+	logger *log.Logger
 }
 
-func SetUserStatus(statusChange structs.StatusChangeMsg) {
+func NewCache() (*Cache, error) {
+	cache := &Cache{
+		conn: redis.NewClient(&redis.Options{
+			Addr:     fmt.Sprintf("%s:6379", os.Getenv("CACHE_ADDRESS")),
+			Password: "",
+			DB:       0,
+		}),
+	}
+
+	return cache, nil
+}
+
+func (cache *Cache) SetUserStatus(statusChange structs.StatusChangeMsg) {
 	// Marshal the status change
 	payload, err2 := json.Marshal(statusChange)
 	if err2 != nil {
@@ -31,7 +38,7 @@ func SetUserStatus(statusChange structs.StatusChangeMsg) {
 	}
 
 	// Set user's status in cache
-	err := CacheConn.Set(
+	err := cache.conn.Set(
 		context.Background(),
 		fmt.Sprintf("ggstatus:%d", statusChange.UIN),
 		payload,
@@ -42,17 +49,17 @@ func SetUserStatus(statusChange structs.StatusChangeMsg) {
 	}
 
 	// Publish a status change announcement
-	err = CacheConn.Publish(context.Background(), "ggstatus", payload).Err()
+	err = cache.conn.Publish(context.Background(), "ggstatus", payload).Err()
 	if err != nil {
 		logging.L.Errorf("Failed to publish status: %s", err)
 	}
 }
 
-func GetStatusChannel() *redis.PubSub {
-	return CacheConn.Subscribe(context.Background(), "ggstatus")
+func (cache *Cache) GetStatusChannel() *redis.PubSub {
+	return cache.conn.Subscribe(context.Background(), "ggstatus")
 }
 
-func RecvStatusChannel(pubsub *redis.PubSub) structs.StatusChangeMsg {
+func (cache *Cache) RecvStatusChannel(pubsub *redis.PubSub) structs.StatusChangeMsg {
 	statusChange := structs.StatusChangeMsg{}
 	msg, err := pubsub.ReceiveMessage(context.Background())
 
@@ -68,14 +75,14 @@ func RecvStatusChannel(pubsub *redis.PubSub) structs.StatusChangeMsg {
 	return statusChange
 }
 
-func PublishMessageChannel(sender uint32, msg structs.Message) error {
+func (cache *Cache) PublishMessageChannel(sender uint32, msg structs.Message) error {
 	payload, err := json.Marshal(msg)
 	if err != nil {
 		logging.L.Errorf("Failed to marshal message: %s", err)
 		return err
 	}
 
-	err = CacheConn.Publish(context.Background(), fmt.Sprintf("ggmsg:%d", sender), payload).Err()
+	err = cache.conn.Publish(context.Background(), fmt.Sprintf("ggmsg:%d", sender), payload).Err()
 	if err != nil {
 		logging.L.Errorf("Failed to send message: %s", err)
 	}
@@ -85,11 +92,11 @@ func PublishMessageChannel(sender uint32, msg structs.Message) error {
 	return err
 }
 
-func GetMessageChannel(uin uint32) *redis.PubSub {
-	return CacheConn.Subscribe(context.Background(), fmt.Sprintf("ggmsg:%d", uin))
+func (cache *Cache) GetMessageChannel(uin uint32) *redis.PubSub {
+	return cache.conn.Subscribe(context.Background(), fmt.Sprintf("ggmsg:%d", uin))
 }
 
-func RecvMessageChannel(pubsub *redis.PubSub) structs.Message {
+func (cache *Cache) RecvMessageChannel(pubsub *redis.PubSub) structs.Message {
 	message := structs.Message{}
 	msg, err := pubsub.ReceiveMessage(context.Background())
 
@@ -107,13 +114,13 @@ func RecvMessageChannel(pubsub *redis.PubSub) structs.Message {
 	return message
 }
 
-func FetchUserStatus(uin uint32) structs.StatusChangeMsg {
+func (cache *Cache) FetchUserStatus(uin uint32) structs.StatusChangeMsg {
 	statusFinal := structs.StatusChangeMsg{
 		UIN:    uin,
 		Status: statuses.GG_STATUS_NOT_AVAIL,
 	}
 
-	status, err := CacheConn.Get(context.Background(), fmt.Sprintf("ggstatus:%d", uin)).Result()
+	status, err := cache.conn.Get(context.Background(), fmt.Sprintf("ggstatus:%d", uin)).Result()
 	if err != nil {
 		logging.L.Errorf("Failed to fetch user status: %s", err)
 		return statusFinal
@@ -126,5 +133,3 @@ func FetchUserStatus(uin uint32) structs.StatusChangeMsg {
 	}
 	return statusFinal
 }
-
-var CacheConn *redis.Client

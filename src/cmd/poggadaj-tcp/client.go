@@ -82,8 +82,8 @@ func (client *Client) Run() {
 	// Start send channels
 	runMsgChannel := true
 	runStatusChannel := true
-	go MsgChannel(client, &runMsgChannel)
-	go StatusChannel(client, &runStatusChannel)
+	go client.MsgChannel(&runMsgChannel)
+	go client.StatusChannel(&runStatusChannel)
 	defer utils.CloseChannel(&runMsgChannel)
 	defer utils.CloseChannel(&runStatusChannel)
 
@@ -286,7 +286,7 @@ func (c *Client) HandleNotifyLast(pRecv *utils.IOStream) {
 
 	// Respond with GG_NOTIFY_REPLY
 	for _, notifyContact := range c.NotifyList {
-		statusChange := cache.FetchUserStatus(notifyContact.UIN)
+		statusChange := c.server.cache.FetchUserStatus(notifyContact.UIN)
 		if c.Version >= 0x2a {
 			notifyReply := protocol.GG_Notify_Reply77{
 				UIN:         statusChange.UIN,
@@ -311,7 +311,7 @@ func (c *Client) HandleNotifyLast(pRecv *utils.IOStream) {
 
 func (c *Client) HandleAddNotify(pRecv *utils.IOStream) {
 	contact := structs.GG_AddNotify(pRecv, &c.NotifyList)
-	c.SendStatus(cache.FetchUserStatus(contact.UIN))
+	c.SendStatus(c.server.cache.FetchUserStatus(contact.UIN))
 }
 
 func (c *Client) HandleRemoveNotify(pRecv *utils.IOStream) {
@@ -332,7 +332,7 @@ func (c *Client) HandleNewStatus(pRecv *utils.IOStream) {
 	p := protocol.GG_New_Status{}
 	p.Deserialize(pRecv)
 
-	cache.SetUserStatus(structs.StatusChangeMsg{
+	c.server.cache.SetUserStatus(structs.StatusChangeMsg{
 		UIN:         c.UIN,
 		Status:      p.Status,
 		Description: p.Description,
@@ -345,7 +345,7 @@ func (c *Client) HandleSendMsg(pRecv *utils.IOStream) {
 	p := protocol.GG_Send_MSG{}
 	p.Deserialize(pRecv)
 	log.StructPPrint("GG_SEND_MSG", p.PrettyPrint())
-	cache.PublishMessageChannel(p.Recipient, structs.Message{c.UIN, p.MsgClass, []byte(p.Content)})
+	c.server.cache.PublishMessageChannel(p.Recipient, structs.Message{c.UIN, p.MsgClass, []byte(p.Content)})
 }
 
 func (c *Client) HandleUserlistReq(pRecv *utils.IOStream) {
@@ -721,7 +721,7 @@ func (c *Client) SendPong() {
 
 func (c *Client) Clean() {
 	// Change user's status to not available
-	cache.SetUserStatus(structs.StatusChangeMsg{
+	c.server.cache.SetUserStatus(structs.StatusChangeMsg{
 		UIN:    c.UIN,
 		Status: statuses.GG_STATUS_NOT_AVAIL,
 	})

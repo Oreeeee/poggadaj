@@ -4,16 +4,15 @@
 package main
 
 import (
-	"codeberg.org/or3e/poggadaj/internal/cache"
 	"codeberg.org/or3e/poggadaj/internal/logging"
 	"codeberg.org/or3e/poggadaj/internal/statuses"
 )
 
-func MsgChannel(c *Client, run *bool) {
+func (c *Client) MsgChannel(run *bool) {
 	defer logging.L.Debugf("Quitting message channel")
-	pubsub := cache.GetMessageChannel(c.UIN)
+	pubsub := c.server.cache.GetMessageChannel(c.UIN)
 	for *run {
-		msg := cache.RecvMessageChannel(pubsub)
+		msg := c.server.cache.RecvMessageChannel(pubsub)
 		if !*run {
 			// Sanity check to not accidentally write to a closed socket
 			continue
@@ -24,11 +23,11 @@ func MsgChannel(c *Client, run *bool) {
 	}
 }
 
-func StatusChannel(c *Client, run *bool) {
+func (c *Client) StatusChannel(run *bool) {
 	defer logging.L.Debugf("Quitting status channel")
-	pubsub := cache.GetStatusChannel()
+	pubsub := c.server.cache.GetStatusChannel()
 	for *run {
-		statusChange := cache.RecvStatusChannel(pubsub)
+		statusChange := c.server.cache.RecvStatusChannel(pubsub)
 		if !*run {
 			// Sanity check to not accidentally write to a closed socket
 			continue
