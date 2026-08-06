@@ -1,0 +1,118 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024-2026 Oreeeee
+
+package main
+
+import (
+	"encoding/binary"
+	"net"
+
+	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/clients"
+	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/protocol"
+	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/utils"
+
+	"codeberg.org/or3e/poggadaj/internal/logging"
+
+	"golang.org/x/text/encoding/charmap"
+)
+
+func HandleConnection(conn net.Conn) {
+	defer conn.Close()
+
+	stream := utils.NewIOStream([]byte{}, binary.LittleEndian, charmap.Windows1250)
+
+	// Here we create a GG_WELCOME packet once the client connects to the server
+	ggw := protocol.InitGG_Welcome()
+	packet := protocol.InitGG_Packet(protocol.GG_WELCOME, ggw)
+
+	_, err := packet.Send(conn)
+	if err != nil {
+		logging.L.Errorf("Error: %s", err)
+	}
+
+	// Wait for the next packet, which will tell us the protocol version handler we need
+	pRecv, err := protocol.ReceivePacket(conn)
+	if err != nil {
+		logging.L.Errorf("Error receiving data, dropping connection!: %s", err)
+		return
+	}
+
+	client := clients.GGClient{}
+	switch pRecv.PacketType {
+	case protocol.GG_LOGIN30:
+		logging.L.Infof("Ancient Gadu-Gadu protocol detected")
+	case protocol.GG_LOGIN:
+		logging.L.Infof("Gadu-Gadu late 4.x - 6.0 protocol detected")
+	case protocol.GG_LOGIN60:
+		logging.L.Infof("Gadu-Gadu 6.0 protocol detected")
+	case protocol.GG_LOGIN70:
+		logging.L.Infof("Gadu-Gadu 7.0 protocol detected")
+	default:
+		logging.L.Infof("Unknown protocol version!")
+	}
+
+	client.Conn = conn
+	client.HandleLogin(pRecv.PacketType, utils.NewIOStream(pRecv.Data, binary.LittleEndian, charmap.Windows1250))
+
+	if !client.Authenticated {
+		return
+	}
+
+	defer client.Clean()
+
+	// Start send channels
+	runMsgChannel := true
+	runStatusChannel := true
+	go MsgChannel(&client, &runMsgChannel)
+	go StatusChannel(&client, &runStatusChannel)
+	defer utils.CloseChannel(&runMsgChannel)
+	defer utils.CloseChannel(&runStatusChannel)
+
+	// Connection loop
+	for {
+		pRecv, err := protocol.ReceivePacket(client.Conn)
+		if err != nil {
+			logging.L.Errorf("Error receiving data, dropping connection!: %s", err)
+			return
+		}
+
+		stream.Reset(pRecv.Data)
+
+		switch pRecv.PacketType {
+		case protocol.GG_NOTIFY30:
+			logging.L.Debugf("Received GG_NOTIFY30")
+			client.HandleNotify30(stream)
+		case protocol.GG_NOTIFY_FIRST:
+			logging.L.Debugf("Received GG_NOTIFY_FIRST")
+			client.HandleNotifyFirst(stream)
+		case protocol.GG_NOTIFY_LAST:
+			logging.L.Debugf("Received GG_NOTIFY_LAST")
+			client.HandleNotifyLast(stream)
+		case protocol.GG_ADD_NOTIFY:
+			logging.L.Debugf("Received GG_ADD_NOTIFY")
+			client.HandleAddNotify(stream)
+		case protocol.GG_REMOVE_NOTIFY:
+			logging.L.Debugf("Received GG_REMOVE_NOTIFY")
+			client.HandleRemoveNotify(stream)
+		case protocol.GG_LIST_EMPTY:
+			logging.L.Debugf("Received GG_LIST_EMPTY")
+		case protocol.GG_NEW_STATUS:
+			logging.L.Debugf("Received GG_NEW_STATUS")
+			client.HandleNewStatus(stream)
+		case protocol.GG_SEND_MSG:
+			logging.L.Debugf("Client is sending a message...")
+			client.HandleSendMsg(stream)
+		case protocol.GG_USERLIST_REQUEST:
+			logging.L.Debugf("Received GG_USERLIST_REQUEST")
+			client.HandleUserlistReq(stream)
+		case protocol.GG_PUBDIR50_REQUEST:
+			logging.L.Debugf("Received GG_PUBDIR50_REQUEST")
+			client.HandlePubdirReq(stream)
+		case protocol.GG_PING:
+			logging.L.Debugf("Received GG_PING")
+			client.SendPong()
+		default:
+			logging.L.Warnf("Received unknown packet, ignoring: 0x00%x\n", pRecv.PacketType)
+		}
+	}
+}
