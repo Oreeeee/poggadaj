@@ -14,6 +14,8 @@ type GG_Pubdir50_Request struct {
 	Request []byte
 }
 
+func (p *GG_Pubdir50_Request) Serialize(stream *utils.IOStream) {}
+
 func (p *GG_Pubdir50_Request) Deserialize(stream *utils.IOStream) {
 	p.Type = stream.ReadU8()
 	p.Seq = stream.ReadU32()

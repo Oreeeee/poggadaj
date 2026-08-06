@@ -12,6 +12,8 @@ type GG_Notify30 struct {
 	UINs []uint32
 }
 
+func (p *GG_Notify30) Serialize(stream *utils.IOStream) {}
+
 func (p *GG_Notify30) Deserialize(stream *utils.IOStream) {
 	contactCount := stream.Available() / 4
 	p.UINs = make([]uint32, contactCount)

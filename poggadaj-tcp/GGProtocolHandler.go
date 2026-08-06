@@ -21,8 +21,7 @@ func HandleConnection(conn net.Conn) {
 
 	// Here we create a GG_WELCOME packet once the client connects to the server
 	ggw := protocol.InitGG_Welcome()
-	ggw.Serialize(stream)
-	packet := protocol.InitGG_Packet(protocol.GG_WELCOME, stream.Get())
+	packet := protocol.InitGG_Packet(protocol.GG_WELCOME, ggw)
 
 	_, err := packet.Send(conn)
 	if err != nil {
@@ -75,7 +74,7 @@ func HandleConnection(conn net.Conn) {
 			return
 		}
 
-		stream := utils.NewIOStream(pRecv.Data, binary.LittleEndian, charmap.Windows1250)
+		stream.Reset(pRecv.Data)
 
 		switch pRecv.PacketType {
 		case protocol.GG_NOTIFY30:

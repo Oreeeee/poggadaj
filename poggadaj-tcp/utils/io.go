@@ -203,3 +203,8 @@ func (stream *IOStream) SerializeString(value string, nullTerminate bool) []byte
 
 	return buf.Bytes()
 }
+
+func (stream *IOStream) Reset(newData []byte) {
+	stream.position = 0
+	stream.data = newData
+}

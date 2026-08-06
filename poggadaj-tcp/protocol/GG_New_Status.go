@@ -12,6 +12,8 @@ type GG_New_Status struct {
 	Description []byte
 }
 
+func (p *GG_New_Status) Serialize(stream *utils.IOStream) {}
+
 func (p *GG_New_Status) Deserialize(stream *utils.IOStream) {
 	p.Status = stream.ReadU32()
 	p.Description = stream.ReadAll()

@@ -15,6 +15,8 @@ type GG_Send_MSG struct {
 	Content   string
 }
 
+func (p *GG_Send_MSG) Serialize(stream *utils.IOStream) {}
+
 func (p *GG_Send_MSG) Deserialize(stream *utils.IOStream) {
 	p.Recipient = stream.ReadU32()
 	p.Seq = stream.ReadU32()

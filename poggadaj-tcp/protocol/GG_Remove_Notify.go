@@ -12,6 +12,8 @@ type GG_Remove_Notify struct {
 	Type byte
 }
 
+func (p *GG_Remove_Notify) Serialize(stream *utils.IOStream) {}
+
 func (p *GG_Remove_Notify) Deserialize(stream *utils.IOStream) {
 	p.UIN = stream.ReadU32()
 	p.Type = stream.ReadU8()

@@ -22,6 +22,8 @@ type GG_Login60 struct {
 	Unknown2     byte
 }
 
+func (p *GG_Login60) Serialize(stream *utils.IOStream) {}
+
 func (p *GG_Login60) Deserialize(stream *utils.IOStream) {
 	p.UIN = stream.ReadU32()
 	p.Hash = stream.ReadU32()

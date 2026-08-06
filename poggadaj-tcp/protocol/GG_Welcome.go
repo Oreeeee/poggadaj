@@ -21,3 +21,5 @@ func InitGG_Welcome() *GG_Welcome {
 func (g *GG_Welcome) Serialize(stream *utils.IOStream) {
 	stream.WriteU32(g.seed)
 }
+
+func (p *GG_Welcome) Deserialize(stream *utils.IOStream) {}

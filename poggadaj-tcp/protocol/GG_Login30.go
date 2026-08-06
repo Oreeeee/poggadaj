@@ -14,6 +14,8 @@ type GG_Login30 struct {
 	Status uint32
 }
 
+func (p *GG_Login30) Serialize(stream *utils.IOStream) {}
+
 func (p *GG_Login30) Deserialize(stream *utils.IOStream) {
 	p.UIN = stream.ReadU32()
 	p.Hash = stream.ReadU32()

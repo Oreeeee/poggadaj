@@ -24,6 +24,8 @@ func (p *GG_Recv_MSG) Serialize(stream *utils.IOStream) {
 	stream.Write(stream.SerializeString(p.Content, false))
 }
 
+func (p *GG_Recv_MSG) Deserialize(stream *utils.IOStream) {}
+
 func (p *GG_Recv_MSG) PrettyPrint() []string {
 	s := []string{
 		fmt.Sprintf("Sender: %d", p.Sender),

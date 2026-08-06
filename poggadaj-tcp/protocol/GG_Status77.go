@@ -32,6 +32,8 @@ func (p *GG_Status77) Serialize(stream *utils.IOStream) {
 	stream.Write(p.Description)
 }
 
+func (p *GG_Status77) Deserialize(stream *utils.IOStream) {}
+
 func (p *GG_Status77) PrettyPrint() []string {
 	s := []string{
 		fmt.Sprintf("UIN: %d", p.UIN),

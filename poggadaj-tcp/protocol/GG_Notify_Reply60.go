@@ -40,6 +40,8 @@ func (p *GG_Notify_Reply60) Serialize(stream *utils.IOStream) {
 	stream.Write(p.Description)
 }
 
+func (p *GG_Notify_Reply60) Deserialize(stream *utils.IOStream) {}
+
 func (p *GG_Notify_Reply60) PrettyPrint() []string {
 	s := []string{
 		fmt.Sprintf("UIN: %d", p.UIN),

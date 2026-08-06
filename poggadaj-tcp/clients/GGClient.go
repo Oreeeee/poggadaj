@@ -6,7 +6,6 @@ package clients
 import (
 	"bytes"
 	"database/sql"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"net"
@@ -188,8 +187,9 @@ func (c *GGClient) HandleNotifyFirst(pRecv *utils.IOStream) {
 func (c *GGClient) HandleNotifyLast(pRecv *utils.IOStream) {
 	uv.GG_NotifyContactDeserialize(pRecv, &c.NotifyList)
 
+	var packet protocol.GG_Packet_Iface
+
 	// Respond with GG_NOTIFY_REPLY
-	responseStream := utils.NewIOStream([]byte{}, binary.LittleEndian, charmap.Windows1250)
 	for _, notifyContact := range c.NotifyList {
 		statusChange := cache.FetchUserStatus(notifyContact.UIN)
 		if c.Version >= 0x2a {
@@ -199,7 +199,7 @@ func (c *GGClient) HandleNotifyLast(pRecv *utils.IOStream) {
 				Description: statusChange.Description,
 			}
 			log.StructPPrint("GG_NOTIFY_REPLY77", notifyReply.PrettyPrint())
-			notifyReply.Serialize(responseStream)
+			packet = &notifyReply
 		} else {
 			notifyReply := protocol.GG_Notify_Reply60{
 				UIN:         statusChange.UIN,
@@ -207,11 +207,11 @@ func (c *GGClient) HandleNotifyLast(pRecv *utils.IOStream) {
 				Description: statusChange.Description,
 			}
 			log.StructPPrint("GG_NOTIFY_REPLY60", notifyReply.PrettyPrint())
-			notifyReply.Serialize(responseStream)
+			packet = &notifyReply
 		}
 	}
 
-	c.SendNotifyReply(buf.Bytes())
+	c.SendNotifyReply(packet)
 }
 
 func (c *GGClient) HandleAddNotify(pRecv *utils.IOStream) {
@@ -250,17 +250,18 @@ func (c *GGClient) HandleSendMsg(pRecv *utils.IOStream) {
 	p := protocol.GG_Send_MSG{}
 	p.Deserialize(pRecv)
 	log.StructPPrint("GG_SEND_MSG", p.PrettyPrint())
-	cache.PublishMessageChannel(p.Recipient, sharedstructs.Message{c.UIN, p.MsgClass, p.Content})
+	cache.PublishMessageChannel(p.Recipient, sharedstructs.Message{c.UIN, p.MsgClass, []byte(p.Content)})
 }
 
 func (c *GGClient) HandleUserlistReq(pRecv *utils.IOStream) {
+	packetLength := pRecv.Len()
 	p := protocol.GG_Userlist_Request{}
 	p.Deserialize(pRecv)
 	log.StructPPrint("GG_USERLIST_REQUEST", p.PrettyPrint())
 
 	switch p.Type {
 	case constants.GG_USERLIST_PUT, constants.GG_USERLIST_PUT_MORE:
-		if pRecv.Length == 1 {
+		if packetLength == 1 {
 			// Client sends 1-sized userlist on userlist delete
 			err := db.DeleteUserList(c.UIN)
 			if err != nil {
@@ -273,14 +274,14 @@ func (c *GGClient) HandleUserlistReq(pRecv *utils.IOStream) {
 				Request: p.Request,
 			}
 			log.StructPPrint("GG_USERLIST_REPLY", p.PrettyPrint())
-			pOut := protocol.InitGG_Packet(protocol.GG_USERLIST_REPLY, p.Serialize())
+			pOut := protocol.InitGG_Packet(protocol.GG_USERLIST_REPLY, &p)
 			_, err = pOut.Send(c.Conn)
 			if err != nil {
 				log.L.Errorf("Error: %s", err)
 			}
 		}
 		c.UserListBuf = append(c.UserListBuf, string(p.Request))
-		if pRecv.Length == 2048 {
+		if packetLength == 2048 {
 			// We've got a multipart list, we need to add it to the buf and wait until
 			// the client sends the final GG_USERLIST_PUT_MORE request
 			return
@@ -461,7 +462,7 @@ func (c *GGClient) SendPubdirResp(Type uint8, seq uint32, contents []byte) {
 		Reply: contents,
 	}
 	log.StructPPrint("GG_PUBDIR50_REPLY", p.PrettyPrint())
-	pOut := protocol.InitGG_Packet(protocol.GG_PUBDIR50_REPLY, p.Serialize())
+	pOut := protocol.InitGG_Packet(protocol.GG_PUBDIR50_REPLY, &p)
 	_, err := pOut.Send(c.Conn)
 	if err != nil {
 		log.L.Errorf("Error: %s", err)
@@ -481,7 +482,7 @@ func (c *GGClient) SendPutUserListAck(i int) {
 		Request: []byte(c.UserListBuf[i]),
 	}
 	log.StructPPrint("GG_USERLIST_REPLY", p.PrettyPrint())
-	pOut := protocol.InitGG_Packet(protocol.GG_USERLIST_REPLY, p.Serialize())
+	pOut := protocol.InitGG_Packet(protocol.GG_USERLIST_REPLY, &p)
 	_, err := pOut.Send(c.Conn)
 	if err != nil {
 		log.L.Errorf("Error: %s", err)
@@ -502,7 +503,7 @@ func (c *GGClient) SendGetUserListResp(userListBuf string) {
 			Request: []byte(str),
 		}
 		log.StructPPrint("GG_USERLIST_REPLY", p.PrettyPrint())
-		pOut := protocol.InitGG_Packet(protocol.GG_USERLIST_REPLY, p.Serialize())
+		pOut := protocol.InitGG_Packet(protocol.GG_USERLIST_REPLY, &p)
 		_, err := pOut.Send(c.Conn)
 		if err != nil {
 			log.L.Errorf("Error: %s", err)
@@ -511,7 +512,7 @@ func (c *GGClient) SendGetUserListResp(userListBuf string) {
 }
 
 func (c *GGClient) SendLoginOK() {
-	pOut := protocol.InitGG_Packet(protocol.GG_LOGIN_OK, []byte{})
+	pOut := protocol.InitEmptyGG_Packet(protocol.GG_LOGIN_OK)
 	_, err := pOut.Send(c.Conn)
 	if err != nil {
 		fmt.Println("Error: ", err)
@@ -519,7 +520,7 @@ func (c *GGClient) SendLoginOK() {
 }
 
 func (c *GGClient) SendLoginFail() {
-	pOut := protocol.InitGG_Packet(protocol.GG_LOGIN_FAILED, []byte{})
+	pOut := protocol.InitEmptyGG_Packet(protocol.GG_LOGIN_FAILED)
 	_, err := pOut.Send(c.Conn)
 	if err != nil {
 		fmt.Println("Error: ", err)
@@ -543,7 +544,7 @@ func (c *GGClient) SendStatus50(statusChange sharedstructs.StatusChangeMsg) {
 		Description: statusChange.Description,
 	}
 	log.StructPPrint("GG_STATUS", p.PrettyPrint())
-	pOut := protocol.InitGG_Packet(protocol.GG_STATUS, p.Serialize())
+	pOut := protocol.InitGG_Packet(protocol.GG_STATUS, &p)
 	_, err := pOut.Send(c.Conn)
 	if err != nil {
 		log.L.Errorf("Error: %s", err)
@@ -561,7 +562,7 @@ func (c *GGClient) SendStatus60(statusChange sharedstructs.StatusChangeMsg) {
 		Description: statusChange.Description,
 	}
 	log.StructPPrint("GG_STATUS60", p.PrettyPrint())
-	pOut := protocol.InitGG_Packet(protocol.GG_STATUS60, p.Serialize())
+	pOut := protocol.InitGG_Packet(protocol.GG_STATUS60, &p)
 	_, err := pOut.Send(c.Conn)
 	if err != nil {
 		log.L.Errorf("Error: %s", err)
@@ -579,7 +580,7 @@ func (c *GGClient) SendStatus77(statusChange sharedstructs.StatusChangeMsg) {
 		Description: statusChange.Description,
 	}
 	log.StructPPrint("GG_STATUS77", p.PrettyPrint())
-	pOut := protocol.InitGG_Packet(protocol.GG_STATUS77, p.Serialize())
+	pOut := protocol.InitGG_Packet(protocol.GG_STATUS77, &p)
 	_, err := pOut.Send(c.Conn)
 	if err != nil {
 		log.L.Errorf("Error: %s", err)
@@ -592,17 +593,17 @@ func (c *GGClient) SendRecvMsg(msg sharedstructs.Message) {
 		Seq:      0,
 		Time:     uint32(time.Now().Unix()),
 		MsgClass: msg.MsgClass,
-		Content:  msg.Content,
+		Content:  string(msg.Content),
 	}
 	log.StructPPrint("GG_RECV_MSG", pS.PrettyPrint())
-	pOut := protocol.InitGG_Packet(protocol.GG_RECV_MSG, pS.Serialize())
+	pOut := protocol.InitGG_Packet(protocol.GG_RECV_MSG, &pS)
 	_, err := pOut.Send(c.Conn)
 	if err != nil {
 		log.L.Errorf("Error: %s", err)
 	}
 }
 
-func (c *GGClient) SendNotifyReply(data []byte) {
+func (c *GGClient) SendNotifyReply(data protocol.GG_Packet_Iface) {
 	var pOut *protocol.GG_Packet
 	if c.Version >= 0x2a {
 		pOut = protocol.InitGG_Packet(protocol.GG_NOTIFY_REPLY77, data)
@@ -616,7 +617,7 @@ func (c *GGClient) SendNotifyReply(data []byte) {
 }
 
 func (c *GGClient) SendPong() {
-	pOut := protocol.InitGG_Packet(protocol.GG_PONG, []byte{})
+	pOut := protocol.InitEmptyGG_Packet(protocol.GG_PONG)
 	_, err := pOut.Send(c.Conn)
 	if err != nil {
 		log.L.Errorf("Error: %s", err)

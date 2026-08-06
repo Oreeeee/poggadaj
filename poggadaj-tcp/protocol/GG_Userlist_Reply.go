@@ -19,6 +19,8 @@ func (p *GG_Userlist_Reply) Serialize(stream *utils.IOStream) {
 	stream.Write(p.Request)
 }
 
+func (p *GG_Userlist_Reply) Deserialize(stream *utils.IOStream) {}
+
 func (p *GG_Userlist_Reply) PrettyPrint() []string {
 	s := []string{
 		fmt.Sprintf("Type: 0x%x", p.Type),

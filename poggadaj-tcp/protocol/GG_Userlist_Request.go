@@ -14,6 +14,8 @@ type GG_Userlist_Request struct {
 	Request []byte
 }
 
+func (p *GG_Userlist_Request) Serialize(stream *utils.IOStream) {}
+
 func (p *GG_Userlist_Request) Deserialize(stream *utils.IOStream) {
 	p.Type = stream.ReadU8()
 	p.Request = stream.ReadAll()

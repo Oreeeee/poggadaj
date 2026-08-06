@@ -17,6 +17,8 @@ type GG_Login struct {
 	LocalPort uint16
 }
 
+func (p *GG_Login) Serialize(stream *utils.IOStream) {}
+
 func (p *GG_Login) Deserialize(stream *utils.IOStream) {
 	p.UIN = stream.ReadU32()
 	p.Hash = stream.ReadU32()
