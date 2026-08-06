@@ -3,7 +3,7 @@
 
 package utils
 
-import "codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/constants"
+import "codeberg.org/or3e/poggadaj/internal/constants"
 
 //var GGVersions = map[uint32]string{
 //	1073741857: "Gadu-Gadu 6.0 (build 139)",

@@ -18,7 +18,6 @@ import (
 	"codeberg.org/or3e/poggadaj/internal/structs"
 	"codeberg.org/or3e/poggadaj/internal/utils/utilshttp"
 	"github.com/labstack/echo/v5"
-	"github.com/labstack/echo/v5/middleware"
 )
 
 type Server struct {
@@ -167,7 +166,7 @@ func NewServer(dbCfg *database.DatabaseConfig) (*Server, error) {
 	}
 	server.db = db
 
-	server.e.Use(middleware.CORS()) // TODO: Configure
+	//server.e.Use(middleware.CORS()) // TODO: Configure
 	server.e.POST("/api/v1/register", server.registerUser)
 	server.e.GET("/api/v1/login", server.loginUser)
 	server.e.POST("/api/v1/changepassword", server.changePassword)

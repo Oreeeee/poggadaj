@@ -4,7 +4,7 @@
 package structs
 
 import (
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/constants"
+	"codeberg.org/or3e/poggadaj/internal/constants"
 	"codeberg.org/or3e/poggadaj/internal/utils"
 )
 

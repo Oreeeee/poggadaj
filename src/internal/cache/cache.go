@@ -27,6 +27,7 @@ func NewCache(logger *log.Logger) (*Cache, error) {
 			Password: "",
 			DB:       0,
 		}),
+		logger: logger,
 	}
 
 	return cache, nil
@@ -36,7 +37,7 @@ func (cache *Cache) SetUserStatus(statusChange structs.StatusChangeMsg) {
 	// Marshal the status change
 	payload, err2 := json.Marshal(statusChange)
 	if err2 != nil {
-		cache.logger.Errorf("Failed to marshal status: %s", err2)
+		cache.logger.Error("Failed to marshal status", "err", err2)
 	}
 
 	// Set user's status in cache
@@ -47,13 +48,13 @@ func (cache *Cache) SetUserStatus(statusChange structs.StatusChangeMsg) {
 		0).Err()
 
 	if err != nil {
-		cache.logger.Errorf("Failed to set user status: %s", err)
+		cache.logger.Error("Failed to set user status", "err", err)
 	}
 
 	// Publish a status change announcement
 	err = cache.conn.Publish(context.Background(), "ggstatus", payload).Err()
 	if err != nil {
-		cache.logger.Errorf("Failed to publish status: %s", err)
+		cache.logger.Error("Failed to publish status", "err", err)
 	}
 }
 
@@ -66,12 +67,12 @@ func (cache *Cache) RecvStatusChannel(pubsub *redis.PubSub) structs.StatusChange
 	msg, err := pubsub.ReceiveMessage(context.Background())
 
 	if err != nil {
-		cache.logger.Errorf("Failed to receive status change: %s", err)
+		cache.logger.Error("Failed to receive status change", "err", err)
 	}
 
 	err = json.Unmarshal([]byte(msg.Payload), &statusChange)
 	if err != nil {
-		cache.logger.Errorf("Failed to unmarshal status change: %s", err)
+		cache.logger.Error("Failed to unmarshal status change", err)
 	}
 
 	return statusChange
@@ -80,13 +81,13 @@ func (cache *Cache) RecvStatusChannel(pubsub *redis.PubSub) structs.StatusChange
 func (cache *Cache) PublishMessageChannel(sender uint32, msg structs.Message) error {
 	payload, err := json.Marshal(msg)
 	if err != nil {
-		cache.logger.Errorf("Failed to marshal message: %s", err)
+		cache.logger.Error("Failed to marshal message", "err", err)
 		return err
 	}
 
 	err = cache.conn.Publish(context.Background(), fmt.Sprintf("ggmsg:%d", sender), payload).Err()
 	if err != nil {
-		cache.logger.Errorf("Failed to send message: %s", err)
+		cache.logger.Error("Failed to send message", "err", err)
 	}
 
 	cache.logger.Debugf("Message sent over pubsub: %s", payload)
@@ -103,12 +104,12 @@ func (cache *Cache) RecvMessageChannel(pubsub *redis.PubSub) structs.Message {
 	msg, err := pubsub.ReceiveMessage(context.Background())
 
 	if err != nil {
-		cache.logger.Errorf("Failed to receive message: %s", err)
+		cache.logger.Error("Failed to receive message", "err", err)
 	}
 
 	err = json.Unmarshal([]byte(msg.Payload), &message)
 	if err != nil {
-		cache.logger.Errorf("Failed to unmarshal message: %s", err)
+		cache.logger.Error("Failed to unmarshal message", "err", err)
 	}
 
 	cache.logger.Debugf("Message received over pubsub: %s", msg.Payload)
@@ -124,13 +125,13 @@ func (cache *Cache) FetchUserStatus(uin uint32) structs.StatusChangeMsg {
 
 	status, err := cache.conn.Get(context.Background(), fmt.Sprintf("ggstatus:%d", uin)).Result()
 	if err != nil {
-		cache.logger.Errorf("Failed to fetch user status: %s", err)
+		cache.logger.Error("Failed to fetch user status", "err", err)
 		return statusFinal
 	}
 
 	err2 := json.Unmarshal([]byte(status), &statusFinal)
 	if err2 != nil {
-		cache.logger.Errorf("Failed to deserialize user status: %s", err)
+		cache.logger.Error("Failed to deserialize user status", "err", err)
 		return statusFinal
 	}
 	return statusFinal

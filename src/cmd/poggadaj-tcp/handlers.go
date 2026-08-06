@@ -9,9 +9,8 @@ import (
 	"errors"
 	"strconv"
 
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/constants"
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/protocol"
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/pubdir"
+	"codeberg.org/or3e/poggadaj/internal/constants"
 	"codeberg.org/or3e/poggadaj/internal/logging"
 	"codeberg.org/or3e/poggadaj/internal/structs"
 	"codeberg.org/or3e/poggadaj/internal/utils"
@@ -179,7 +178,7 @@ func handlePubdirReq(c *Client, pRecv *utils.IOStream) error {
 
 	switch p.Type {
 	case constants.GG_PUBDIR50_SEARCH:
-		req := pubdir.PubdirEntry{}
+		req := structs.PubdirEntry{}
 		err := req.Read(p.Request)
 		if err != nil {
 			c.logger.Errorf("Failed to read pubdir entry: %s", err)
@@ -213,8 +212,8 @@ func handlePubdirReq(c *Client, pRecv *utils.IOStream) error {
 		writer := transform.NewWriter(&respBuilder, charmap.Windows1250.NewEncoder())
 		defer writer.Close()
 
-		respBuilder.Write(pubdir.PubdirWriteRange(resp)) // TODO: make that use stream directly?
-		pubdir.WriteSingleParam(writer, "\x00nextstart", nextStart)
+		respBuilder.Write(structs.PubdirWriteRange(resp)) // TODO: make that use stream directly?
+		structs.WriteSingleParam(writer, "\x00nextstart", nextStart)
 
 		c.SendPubdirResp(
 			constants.GG_PUBDIR50_SEARCH_REPLY,
@@ -225,7 +224,7 @@ func handlePubdirReq(c *Client, pRecv *utils.IOStream) error {
 		resp, err := c.server.db.GetPubdirDataByUin(c.UIN)
 		if errors.Is(err, sql.ErrNoRows) {
 			c.logger.Infof("Creating empty pubdir entry for UIN %d", c.UIN)
-			resp = &pubdir.PubdirEntry{}
+			resp = &structs.PubdirEntry{}
 			c.server.db.WritePubdirData(c.UIN, resp)
 		} else if err != nil {
 			c.logger.Errorf("Failed to retreive pubdir data for UIN %d: %v", c.UIN, err)
@@ -251,7 +250,7 @@ func handlePubdirReq(c *Client, pRecv *utils.IOStream) error {
 			resp.Write(),
 		)
 	case constants.GG_PUBDIR50_WRITE:
-		req := pubdir.PubdirEntry{}
+		req := structs.PubdirEntry{}
 		err := req.Read(p.Request)
 		if err != nil {
 			c.logger.Errorf("Failed to read pubdir entry: %s", err)

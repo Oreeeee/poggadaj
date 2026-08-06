@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"charm.land/log/v2"
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/constants"
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/protocol"
+	"codeberg.org/or3e/poggadaj/internal/constants"
 	"codeberg.org/or3e/poggadaj/internal/logging"
 	"codeberg.org/or3e/poggadaj/internal/statuses"
 	"codeberg.org/or3e/poggadaj/internal/structs"
@@ -51,14 +51,6 @@ func (client *Client) Run() {
 	}
 
 	defer client.Clean()
-
-	// Start send channels
-	runMsgChannel := true
-	runStatusChannel := true
-	go client.MsgChannel(&runMsgChannel)
-	go client.StatusChannel(&runStatusChannel)
-	defer utils.CloseChannel(&runMsgChannel)
-	defer utils.CloseChannel(&runStatusChannel)
 
 	// Connection loop
 	for {
@@ -106,6 +98,15 @@ func (client *Client) Run() {
 				UIN:    client.UIN,
 				Status: client.Status,
 			})
+			// Start send channels
+			runMsgChannel := true
+			runStatusChannel := true
+			go client.MsgChannel(&runMsgChannel)
+			go client.StatusChannel(&runStatusChannel)
+			defer utils.CloseChannel(&runMsgChannel)
+			defer utils.CloseChannel(&runStatusChannel)
+
+			continue
 		}
 
 		if handler, ok := Handlers[pRecv.PacketType]; ok {

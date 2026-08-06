@@ -9,8 +9,7 @@ import (
 	"fmt"
 	"time"
 
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-api/errs"
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/pubdir"
+	perrors "codeberg.org/or3e/poggadaj/internal/errors"
 	"codeberg.org/or3e/poggadaj/internal/security/argon2"
 	"codeberg.org/or3e/poggadaj/internal/security/gg"
 	"codeberg.org/or3e/poggadaj/internal/structs"
@@ -115,8 +114,8 @@ func (db *Database) DeleteUserList(uin uint32) error {
 	return err
 }
 
-func (db *Database) GetPubdirDataByUin(uin uint32) (*pubdir.PubdirEntry, error) {
-	entry := &pubdir.PubdirEntry{}
+func (db *Database) GetPubdirDataByUin(uin uint32) (*structs.PubdirEntry, error) {
+	entry := &structs.PubdirEntry{}
 	err := db.conn.QueryRow(
 		context.Background(),
 		"SELECT uin, firstname, lastname, nickname, gender, birthyear, city, familyname, familycity FROM pubdir WHERE uin = $1",
@@ -140,7 +139,7 @@ func (db *Database) GetPubdirDataByUin(uin uint32) (*pubdir.PubdirEntry, error) 
 	return entry, nil
 }
 
-func (db *Database) WritePubdirData(uin uint32, entry *pubdir.PubdirEntry) error {
+func (db *Database) WritePubdirData(uin uint32, entry *structs.PubdirEntry) error {
 	_, err := db.conn.Exec(context.Background(),
 		`INSERT INTO pubdir (uin, firstname, lastname, nickname, gender, birthyear, city, familyname, familycity)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -151,10 +150,10 @@ func (db *Database) WritePubdirData(uin uint32, entry *pubdir.PubdirEntry) error
 	return err
 }
 
-func (db *Database) SearchInPubdir(query *pubdir.PubdirEntry) ([]pubdir.PubdirEntry, uint32, error) {
+func (db *Database) SearchInPubdir(query *structs.PubdirEntry) ([]structs.PubdirEntry, uint32, error) {
 	// TODO: Add support for only-online option
 
-	results := []pubdir.PubdirEntry{}
+	results := []structs.PubdirEntry{}
 
 	// Since the lookup parameters can vary by query, we need to dynamically build the SQL query
 	dbColumns := []string{}
@@ -234,7 +233,7 @@ func (db *Database) SearchInPubdir(query *pubdir.PubdirEntry) ([]pubdir.PubdirEn
 	defer rows.Close()
 
 	for rows.Next() {
-		result := pubdir.PubdirEntry{}
+		result := structs.PubdirEntry{}
 		err = rows.Scan(&result.UIN, &result.Firstname, &result.Lastname, &result.Birthyear, &result.City, &result.Gender)
 		if err != nil {
 			return nil, 0, err
@@ -376,7 +375,7 @@ func (db *Database) UpdateUserPassword(name string, chgreq structs.ChangePasswor
 	case 3:
 		return db.UpdateSHA1Password(name, chgreq.Password)
 	default:
-		return errs.WrongPasswordType{PasswordType: chgreq.PasswordType}
+		return perrors.WrongPasswordType{PasswordType: chgreq.PasswordType}
 	}
 }
 
