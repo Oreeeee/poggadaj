@@ -6,8 +6,8 @@
   {
     "label": "Debug poggadaj-tcp",
     "adapter": "Delve",
-    "program": ".",
-    "cwd": "${ZED_WORKTREE_ROOT}/poggadaj-tcp",
+    "program": "${ZED_WORKTREE_ROOT}/src/cmd/poggadaj-tcp",
+    "cwd": "${ZED_WORKTREE_ROOT}/src",
     "request": "launch",
     "mode": "debug",
     "envFile": "${ZED_WORKTREE_ROOT}/.env",
@@ -20,8 +20,8 @@
   {
     "label": "Debug poggadaj-http",
     "adapter": "Delve",
-    "program": ".",
-    "cwd": "${ZED_WORKTREE_ROOT}/poggadaj-http",
+    "program": "${ZED_WORKTREE_ROOT}/src/cmd/poggadaj-http",
+    "cwd": "${ZED_WORKTREE_ROOT}/src",
     "request": "launch",
     "mode": "debug",
     "envFile": "${ZED_WORKTREE_ROOT}/.env",
@@ -34,8 +34,8 @@
   {
     "label": "Debug poggadaj-api",
     "adapter": "Delve",
-    "program": ".",
-    "cwd": "${ZED_WORKTREE_ROOT}/poggadaj-api",
+    "program": "${ZED_WORKTREE_ROOT}/src/cmd/poggadaj-api",
+    "cwd": "${ZED_WORKTREE_ROOT}/src"",
     "request": "launch",
     "mode": "debug",
     "envFile": "${ZED_WORKTREE_ROOT}/.env",
