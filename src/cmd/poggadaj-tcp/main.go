@@ -9,16 +9,23 @@ import (
 	"os"
 	"time"
 
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/database"
 	"codeberg.org/or3e/poggadaj/internal/cache"
+	"codeberg.org/or3e/poggadaj/internal/database"
 	"codeberg.org/or3e/poggadaj/internal/logging"
 
 	"charm.land/log/v2"
 )
 
+var DatabaseConn *database.Database
+
 func main() {
-	dbconn, err := database.GetDBConn()
-	database.DatabaseConn = dbconn
+	dbconn, err := database.NewDatabase(&database.DatabaseConfig{
+		Host:     os.Getenv("DB_ADDRESS"),
+		Port:     "5432",
+		Username: "poggadaj",
+		Password: os.Getenv("DB_PASSWORD"),
+	})
+	DatabaseConn = dbconn
 
 	cache.CacheConn = cache.GetCacheConn()
 
@@ -35,7 +42,7 @@ func main() {
 		return
 	}
 	defer l.Close()
-	defer database.DatabaseConn.Close()
+	//defer database.DatabaseConn.Close()
 
 	logging.L.Infof("Listening on %s:%d", os.Getenv("LISTEN_ADDRESS"), 8074)
 

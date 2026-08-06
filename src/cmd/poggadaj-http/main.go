@@ -10,16 +10,20 @@ import (
 	"os"
 
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-http/appmsg"
+	"codeberg.org/or3e/poggadaj/internal/database"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v5"
 )
 
-var DatabaseConn *pgxpool.Pool
+var DatabaseConn *database.Database
 
 func main() {
-	dbconn, _ := GetDBConn()
-	DatabaseConn = dbconn
+	DatabaseConn, _ = database.NewDatabase(&database.DatabaseConfig{
+		Host:     os.Getenv("DB_ADDRESS"),
+		Port:     "5432",
+		Username: "poggadaj",
+		Password: os.Getenv("DB_PASSWORD"),
+	})
 
 	r := echo.New()
 

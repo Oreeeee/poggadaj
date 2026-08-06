@@ -10,14 +10,14 @@ import (
 	"os"
 	"strings"
 
+	"codeberg.org/or3e/poggadaj/internal/database"
 	"codeberg.org/or3e/poggadaj/internal/security/argon2"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 )
 
-var DatabaseConn *pgxpool.Pool
+var DatabaseConn *database.Database
 var Sessions []AuthorizedSession
 
 func registerUser(c *echo.Context) error {
@@ -27,7 +27,7 @@ func registerUser(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, &RegisterResponse{Error: "Failed to unmarshal register request"})
 	}
 
-	uin, err := CreateUser(regBody)
+	uin, err := DatabaseConn.CreateUser(regBody)
 	if err != nil {
 		fmt.Println(err)
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint \"gguser_name_key\"") {
@@ -42,7 +42,7 @@ func registerUser(c *echo.Context) error {
 func loginUser(c *echo.Context) error {
 	name := c.FormValue("name")
 	password := c.FormValue("password")
-	passwordHash, _ := GetUserPasswordHash(name)
+	passwordHash, _ := DatabaseConn.GetUserPasswordHash(name)
 	passwordMatch, _ := argon2.ComparePasswords(password, passwordHash)
 	if passwordMatch {
 		// Add the session to the authorized session list
@@ -82,7 +82,7 @@ func changePassword(c *echo.Context) error {
 		return c.String(http.StatusBadRequest, "Failed to unmarshal ChangePasswordRequest")
 	}
 
-	err := UpdateUserPassword(username, body)
+	err := DatabaseConn.UpdateUserPassword(username, body)
 	if err != nil {
 		if strings.Contains(err.Error(), "Wrong password type") {
 			return c.String(http.StatusBadRequest, err.Error())
@@ -104,15 +104,15 @@ func changeClientsPassword(c *echo.Context) error {
 		return c.String(http.StatusBadRequest, "Failed to unmarshal ChangePasswordRequest")
 	}
 
-	err1 := UpdateAncientPassword(username, body.Password)
+	err1 := DatabaseConn.UpdateAncientPassword(username, body.Password)
 	if err1 != nil {
 		return c.String(http.StatusInternalServerError, "")
 	}
-	err2 := UpdateGG32Password(username, body.Password)
+	err2 := DatabaseConn.UpdateGG32Password(username, body.Password)
 	if err2 != nil {
 		return c.String(http.StatusInternalServerError, "")
 	}
-	err3 := UpdateSHA1Password(username, body.Password)
+	err3 := DatabaseConn.UpdateSHA1Password(username, body.Password)
 	if err3 != nil {
 		return c.String(http.StatusInternalServerError, "")
 	}
@@ -133,7 +133,7 @@ func userData(c *echo.Context) error {
 	if !sessionValid {
 		return c.String(http.StatusUnauthorized, "")
 	}
-	uin, joined, err := GetUserData(username)
+	uin, joined, err := DatabaseConn.GetUserData(username)
 	if err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusBadRequest, "{}")
@@ -145,8 +145,12 @@ func userData(c *echo.Context) error {
 }
 
 func main() {
-	dbconn, _ := GetDBConn()
-	DatabaseConn = dbconn
+	DatabaseConn, _ = database.NewDatabase(&database.DatabaseConfig{
+		Host:     os.Getenv("DB_ADDRESS"),
+		Port:     "5432",
+		Username: "poggadaj",
+		Password: os.Getenv("DB_PASSWORD"),
+	})
 
 	r := echo.New()
 	r.Use(middleware.CORS()) // TODO: Configure

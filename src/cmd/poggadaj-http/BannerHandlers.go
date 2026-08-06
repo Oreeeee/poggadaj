@@ -12,7 +12,7 @@ import (
 )
 
 func buildResponse(bannerType int) string {
-	ads := GetAds(bannerType)
+	ads := DatabaseConn.GetAds(bannerType)
 	// TODO: Give the correct dimensions depending on the banner type once Wayback Machine goes back online
 	imageFmt := "<img src=\"%s\" />"
 	response := ""
