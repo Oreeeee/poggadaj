@@ -28,9 +28,34 @@ func (server *Server) handleConnection(conn net.Conn) {
 		server,
 		logging.NewLoggerWithPrefix(conn.RemoteAddr().String()),
 	)
-	server.connections = append(server.connections, client)
+	// TODO: add a mutex
+	server.registerClient(client)
+	client.Run()
+	server.unregisterClient(client)
+}
 
-	go client.Run()
+func (server *Server) registerClient(c *Client) {
+	// Try to find an empty space in the array first
+	for i, client := range server.connections {
+		if client != nil {
+			continue
+		}
+		server.connections[i] = c
+		return
+	}
+
+	// No empty space found, so append the connection
+	server.connections = append(server.connections, c)
+}
+
+func (server *Server) unregisterClient(c *Client) {
+	for i, client := range server.connections {
+		if client != c {
+			continue
+		}
+
+		server.connections[i] = nil
+	}
 }
 
 func (server *Server) Run() error {
@@ -50,7 +75,7 @@ func (server *Server) Run() error {
 		}
 
 		server.logger.Infof("Accepted connection from %s", conn.RemoteAddr())
-		server.handleConnection(conn)
+		go server.handleConnection(conn)
 	}
 }
 
