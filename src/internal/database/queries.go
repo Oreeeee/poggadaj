@@ -11,6 +11,7 @@ import (
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/structs"
 	"codeberg.org/or3e/poggadaj/internal/security/argon2"
 	"codeberg.org/or3e/poggadaj/internal/security/gg"
+	"codeberg.org/or3e/poggadaj/internal/utils"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -287,15 +288,15 @@ func (db *Database) CreateUser(regBody RegisterRequest) (int, error) {
 	}
 
 	if regBody.GGAncientPassword != "" {
-		GGAncientHash = gg.GGAncientLoginHash(regBody.GGAncientPassword, GetSeed())
+		GGAncientHash = gg.GGAncientLoginHash(regBody.GGAncientPassword, utils.GetSeed())
 		dbArgs["password_gg_ancient"] = GGAncientHash
 	}
 	if regBody.GG32Password != "" {
-		GG32Hash = gg.GG32LoginHash(regBody.GG32Password, GetSeed())
+		GG32Hash = gg.GG32LoginHash(regBody.GG32Password, utils.GetSeed())
 		dbArgs["password_gg32"] = GG32Hash
 	}
 	if regBody.GGSHA1Password != "" {
-		GGSHA1Hash = gg.GGSHA1LoginHash(regBody.GGSHA1Password, GetSeed())
+		GGSHA1Hash = gg.GGSHA1LoginHash(regBody.GGSHA1Password, utils.GetSeed())
 		dbArgs["password_sha1"] = GGSHA1Hash
 	}
 
@@ -338,21 +339,21 @@ func (db *Database) UpdateWebsitePassword(name string, password string) error {
 }
 
 func (db *Database) UpdateAncientPassword(name string, password string) error {
-	hashedPassword := gg.GGAncientLoginHash(password, GetSeed())
+	hashedPassword := gg.GGAncientLoginHash(password, utils.GetSeed())
 	query := "UPDATE gguser SET password_gg_ancient=$1 WHERE name=$2"
 	_, err := db.conn.Exec(context.Background(), query, hashedPassword, name)
 	return err
 }
 
 func (db *Database) UpdateGG32Password(name string, password string) error {
-	hashedPassword := gg.GG32LoginHash(password, GetSeed())
+	hashedPassword := gg.GG32LoginHash(password, utils.GetSeed())
 	query := "UPDATE gguser SET password_gg32=$1 WHERE name=$2"
 	_, err := db.conn.Exec(context.Background(), query, hashedPassword, name)
 	return err
 }
 
 func (db *Database) UpdateSHA1Password(name string, password string) error {
-	hashedPassword := gg.GGSHA1LoginHash(password, GetSeed())
+	hashedPassword := gg.GGSHA1LoginHash(password, utils.GetSeed())
 	query := "UPDATE gguser SET password_sha1=$1 WHERE name=$2"
 	_, err := db.conn.Exec(context.Background(), query, hashedPassword, name)
 	return err

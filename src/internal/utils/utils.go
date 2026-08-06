@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
+	"os"
+	"strconv"
 )
 
 func LeIntToIPv4(ipn uint32) net.IP {
@@ -38,4 +40,16 @@ func BoolToInt(b bool) int {
 		return 1
 	}
 	return 0
+}
+
+func PasswordFitsRestrictions(password string) bool {
+	if len(password) < 8 || len(password) > 64 {
+		return false
+	}
+	return true
+}
+
+func GetSeed() uint32 {
+	seed64, _ := strconv.ParseUint(os.Getenv("GG_SEED"), 10, 32)
+	return uint32(seed64)
 }
