@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SPDX-FileCopyrightText: 2024-2026 Oreeeee
 
-package universal
+package structs
 
 import (
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/constants"

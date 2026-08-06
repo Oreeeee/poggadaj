@@ -15,10 +15,10 @@ import (
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/constants"
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/protocol"
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/pubdir"
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/structs"
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/utils"
 	"codeberg.org/or3e/poggadaj/internal/cache"
 	"codeberg.org/or3e/poggadaj/internal/statuses"
+	"codeberg.org/or3e/poggadaj/internal/structs"
+	"codeberg.org/or3e/poggadaj/internal/utils"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
 )
@@ -31,7 +31,7 @@ type Client struct {
 	UIN           uint32
 	Status        uint32
 	Authenticated bool
-	NotifyList    []uv.GG_NotifyContact
+	NotifyList    []structs.GG_NotifyContact
 	Version       uint8
 	VOIP          bool
 	ProtocolLevel uint8
@@ -155,7 +155,7 @@ func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 			c.logger.Debugf("Sending GG_LOGIN_OK")
 			c.SendLoginOK()
 
-			cache.SetUserStatus(sharedstructs.StatusChangeMsg{
+			cache.SetUserStatus(structs.StatusChangeMsg{
 				UIN:    c.UIN,
 				Status: p.Status,
 			})
@@ -180,7 +180,7 @@ func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 			c.SendLoginOK()
 
 			// Set user's status
-			cache.SetUserStatus(sharedstructs.StatusChangeMsg{
+			cache.SetUserStatus(structs.StatusChangeMsg{
 				UIN:    c.UIN,
 				Status: p.Status,
 			})
@@ -211,7 +211,7 @@ func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 			c.SendLoginOK()
 
 			// Set user's status
-			cache.SetUserStatus(sharedstructs.StatusChangeMsg{
+			cache.SetUserStatus(structs.StatusChangeMsg{
 				UIN:    c.UIN,
 				Status: p.Status,
 			})
@@ -242,7 +242,7 @@ func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 			c.SendLoginOK()
 
 			// Set user's status
-			cache.SetUserStatus(sharedstructs.StatusChangeMsg{
+			cache.SetUserStatus(structs.StatusChangeMsg{
 				UIN:    c.UIN,
 				Status: p.Status,
 			})
@@ -267,7 +267,7 @@ func (c *Client) HandleNotify30(pRecv *utils.IOStream) {
 	p.Deserialize(pRecv)
 	log.StructPPrint("GG_NOTIFY30", p.PrettyPrint())
 	for _, uin := range p.UINs {
-		contact := uv.GG_NotifyContact{
+		contact := structs.GG_NotifyContact{
 			UIN:  uin,
 			Type: 0x03,
 		}
@@ -276,11 +276,11 @@ func (c *Client) HandleNotify30(pRecv *utils.IOStream) {
 }
 
 func (c *Client) HandleNotifyFirst(pRecv *utils.IOStream) {
-	uv.GG_NotifyContactDeserialize(pRecv, &c.NotifyList)
+	structs.GG_NotifyContactDeserialize(pRecv, &c.NotifyList)
 }
 
 func (c *Client) HandleNotifyLast(pRecv *utils.IOStream) {
-	uv.GG_NotifyContactDeserialize(pRecv, &c.NotifyList)
+	structs.GG_NotifyContactDeserialize(pRecv, &c.NotifyList)
 
 	var packet protocol.GG_Packet_Iface
 
@@ -310,7 +310,7 @@ func (c *Client) HandleNotifyLast(pRecv *utils.IOStream) {
 }
 
 func (c *Client) HandleAddNotify(pRecv *utils.IOStream) {
-	contact := uv.GG_AddNotify(pRecv, &c.NotifyList)
+	contact := structs.GG_AddNotify(pRecv, &c.NotifyList)
 	c.SendStatus(cache.FetchUserStatus(contact.UIN))
 }
 
@@ -322,7 +322,7 @@ func (c *Client) HandleRemoveNotify(pRecv *utils.IOStream) {
 	for i, notify := range c.NotifyList {
 		if notify.UIN == p.UIN {
 			c.logger.Debugf("Removed UIN: %d", notify.UIN)
-			c.NotifyList[i] = uv.GG_NotifyContact{}
+			c.NotifyList[i] = structs.GG_NotifyContact{}
 			return // We don't need to look further
 		}
 	}
@@ -332,7 +332,7 @@ func (c *Client) HandleNewStatus(pRecv *utils.IOStream) {
 	p := protocol.GG_New_Status{}
 	p.Deserialize(pRecv)
 
-	cache.SetUserStatus(sharedstructs.StatusChangeMsg{
+	cache.SetUserStatus(structs.StatusChangeMsg{
 		UIN:         c.UIN,
 		Status:      p.Status,
 		Description: p.Description,
@@ -345,7 +345,7 @@ func (c *Client) HandleSendMsg(pRecv *utils.IOStream) {
 	p := protocol.GG_Send_MSG{}
 	p.Deserialize(pRecv)
 	log.StructPPrint("GG_SEND_MSG", p.PrettyPrint())
-	cache.PublishMessageChannel(p.Recipient, sharedstructs.Message{c.UIN, p.MsgClass, []byte(p.Content)})
+	cache.PublishMessageChannel(p.Recipient, structs.Message{c.UIN, p.MsgClass, []byte(p.Content)})
 }
 
 func (c *Client) HandleUserlistReq(pRecv *utils.IOStream) {
@@ -622,7 +622,7 @@ func (c *Client) SendLoginFail() {
 	}
 }
 
-func (c *Client) SendStatus(statusChange sharedstructs.StatusChangeMsg) {
+func (c *Client) SendStatus(statusChange structs.StatusChangeMsg) {
 	if c.Version >= 0x2a {
 		c.SendStatus77(statusChange)
 	} else if c.Version >= 0x20 {
@@ -632,7 +632,7 @@ func (c *Client) SendStatus(statusChange sharedstructs.StatusChangeMsg) {
 	}
 }
 
-func (c *Client) SendStatus50(statusChange sharedstructs.StatusChangeMsg) {
+func (c *Client) SendStatus50(statusChange structs.StatusChangeMsg) {
 	p := protocol.GG_Status{
 		UIN:         statusChange.UIN,
 		Status:      statusChange.Status,
@@ -646,7 +646,7 @@ func (c *Client) SendStatus50(statusChange sharedstructs.StatusChangeMsg) {
 	}
 }
 
-func (c *Client) SendStatus60(statusChange sharedstructs.StatusChangeMsg) {
+func (c *Client) SendStatus60(statusChange structs.StatusChangeMsg) {
 	p := protocol.GG_Status60{
 		UIN:         statusChange.UIN,
 		Status:      uint8(statusChange.Status),
@@ -664,7 +664,7 @@ func (c *Client) SendStatus60(statusChange sharedstructs.StatusChangeMsg) {
 	}
 }
 
-func (c *Client) SendStatus77(statusChange sharedstructs.StatusChangeMsg) {
+func (c *Client) SendStatus77(statusChange structs.StatusChangeMsg) {
 	p := protocol.GG_Status77{
 		UIN:         statusChange.UIN,
 		Status:      uint8(statusChange.Status),
@@ -682,7 +682,7 @@ func (c *Client) SendStatus77(statusChange sharedstructs.StatusChangeMsg) {
 	}
 }
 
-func (c *Client) SendRecvMsg(msg sharedstructs.Message) {
+func (c *Client) SendRecvMsg(msg structs.Message) {
 	pS := protocol.GG_Recv_MSG{
 		Sender:   msg.From,
 		Seq:      0,
@@ -721,7 +721,7 @@ func (c *Client) SendPong() {
 
 func (c *Client) Clean() {
 	// Change user's status to not available
-	cache.SetUserStatus(sharedstructs.StatusChangeMsg{
+	cache.SetUserStatus(structs.StatusChangeMsg{
 		UIN:    c.UIN,
 		Status: statuses.GG_STATUS_NOT_AVAIL,
 	})
