@@ -73,20 +73,20 @@ func (db *Database) PutUserList(userList []structs.UserListRequest, uin uint32) 
 	for i := 0; i < len(userList); i++ {
 		_, err := res.Exec()
 		if err != nil {
-			log.L.Errorf("Failed to execute batch insert: %v\n", err)
+			db.logger.Errorf("Failed to execute batch insert: %v\n", err)
 		}
 	}
 
 	err := res.Close()
 	if err != nil {
-		log.L.Errorf("Failed to close batch results: %v\n", err)
+		db.logger.Errorf("Failed to close batch results: %v\n", err)
 	}
 }
 
 func (db *Database) GetUserList(uin uint32) []structs.UserListRequest {
 	rows, err := db.conn.Query(context.Background(), "SELECT firstname, lastname, pseudonym, display_name, mobile_number, grp, uin, email, avail_sound, avail_path, msg_sound, msg_path, hidden, landline_number FROM ggcontact WHERE owner_uin=$1", uin)
 	if err != nil {
-		log.L.Errorf("Failed to execute query: %v\n", err)
+		db.logger.Errorf("Failed to execute query: %v\n", err)
 	}
 	defer rows.Close()
 
@@ -95,13 +95,13 @@ func (db *Database) GetUserList(uin uint32) []structs.UserListRequest {
 		var user structs.UserListRequest
 		err := rows.Scan(&user.FirstName, &user.LastName, &user.Pseudonym, &user.DisplayName, &user.MobileNumber, &user.Group, &user.UIN, &user.Email, &user.AvailSound, &user.AvailPath, &user.MsgSound, &user.MsgPath, &user.Hidden, &user.LandlineNumber)
 		if err != nil {
-			log.L.Errorf("Failed to scan row: %v\n", err)
+			db.logger.Errorf("Failed to scan row: %v\n", err)
 		}
 		userList = append(userList, user)
 	}
 
 	if rows.Err() != nil {
-		log.L.Errorf("Failed to execute query: %v\n", rows.Err())
+		db.logger.Errorf("Failed to execute query: %v\n", rows.Err())
 	}
 
 	return userList

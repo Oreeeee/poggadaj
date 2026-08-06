@@ -52,7 +52,7 @@ func (server *Server) Run() error {
 }
 
 func NewServer(dbCfg *database.DatabaseConfig, cache *cache.Cache, ip string) (*Server, error) {
-	dbConn, err := database.NewDatabase(dbCfg)
+	dbConn, err := database.NewDatabase(dbCfg, logging.NewLoggerWithPrefix("database"))
 	if err != nil {
 		return nil, err
 	}

@@ -9,6 +9,7 @@ import (
 
 	"codeberg.org/or3e/poggadaj/internal/cache"
 	"codeberg.org/or3e/poggadaj/internal/database"
+	"codeberg.org/or3e/poggadaj/internal/logging"
 )
 
 func main() {
@@ -19,7 +20,7 @@ func main() {
 		Password: os.Getenv("DB_PASSWORD"),
 	}
 
-	cache, _ := cache.NewCache()
+	cache, _ := cache.NewCache(logging.NewLoggerWithPrefix("cache"))
 
 	server, err := NewServer(dbCfg, cache, fmt.Sprintf("%s:8074", os.Getenv("LISTEN_ADDRESS")))
 	if err != nil {
