@@ -15,7 +15,6 @@ import (
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/constants"
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/protocol"
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/pubdir"
-	"codeberg.org/or3e/poggadaj/internal/cache"
 	"codeberg.org/or3e/poggadaj/internal/logging"
 	"codeberg.org/or3e/poggadaj/internal/statuses"
 	"codeberg.org/or3e/poggadaj/internal/structs"
@@ -156,7 +155,7 @@ func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 			c.logger.Debugf("Sending GG_LOGIN_OK")
 			c.SendLoginOK()
 
-			cache.SetUserStatus(structs.StatusChangeMsg{
+			c.server.cache.SetUserStatus(structs.StatusChangeMsg{
 				UIN:    c.UIN,
 				Status: p.Status,
 			})
@@ -181,7 +180,7 @@ func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 			c.SendLoginOK()
 
 			// Set user's status
-			cache.SetUserStatus(structs.StatusChangeMsg{
+			c.server.cache.SetUserStatus(structs.StatusChangeMsg{
 				UIN:    c.UIN,
 				Status: p.Status,
 			})
@@ -198,7 +197,7 @@ func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 	case protocol.GG_LOGIN60:
 		p := protocol.GG_Login60{}
 		p.Deserialize(data)
-		logging.StructPPrint("GG_LOGIN60", p.PrettyPrint())
+		logging.StructPPrint(c.logger, "GG_LOGIN60", p.PrettyPrint())
 
 		c.UIN = p.UIN
 
@@ -212,7 +211,7 @@ func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 			c.SendLoginOK()
 
 			// Set user's status
-			cache.SetUserStatus(structs.StatusChangeMsg{
+			c.server.cache.SetUserStatus(structs.StatusChangeMsg{
 				UIN:    c.UIN,
 				Status: p.Status,
 			})
@@ -229,7 +228,7 @@ func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 	case protocol.GG_LOGIN70:
 		p := protocol.GG_Login70{}
 		p.Deserialize(data)
-		logging.StructPPrint("GG_LOGIN70", p.PrettyPrint())
+		logging.StructPPrint(c.logger, "GG_LOGIN70", p.PrettyPrint())
 
 		c.UIN = p.UIN
 
@@ -243,7 +242,7 @@ func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 			c.SendLoginOK()
 
 			// Set user's status
-			cache.SetUserStatus(structs.StatusChangeMsg{
+			c.server.cache.SetUserStatus(structs.StatusChangeMsg{
 				UIN:    c.UIN,
 				Status: p.Status,
 			})
