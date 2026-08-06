@@ -6,7 +6,7 @@ package protocol
 import (
 	"fmt"
 
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/utils"
+	"codeberg.org/or3e/poggadaj/internal/utils"
 )
 
 type GG_Recv_MSG struct {

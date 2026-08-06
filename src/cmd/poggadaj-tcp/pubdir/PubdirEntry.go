@@ -10,9 +10,7 @@ import (
 	"strings"
 
 	"codeberg.org/or3e/poggadaj/internal/logging"
-
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/utils"
-
+	"codeberg.org/or3e/poggadaj/internal/utils"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
 )

@@ -9,8 +9,7 @@ import (
 	"errors"
 	"net"
 
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/utils"
-
+	"codeberg.org/or3e/poggadaj/internal/utils"
 	"golang.org/x/text/encoding/charmap"
 )
 

@@ -5,7 +5,7 @@ package universal
 
 import (
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/constants"
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/utils"
+	"codeberg.org/or3e/poggadaj/internal/utils"
 )
 
 func GG_NotifyContactDeserialize(stream *utils.IOStream, contactList *[]GG_NotifyContact) {

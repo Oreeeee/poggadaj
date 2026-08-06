@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/utils"
+	"codeberg.org/or3e/poggadaj/internal/utils"
 )
 
 type GG_Userlist_Request struct {
