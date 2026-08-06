@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	"codeberg.org/or3e/poggadaj/internal/logging"
 	"codeberg.org/or3e/poggadaj/internal/utils"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
@@ -65,10 +64,7 @@ func (p *PubdirEntry) Read(data []byte) error {
 				years := strings.Split(v, " ")
 
 				if len(years) != 2 {
-					logging.L.Errorf("Invalid age range provided: %v", v)
-					p.YearIsRange = false
-					continue
-					//return errors.New("invalid age range provided")
+					return fmt.Errorf("Invalid age range provided: %v", v)
 				}
 
 				minyear, _ := strconv.ParseUint(years[0], 10, 16)

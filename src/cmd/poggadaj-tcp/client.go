@@ -16,6 +16,7 @@ import (
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/protocol"
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/pubdir"
 	"codeberg.org/or3e/poggadaj/internal/cache"
+	"codeberg.org/or3e/poggadaj/internal/logging"
 	"codeberg.org/or3e/poggadaj/internal/statuses"
 	"codeberg.org/or3e/poggadaj/internal/structs"
 	"codeberg.org/or3e/poggadaj/internal/utils"
@@ -142,7 +143,7 @@ func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 		c.ProtocolLevel = 30
 		p := protocol.GG_Login30{}
 		p.Deserialize(data)
-		log.StructPPrint("GG_LOGIN30", p.PrettyPrint())
+		logging.StructPPrint(c.logger, "GG_LOGIN30", p.PrettyPrint())
 
 		c.UIN = p.UIN
 
@@ -166,7 +167,7 @@ func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 	case protocol.GG_LOGIN:
 		p := protocol.GG_Login{}
 		p.Deserialize(data)
-		log.StructPPrint("GG_LOGIN", p.PrettyPrint())
+		logging.StructPPrint(c.logger, "GG_LOGIN", p.PrettyPrint())
 
 		c.UIN = p.UIN
 
@@ -197,7 +198,7 @@ func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 	case protocol.GG_LOGIN60:
 		p := protocol.GG_Login60{}
 		p.Deserialize(data)
-		log.StructPPrint("GG_LOGIN60", p.PrettyPrint())
+		logging.StructPPrint("GG_LOGIN60", p.PrettyPrint())
 
 		c.UIN = p.UIN
 
@@ -228,7 +229,7 @@ func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 	case protocol.GG_LOGIN70:
 		p := protocol.GG_Login70{}
 		p.Deserialize(data)
-		log.StructPPrint("GG_LOGIN70", p.PrettyPrint())
+		logging.StructPPrint("GG_LOGIN70", p.PrettyPrint())
 
 		c.UIN = p.UIN
 
@@ -265,7 +266,7 @@ func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 func (c *Client) HandleNotify30(pRecv *utils.IOStream) {
 	p := protocol.GG_Notify30{}
 	p.Deserialize(pRecv)
-	log.StructPPrint("GG_NOTIFY30", p.PrettyPrint())
+	logging.StructPPrint(c.logger, "GG_NOTIFY30", p.PrettyPrint())
 	for _, uin := range p.UINs {
 		contact := structs.GG_NotifyContact{
 			UIN:  uin,
@@ -293,7 +294,7 @@ func (c *Client) HandleNotifyLast(pRecv *utils.IOStream) {
 				Status:      uint8(statusChange.Status),
 				Description: statusChange.Description,
 			}
-			log.StructPPrint("GG_NOTIFY_REPLY77", notifyReply.PrettyPrint())
+			logging.StructPPrint(c.logger, "GG_NOTIFY_REPLY77", notifyReply.PrettyPrint())
 			packet = &notifyReply
 		} else {
 			notifyReply := protocol.GG_Notify_Reply60{
@@ -301,7 +302,7 @@ func (c *Client) HandleNotifyLast(pRecv *utils.IOStream) {
 				Status:      uint8(statusChange.Status),
 				Description: statusChange.Description,
 			}
-			log.StructPPrint("GG_NOTIFY_REPLY60", notifyReply.PrettyPrint())
+			logging.StructPPrint(c.logger, "GG_NOTIFY_REPLY60", notifyReply.PrettyPrint())
 			packet = &notifyReply
 		}
 	}
@@ -344,7 +345,7 @@ func (c *Client) HandleNewStatus(pRecv *utils.IOStream) {
 func (c *Client) HandleSendMsg(pRecv *utils.IOStream) {
 	p := protocol.GG_Send_MSG{}
 	p.Deserialize(pRecv)
-	log.StructPPrint("GG_SEND_MSG", p.PrettyPrint())
+	logging.StructPPrint(c.logger, "GG_SEND_MSG", p.PrettyPrint())
 	c.server.cache.PublishMessageChannel(p.Recipient, structs.Message{c.UIN, p.MsgClass, []byte(p.Content)})
 }
 
@@ -352,7 +353,7 @@ func (c *Client) HandleUserlistReq(pRecv *utils.IOStream) {
 	packetLength := pRecv.Len()
 	p := protocol.GG_Userlist_Request{}
 	p.Deserialize(pRecv)
-	log.StructPPrint("GG_USERLIST_REQUEST", p.PrettyPrint())
+	logging.StructPPrint(c.logger, "GG_USERLIST_REQUEST", p.PrettyPrint())
 
 	switch p.Type {
 	case constants.GG_USERLIST_PUT, constants.GG_USERLIST_PUT_MORE:
@@ -368,7 +369,7 @@ func (c *Client) HandleUserlistReq(pRecv *utils.IOStream) {
 				Type:    constants.GG_USERLIST_PUT_REPLY,
 				Request: p.Request,
 			}
-			log.StructPPrint("GG_USERLIST_REPLY", p.PrettyPrint())
+			logging.StructPPrint(c.logger, "GG_USERLIST_REPLY", p.PrettyPrint())
 			pOut := protocol.InitGG_Packet(protocol.GG_USERLIST_REPLY, &p)
 			_, err = pOut.Send(c.conn)
 			if err != nil {
@@ -400,7 +401,7 @@ func (c *Client) HandleUserlistReq(pRecv *utils.IOStream) {
 func (c *Client) HandlePubdirReq(pRecv *utils.IOStream) {
 	p := protocol.GG_Pubdir50_Request{}
 	p.Deserialize(pRecv)
-	log.StructPPrint("GG_PUBDIR50_REQUEST", p.PrettyPrint())
+	logging.StructPPrint(c.logger, "GG_PUBDIR50_REQUEST", p.PrettyPrint())
 
 	switch p.Type {
 	case constants.GG_PUBDIR50_SEARCH:
@@ -556,7 +557,7 @@ func (c *Client) SendPubdirResp(Type uint8, seq uint32, contents []byte) {
 		Seq:   seq,
 		Reply: contents,
 	}
-	log.StructPPrint("GG_PUBDIR50_REPLY", p.PrettyPrint())
+	logging.StructPPrint(c.logger, "GG_PUBDIR50_REPLY", p.PrettyPrint())
 	pOut := protocol.InitGG_Packet(protocol.GG_PUBDIR50_REPLY, &p)
 	_, err := pOut.Send(c.conn)
 	if err != nil {
@@ -576,7 +577,7 @@ func (c *Client) SendPutUserListAck(i int) {
 		Type:    reqType,
 		Request: []byte(c.UserListBuf[i]),
 	}
-	log.StructPPrint("GG_USERLIST_REPLY", p.PrettyPrint())
+	logging.StructPPrint(c.logger, "GG_USERLIST_REPLY", p.PrettyPrint())
 	pOut := protocol.InitGG_Packet(protocol.GG_USERLIST_REPLY, &p)
 	_, err := pOut.Send(c.conn)
 	if err != nil {
@@ -597,7 +598,7 @@ func (c *Client) SendGetUserListResp(userListBuf string) {
 			Type:    uint8(replyType),
 			Request: []byte(str),
 		}
-		log.StructPPrint("GG_USERLIST_REPLY", p.PrettyPrint())
+		logging.StructPPrint(c.logger, "GG_USERLIST_REPLY", p.PrettyPrint())
 		pOut := protocol.InitGG_Packet(protocol.GG_USERLIST_REPLY, &p)
 		_, err := pOut.Send(c.conn)
 		if err != nil {
@@ -638,7 +639,7 @@ func (c *Client) SendStatus50(statusChange structs.StatusChangeMsg) {
 		Status:      statusChange.Status,
 		Description: statusChange.Description,
 	}
-	log.StructPPrint("GG_STATUS", p.PrettyPrint())
+	logging.StructPPrint(c.logger, "GG_STATUS", p.PrettyPrint())
 	pOut := protocol.InitGG_Packet(protocol.GG_STATUS, &p)
 	_, err := pOut.Send(c.conn)
 	if err != nil {
@@ -656,7 +657,7 @@ func (c *Client) SendStatus60(statusChange structs.StatusChangeMsg) {
 		ImageSize:   0,
 		Description: statusChange.Description,
 	}
-	log.StructPPrint("GG_STATUS60", p.PrettyPrint())
+	logging.StructPPrint(c.logger, "GG_STATUS60", p.PrettyPrint())
 	pOut := protocol.InitGG_Packet(protocol.GG_STATUS60, &p)
 	_, err := pOut.Send(c.conn)
 	if err != nil {
@@ -674,7 +675,7 @@ func (c *Client) SendStatus77(statusChange structs.StatusChangeMsg) {
 		ImageSize:   0,
 		Description: statusChange.Description,
 	}
-	log.StructPPrint("GG_STATUS77", p.PrettyPrint())
+	logging.StructPPrint(c.logger, "GG_STATUS77", p.PrettyPrint())
 	pOut := protocol.InitGG_Packet(protocol.GG_STATUS77, &p)
 	_, err := pOut.Send(c.conn)
 	if err != nil {
@@ -690,7 +691,7 @@ func (c *Client) SendRecvMsg(msg structs.Message) {
 		MsgClass: msg.MsgClass,
 		Content:  string(msg.Content),
 	}
-	log.StructPPrint("GG_RECV_MSG", pS.PrettyPrint())
+	logging.StructPPrint(c.logger, "GG_RECV_MSG", pS.PrettyPrint())
 	pOut := protocol.InitGG_Packet(protocol.GG_RECV_MSG, &pS)
 	_, err := pOut.Send(c.conn)
 	if err != nil {

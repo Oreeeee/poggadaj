@@ -8,9 +8,9 @@ import (
 
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-api/errs"
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/pubdir"
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/structs"
 	"codeberg.org/or3e/poggadaj/internal/security/argon2"
 	"codeberg.org/or3e/poggadaj/internal/security/gg"
+	"codeberg.org/or3e/poggadaj/internal/structs"
 	"codeberg.org/or3e/poggadaj/internal/utils"
 	"github.com/jackc/pgx/v5"
 )

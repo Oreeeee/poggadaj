@@ -3,6 +3,24 @@
 
 package logging
 
-import "charm.land/log/v2"
+import (
+	"os"
+	"time"
 
-var L *log.Logger
+	"charm.land/log/v2"
+)
+
+func NewLoggerWithPrefix(prefix string) *log.Logger {
+	logger := NewLogger()
+	logger.SetPrefix(prefix)
+	return logger
+}
+
+func NewLogger() *log.Logger {
+	return log.NewWithOptions(os.Stdout, log.Options{
+		ReportCaller:    true,
+		ReportTimestamp: true,
+		TimeFormat:      time.DateTime,
+		Level:           log.DebugLevel,
+	})
+}

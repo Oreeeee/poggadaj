@@ -3,9 +3,11 @@
 
 package logging
 
-func StructPPrint(packetName string, packetLines []string) {
-	L.Debugf(packetName)
+import "charm.land/log/v2"
+
+func StructPPrint(logger *log.Logger, packetName string, packetLines []string) {
+	logger.Debug(packetName)
 	for _, line := range packetLines {
-		L.Debugf(line)
+		logger.Debug(line)
 	}
 }

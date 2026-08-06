@@ -20,7 +20,11 @@ type Server struct {
 }
 
 func (server *Server) handleConnection(conn net.Conn) {
-	client, _ := NewClient(conn, server, server.logger)
+	client, _ := NewClient(
+		conn,
+		server,
+		logging.NewLoggerWithPrefix(conn.RemoteAddr().String()),
+	)
 	server.connections = append(server.connections, client)
 
 	go client.Run()
@@ -33,16 +37,16 @@ func (server *Server) Run() error {
 	}
 	defer l.Close()
 
-	logging.L.Infof("Listening on %s:%d", os.Getenv("LISTEN_ADDRESS"), 8074)
+	server.logger.Infof("Listening on %s:%d", os.Getenv("LISTEN_ADDRESS"), 8074)
 
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			logging.L.Errorf("Error accepting from %s: %s", conn.RemoteAddr(), err)
+			server.logger.Errorf("Error accepting from %s: %s", conn.RemoteAddr(), err)
 			continue
 		}
 
-		logging.L.Infof("Accepted connection from %s", conn.RemoteAddr())
+		server.logger.Infof("Accepted connection from %s", conn.RemoteAddr())
 		server.handleConnection(conn)
 	}
 }
@@ -56,7 +60,7 @@ func NewServer(dbCfg *database.DatabaseConfig, cache *cache.Cache, ip string) (*
 	server := &Server{
 		ip:     ip,
 		db:     dbConn,
-		logger: logging.L,
+		logger: logging.NewLogger(),
 		cache:  cache,
 	}
 
