@@ -2,7 +2,9 @@ version: "3"
 
 services:
   http:
-    build: poggadaj-http
+    build:
+      dockerfile: ./cmd/poggadaj-http/Dockerfile
+      context: ./src/
     restart: always
     ports:
       - "80:8080"
@@ -33,7 +35,9 @@ services:
         condition: service_completed_successfully
 
   api:
-    build: poggadaj-api
+    build:
+      dockerfile: ./cmd/poggadaj-api/Dockerfile
+      context: ./src/
     restart: always
     environment:
       - LISTEN_ADDRESS=0.0.0.0
@@ -47,7 +51,9 @@ services:
         condition: service_completed_successfully
 
   tcp:
-    build: poggadaj-tcp
+    build:
+      dockerfile: ./cmd/poggadaj-tcp/Dockerfile
+      context: ./src/
     restart: always
     ports:
       - "8074:8074"
