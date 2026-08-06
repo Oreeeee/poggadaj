@@ -30,7 +30,7 @@ func (server *Server) handleConnection(conn net.Conn) {
 		server,
 		logging.NewLoggerWithPrefix(conn.RemoteAddr().String()),
 	)
-	// TODO: add a mutex
+
 	server.registerClient(client)
 	client.Run()
 	server.unregisterClient(client)
