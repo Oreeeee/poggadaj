@@ -16,7 +16,7 @@ Open Source reimplementation of the Gadu-Gadu backend services written in Go
 | Simple statuses                         |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Statuses with descriptions              |      N/A      |       ✅       |         ✅         |         ✅         |       ✅       |
 | Status masks                            |      N/A      |       ❌       |         ❌         |         ❌         |       ❌       |
-| Sending messages                        |       ❌       |       ✅       |         ✅         |         ✅         |       ✅       |
+| Sending messages                        |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Receiving messages                      |       ❌       |       ✅       |         ✅         |         ✅         |       ✅       |
 | P2P                                     |       ❌       |       ❌       |         ❌         |         ❌         |       ❌       |
 | P2P over a relay                        |       ❌       |       ❌       |         ❌         |         ❌         |       ❌       |

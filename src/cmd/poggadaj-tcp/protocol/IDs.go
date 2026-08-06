@@ -8,6 +8,7 @@ const (
 	GG_LOGIN30          = 0x0001
 	GG_NEW_STATUS       = 0x0002
 	GG_NOTIFY30         = 0x0003
+	GG_SEND_MSG30       = 0x0005
 	GG_PING             = 0x0008
 	GG_SEND_MSG         = 0x000b
 	GG_LOGIN            = 0x000c
@@ -25,6 +26,7 @@ const (
 	GG_WELCOME        = 0x0001
 	GG_STATUS         = 0x0002
 	GG_LOGIN_OK       = 0x0003
+	GG_SEND_MSG_ACK   = 0x0005
 	GG_PONG           = 0x0007
 	GG_LOGIN_FAILED   = 0x0009
 	GG_RECV_MSG       = 0x000a

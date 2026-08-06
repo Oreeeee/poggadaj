@@ -113,6 +113,26 @@ func handleNewStatus(c *Client, pRecv *utils.IOStream) error {
 	return nil
 }
 
+func handleSendMsg30(c *Client, pRecv *utils.IOStream) error {
+	p := protocol.GG_Send_MSG30{}
+	p.Deserialize(pRecv)
+	logging.StructPPrint(c.logger, "GG_SEND_MSG30", p.PrettyPrint())
+	c.server.cache.PublishMessageChannel(p.Recipient, structs.Message{c.UIN, 0, []byte(p.Content)})
+
+	resp := protocol.GG_Send_Msg_Ack{
+		Status:    constants.GG_ACK_DELIVERED,
+		Recipient: p.Recipient,
+		Seq:       p.Seq,
+	}
+	ggp := protocol.InitGG_Packet(protocol.GG_SEND_MSG_ACK, &resp)
+	_, err := ggp.Send(c.conn)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func handleSendMsg(c *Client, pRecv *utils.IOStream) error {
 	p := protocol.GG_Send_MSG{}
 	p.Deserialize(pRecv)
@@ -372,6 +392,7 @@ func init() {
 	Handlers[protocol.GG_REMOVE_NOTIFY] = handleRemoveNotify
 	Handlers[protocol.GG_LIST_EMPTY] = handleNotifyLast
 	Handlers[protocol.GG_NEW_STATUS] = handleNewStatus
+	Handlers[protocol.GG_SEND_MSG30] = handleSendMsg30
 	Handlers[protocol.GG_SEND_MSG] = handleSendMsg
 	Handlers[protocol.GG_USERLIST_REQUEST] = handleUserlistReq
 	Handlers[protocol.GG_PUBDIR50_REQUEST] = handlePubdirReq
