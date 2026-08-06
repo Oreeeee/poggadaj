@@ -248,9 +248,9 @@ func (db *Database) SearchInPubdir(query *pubdir.PubdirEntry) ([]pubdir.PubdirEn
 	return results, nextStart, nil
 }
 
-func (db *Database) GetAds(bannerType int) []Ad {
+func (db *Database) GetAds(bannerType int) []structs.Ad {
 	query := fmt.Sprintf("SELECT adtype, bannertype, image, html FROM adserver_ad WHERE bannertype=%d", bannerType)
-	ads := make([]Ad, 0)
+	ads := make([]structs.Ad, 0)
 
 	rows, err := db.conn.Query(context.Background(), query)
 	if err != nil {
@@ -260,7 +260,7 @@ func (db *Database) GetAds(bannerType int) []Ad {
 	defer rows.Close()
 
 	for rows.Next() {
-		ad := Ad{}
+		ad := structs.Ad{}
 		err := rows.Scan(&ad.AdType, &ad.BannerType, &ad.Image, &ad.Html)
 		if err != nil {
 			fmt.Println(err)
@@ -271,7 +271,7 @@ func (db *Database) GetAds(bannerType int) []Ad {
 	return ads
 }
 
-func (db *Database) CreateUser(regBody RegisterRequest) (int, error) {
+func (db *Database) CreateUser(regBody structs.RegisterRequest) (int, error) {
 	var GGAncientHash uint32
 	var GG32Hash uint32
 	var GGSHA1Hash string
@@ -359,7 +359,7 @@ func (db *Database) UpdateSHA1Password(name string, password string) error {
 	return err
 }
 
-func (db *Database) UpdateUserPassword(name string, chgreq ChangePasswordRequest) error {
+func (db *Database) UpdateUserPassword(name string, chgreq structs.ChangePasswordRequest) error {
 	switch chgreq.PasswordType {
 	case 0:
 		// Website password

@@ -12,6 +12,7 @@ import (
 
 	"codeberg.org/or3e/poggadaj/internal/database"
 	"codeberg.org/or3e/poggadaj/internal/security/argon2"
+	"codeberg.org/or3e/poggadaj/internal/structs"
 
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
@@ -21,7 +22,7 @@ var DatabaseConn *database.Database
 var Sessions []AuthorizedSession
 
 func registerUser(c *echo.Context) error {
-	regBody := RegisterRequest{}
+	regBody := structs.RegisterRequest{}
 	bodyErr := json.NewDecoder(c.Request().Body).Decode(&regBody)
 	if bodyErr != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterResponse{Error: "Failed to unmarshal register request"})
@@ -76,7 +77,7 @@ func changePassword(c *echo.Context) error {
 		return c.String(http.StatusUnauthorized, "")
 	}
 
-	body := ChangePasswordRequest{}
+	body := structs.ChangePasswordRequest{}
 	bodyErr := json.NewDecoder(c.Request().Body).Decode(&body)
 	if bodyErr != nil {
 		return c.String(http.StatusBadRequest, "Failed to unmarshal ChangePasswordRequest")
@@ -98,7 +99,7 @@ func changeClientsPassword(c *echo.Context) error {
 		return c.String(http.StatusUnauthorized, "")
 	}
 
-	body := ChangePasswordRequest{}
+	body := structs.ChangePasswordRequest{}
 	bodyErr := json.NewDecoder(c.Request().Body).Decode(&body)
 	if bodyErr != nil {
 		return c.String(http.StatusBadRequest, "Failed to unmarshal ChangePasswordRequest")

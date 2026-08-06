@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 
+	"codeberg.org/or3e/poggadaj/internal/structs"
 	"github.com/labstack/echo/v5"
 )
 
@@ -26,7 +27,7 @@ func buildResponse(bannerType int) string {
 	ad := ads[rand.Intn(len(ads))]
 
 	// Build an image response if we got an image ad
-	if ad.AdType == ADTYPE_IMAGE {
+	if ad.AdType == structs.ADTYPE_IMAGE {
 		// TODO: Add image support
 		return response
 		imageUrl := ad.Image.String
