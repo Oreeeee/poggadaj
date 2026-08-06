@@ -35,7 +35,7 @@
     "label": "Debug poggadaj-api",
     "adapter": "Delve",
     "program": "${ZED_WORKTREE_ROOT}/src/cmd/poggadaj-api",
-    "cwd": "${ZED_WORKTREE_ROOT}/src"",
+    "cwd": "${ZED_WORKTREE_ROOT}/src",
     "request": "launch",
     "mode": "debug",
     "envFile": "${ZED_WORKTREE_ROOT}/.env",
