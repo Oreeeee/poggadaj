@@ -17,10 +17,12 @@ import (
 func HandleConnection(conn net.Conn) {
 	defer conn.Close()
 
+	stream := utils.NewIOStream([]byte{}, binary.LittleEndian, charmap.Windows1250)
+
 	// Here we create a GG_WELCOME packet once the client connects to the server
 	ggw := protocol.InitGG_Welcome()
-	ggwB := ggw.Serialize()
-	packet := protocol.InitGG_Packet(protocol.GG_WELCOME, ggwB)
+	ggw.Serialize(stream)
+	packet := protocol.InitGG_Packet(protocol.GG_WELCOME, stream.Get())
 
 	_, err := packet.Send(conn)
 	if err != nil {
@@ -28,8 +30,8 @@ func HandleConnection(conn net.Conn) {
 	}
 
 	// Wait for the next packet, which will tell us the protocol version handler we need
-	pRecv := protocol.GG_Packet{}
-	if pRecv.Receive(conn) != nil {
+	pRecv, err := protocol.ReceivePacket(conn)
+	if err != nil {
 		logging.L.Errorf("Error receiving data, dropping connection!: %s", err)
 		return
 	}
@@ -49,7 +51,7 @@ func HandleConnection(conn net.Conn) {
 	}
 
 	client.Conn = conn
-	client.HandleLogin(pRecv.PacketType, pRecv)
+	client.HandleLogin(pRecv.PacketType, utils.NewIOStream(pRecv.Data, binary.LittleEndian, charmap.Windows1250))
 
 	if !client.Authenticated {
 		return
@@ -67,8 +69,7 @@ func HandleConnection(conn net.Conn) {
 
 	// Connection loop
 	for {
-		pRecv := protocol.GG_Packet{}
-		err := pRecv.Receive(client.Conn)
+		pRecv, err := protocol.ReceivePacket(client.Conn)
 		if err != nil {
 			logging.L.Errorf("Error receiving data, dropping connection!: %s", err)
 			return

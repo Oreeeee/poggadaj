@@ -24,13 +24,15 @@ func InitGG_Packet(packetType uint32, data []byte) *GG_Packet {
 	}
 }
 
-func (p *GG_Packet) Receive(conn net.Conn) error {
+func ReceivePacket(conn net.Conn) (*GG_Packet, error) {
 	// Read PacketType + Length
 	recvBuf := make([]byte, 8) // PacketType + Length
 	_, err := conn.Read(recvBuf)
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	p := &GG_Packet{}
 
 	buf := bytes.NewBuffer(recvBuf)
 	binary.Read(buf, binary.LittleEndian, &p.PacketType)
@@ -39,17 +41,17 @@ func (p *GG_Packet) Receive(conn net.Conn) error {
 	if p.Length > 0xFFFF {
 		// Basic "protection" against crashing the server
 		// TODO: Check if this is necessary?
-		return errors.New("p.Length > 0xFFFF")
+		return nil, errors.New("p.Length > 0xFFFF")
 	}
 
 	// Read the rest
 	p.Data = make([]byte, p.Length)
 	_, err = conn.Read(p.Data)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return p, nil
 }
 
 func (p *GG_Packet) Send(conn net.Conn) (int, error) {

@@ -42,12 +42,12 @@ type GGClient struct {
 	UserListBuf   []string
 }
 
-func (c *GGClient) HandleLogin(packetType uint32, pRecv protocol.GG_Packet) bool {
+func (c *GGClient) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 	switch packetType {
 	case protocol.GG_LOGIN30:
 		c.ProtocolLevel = 30
 		p := protocol.GG_Login30{}
-		p.Deserialize(pRecv.Data)
+		p.Deserialize(data)
 		log.StructPPrint("GG_LOGIN30", p.PrettyPrint())
 
 		c.UIN = p.UIN
@@ -71,7 +71,7 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv protocol.GG_Packet) bool
 		return false
 	case protocol.GG_LOGIN:
 		p := protocol.GG_Login{}
-		p.Deserialize(pRecv.Data)
+		p.Deserialize(data)
 		log.StructPPrint("GG_LOGIN", p.PrettyPrint())
 
 		c.UIN = p.UIN
@@ -102,7 +102,7 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv protocol.GG_Packet) bool
 		return false
 	case protocol.GG_LOGIN60:
 		p := protocol.GG_Login60{}
-		p.Deserialize(pRecv.Data)
+		p.Deserialize(data)
 		log.StructPPrint("GG_LOGIN60", p.PrettyPrint())
 
 		c.UIN = p.UIN
@@ -133,7 +133,7 @@ func (c *GGClient) HandleLogin(packetType uint32, pRecv protocol.GG_Packet) bool
 		return false
 	case protocol.GG_LOGIN70:
 		p := protocol.GG_Login70{}
-		p.Deserialize(pRecv.Data)
+		p.Deserialize(data)
 		log.StructPPrint("GG_LOGIN70", p.PrettyPrint())
 
 		c.UIN = p.UIN
