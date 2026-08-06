@@ -6,6 +6,7 @@ package main
 import (
 	"net"
 	"os"
+	"sync"
 
 	"charm.land/log/v2"
 	"codeberg.org/or3e/poggadaj/internal/cache"
@@ -14,12 +15,13 @@ import (
 )
 
 type Server struct {
-	ip          string
-	listener    net.Listener
-	db          *database.Database
-	cache       *cache.Cache
-	logger      *log.Logger
-	connections []*Client
+	ip            string
+	listener      net.Listener
+	db            *database.Database
+	cache         *cache.Cache
+	logger        *log.Logger
+	muConnections sync.RWMutex
+	connections   []*Client
 }
 
 func (server *Server) handleConnection(conn net.Conn) {
@@ -35,20 +37,29 @@ func (server *Server) handleConnection(conn net.Conn) {
 }
 
 func (server *Server) registerClient(c *Client) {
+	server.muConnections.Lock()
+	defer server.muConnections.Unlock()
+
 	// Try to find an empty space in the array first
 	for i, client := range server.connections {
 		if client != nil {
 			continue
 		}
+
+		server.logger.Info("Found an empty space in the array")
 		server.connections[i] = c
 		return
 	}
 
 	// No empty space found, so append the connection
+	server.logger.Info("No empty space in the array, appending the new connection")
 	server.connections = append(server.connections, c)
 }
 
 func (server *Server) unregisterClient(c *Client) {
+	server.muConnections.Lock()
+	defer server.muConnections.Unlock()
+
 	for i, client := range server.connections {
 		if client != c {
 			continue
