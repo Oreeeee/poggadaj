@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SPDX-FileCopyrightText: 2024-2026 Oreeeee
 
-package c2s
+package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
+	"poggadaj-tcp/utils"
 )
 
 type GG_Login30 struct {
@@ -15,14 +14,12 @@ type GG_Login30 struct {
 	Status uint32
 }
 
-func (p *GG_Login30) Deserialize(data []byte) []byte {
-	buf := bytes.NewBuffer(data)
+func (p *GG_Login30) Serialize(stream *utils.IOStream) {}
 
-	binary.Read(buf, binary.LittleEndian, &p.UIN)
-	binary.Read(buf, binary.LittleEndian, &p.Hash)
-	binary.Read(buf, binary.LittleEndian, &p.Status)
-
-	return buf.Bytes()
+func (p *GG_Login30) Deserialize(stream *utils.IOStream) {
+	p.UIN = stream.ReadU32()
+	p.Hash = stream.ReadU32()
+	p.Status = stream.ReadU32()
 }
 
 func (p *GG_Login30) PrettyPrint() []string {

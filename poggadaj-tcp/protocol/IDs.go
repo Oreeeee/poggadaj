@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SPDX-FileCopyrightText: 2024-2026 Oreeeee
 
-package c2s
+package protocol
 
 const (
+	// Client to Server
 	GG_LOGIN30          = 0x0001
 	GG_NEW_STATUS       = 0x0002
 	GG_NOTIFY30         = 0x0003
@@ -19,4 +20,18 @@ const (
 	GG_LOGIN60          = 0x0015
 	GG_USERLIST_REQUEST = 0x0016
 	GG_LOGIN70          = 0x0019
+
+	// Server to Client
+	GG_WELCOME        = 0x0001
+	GG_STATUS         = 0x0002
+	GG_LOGIN_OK       = 0x0003
+	GG_PONG           = 0x0007
+	GG_LOGIN_FAILED   = 0x0009
+	GG_RECV_MSG       = 0x000a
+	GG_PUBDIR50_REPLY = 0x000e
+	GG_STATUS60       = 0x000f
+	GG_USERLIST_REPLY = 0x0010
+	GG_NOTIFY_REPLY60 = 0x0011
+	GG_STATUS77       = 0x0017
+	GG_NOTIFY_REPLY77 = 0x0018
 )

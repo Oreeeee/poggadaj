@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SPDX-FileCopyrightText: 2024-2026 Oreeeee
 
-package s2c
+package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
+	"poggadaj-tcp/utils"
 	"strconv"
 )
 
@@ -15,12 +14,12 @@ type GG_Userlist_Reply struct {
 	Request []byte
 }
 
-func (p *GG_Userlist_Reply) Serialize() []byte {
-	buf := new(bytes.Buffer)
-	binary.Write(buf, binary.LittleEndian, p.Type)
-	binary.Write(buf, binary.LittleEndian, p.Request)
-	return buf.Bytes()
+func (p *GG_Userlist_Reply) Serialize(stream *utils.IOStream) {
+	stream.WriteU8(p.Type)
+	stream.Write(p.Request)
 }
+
+func (p *GG_Userlist_Reply) Deserialize(stream *utils.IOStream) {}
 
 func (p *GG_Userlist_Reply) PrettyPrint() []string {
 	s := []string{

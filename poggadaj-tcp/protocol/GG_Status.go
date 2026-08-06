@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SPDX-FileCopyrightText: 2024-2026 Oreeeee
 
-package s2c
+package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
+	"poggadaj-tcp/utils"
 )
 
 type GG_Status struct {
@@ -15,13 +14,13 @@ type GG_Status struct {
 	Description []byte
 }
 
-func (p *GG_Status) Serialize() []byte {
-	buf := new(bytes.Buffer)
-	binary.Write(buf, binary.LittleEndian, p.UIN)
-	binary.Write(buf, binary.LittleEndian, p.Status)
-	binary.Write(buf, binary.LittleEndian, p.Description)
-	return buf.Bytes()
+func (p *GG_Status) Serialize(stream *utils.IOStream) {
+	stream.WriteU32(p.UIN)
+	stream.WriteU32(p.Status)
+	stream.Write(p.Description)
 }
+
+func (p *GG_Status) Deserialize(stream *utils.IOStream) {}
 
 func (p *GG_Status) PrettyPrint() []string {
 	s := []string{

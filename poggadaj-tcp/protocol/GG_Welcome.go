@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SPDX-FileCopyrightText: 2024-2026 Oreeeee
 
-package s2c
+package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
 	"os"
+	"poggadaj-tcp/utils"
 	"strconv"
 )
 
@@ -19,8 +18,8 @@ func InitGG_Welcome() *GG_Welcome {
 	return &GG_Welcome{seed: uint32(seed64)}
 }
 
-func (g *GG_Welcome) Serialize() []byte {
-	buf := new(bytes.Buffer)
-	binary.Write(buf, binary.LittleEndian, g.seed)
-	return buf.Bytes()
+func (g *GG_Welcome) Serialize(stream *utils.IOStream) {
+	stream.WriteU32(g.seed)
 }
+
+func (p *GG_Welcome) Deserialize(stream *utils.IOStream) {}

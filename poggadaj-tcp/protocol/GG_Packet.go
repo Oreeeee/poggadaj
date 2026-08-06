@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SPDX-FileCopyrightText: 2024-2026 Oreeeee
 
-package packets
+package protocol
 
 import (
 	"bytes"
 	"encoding/binary"
 	"errors"
 	"net"
+	"poggadaj-tcp/utils"
+
+	"golang.org/x/text/encoding/charmap"
 )
 
 type GG_Packet struct {
@@ -16,7 +19,23 @@ type GG_Packet struct {
 	Data       []byte
 }
 
-func InitGG_Packet(packetType uint32, data []byte) *GG_Packet {
+func InitEmptyGG_Packet(packetType uint32) *GG_Packet {
+	return &GG_Packet{
+		PacketType: packetType,
+		Length:     0,
+		Data:       []byte{},
+	}
+}
+
+func InitGG_Packet(packetType uint32, packetStruct GG_Packet_Iface) *GG_Packet {
+	data := []byte{}
+	if packetStruct != nil {
+		stream := utils.NewIOStream([]byte{}, binary.LittleEndian, charmap.Windows1250)
+		packetStruct.Serialize(stream)
+
+		data = stream.Get()
+	}
+
 	return &GG_Packet{
 		PacketType: packetType,
 		Length:     uint32(len(data)),
@@ -24,13 +43,15 @@ func InitGG_Packet(packetType uint32, data []byte) *GG_Packet {
 	}
 }
 
-func (p *GG_Packet) Receive(conn net.Conn) error {
+func ReceivePacket(conn net.Conn) (*GG_Packet, error) {
 	// Read PacketType + Length
 	recvBuf := make([]byte, 8) // PacketType + Length
 	_, err := conn.Read(recvBuf)
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	p := &GG_Packet{}
 
 	buf := bytes.NewBuffer(recvBuf)
 	binary.Read(buf, binary.LittleEndian, &p.PacketType)
@@ -39,17 +60,21 @@ func (p *GG_Packet) Receive(conn net.Conn) error {
 	if p.Length > 0xFFFF {
 		// Basic "protection" against crashing the server
 		// TODO: Check if this is necessary?
-		return errors.New("p.Length > 0xFFFF")
+		return nil, errors.New("p.Length > 0xFFFF")
 	}
 
 	// Read the rest
 	p.Data = make([]byte, p.Length)
-	_, err = conn.Read(p.Data)
-	if err != nil {
-		return err
+	received := 0
+	for received < int(p.Length) {
+		pass, err := conn.Read(p.Data)
+		if err != nil {
+			return nil, err
+		}
+		received += pass
 	}
 
-	return nil
+	return p, nil
 }
 
 func (p *GG_Packet) Send(conn net.Conn) (int, error) {

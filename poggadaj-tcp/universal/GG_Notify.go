@@ -4,27 +4,26 @@
 package universal
 
 import (
-	"bytes"
-	"encoding/binary"
 	"poggadaj-tcp/constants"
+	"poggadaj-tcp/utils"
 )
 
-func GG_NotifyContactDeserialize(data []byte, packetSize uint32, contactList *[]GG_NotifyContact) {
-	buf := bytes.NewBuffer(data)
-	contactListLen := int(packetSize / constants.GG_NOTIFYCONTACT_SIZE)
+func GG_NotifyContactDeserialize(stream *utils.IOStream, contactList *[]GG_NotifyContact) {
+	contactListLen := int(stream.Available() / constants.GG_NOTIFYCONTACT_SIZE)
 	for i := 0; i < contactListLen; i++ {
-		contact := GG_NotifyContact{}
-		binary.Read(buf, binary.LittleEndian, &contact.UIN)
-		binary.Read(buf, binary.LittleEndian, &contact.Type)
+		contact := GG_NotifyContact{
+			UIN:  stream.ReadU32(),
+			Type: stream.ReadU8(),
+		}
 		*contactList = append(*contactList, contact)
 	}
 }
 
-func GG_AddNotify(data []byte, contactList *[]GG_NotifyContact) GG_NotifyContact {
-	buf := bytes.NewBuffer(data)
-	contact := GG_NotifyContact{}
-	binary.Read(buf, binary.LittleEndian, &contact.UIN)
-	binary.Read(buf, binary.LittleEndian, &contact.Type)
+func GG_AddNotify(stream *utils.IOStream, contactList *[]GG_NotifyContact) GG_NotifyContact {
+	contact := GG_NotifyContact{
+		UIN:  stream.ReadU32(),
+		Type: stream.ReadU8(),
+	}
 	*contactList = append(*contactList, contact)
 	return contact
 }
