@@ -5,7 +5,6 @@ package main
 
 import (
 	"fmt"
-	"net"
 	"os"
 	"time"
 
@@ -16,16 +15,13 @@ import (
 	"charm.land/log/v2"
 )
 
-var DatabaseConn *database.Database
-
 func main() {
-	dbconn, err := database.NewDatabase(&database.DatabaseConfig{
+	dbCfg := &database.DatabaseConfig{
 		Host:     os.Getenv("DB_ADDRESS"),
 		Port:     "5432",
 		Username: "poggadaj",
 		Password: os.Getenv("DB_PASSWORD"),
-	})
-	DatabaseConn = dbconn
+	}
 
 	cache.CacheConn = cache.GetCacheConn()
 
@@ -36,24 +32,9 @@ func main() {
 		Level:           log.DebugLevel,
 	})
 
-	l, err := net.Listen("tcp", fmt.Sprintf("%s:8074", os.Getenv("LISTEN_ADDRESS")))
+	server, err := NewServer(dbCfg, fmt.Sprintf("%s:8074", os.Getenv("LISTEN_ADDRESS")))
 	if err != nil {
-		logging.L.Fatal(err)
-		return
+		panic(err)
 	}
-	defer l.Close()
-	//defer database.DatabaseConn.Close()
-
-	logging.L.Infof("Listening on %s:%d", os.Getenv("LISTEN_ADDRESS"), 8074)
-
-	for {
-		conn, err := l.Accept()
-		if err != nil {
-			logging.L.Errorf("Error accepting from %s: %s", conn.RemoteAddr(), err)
-			continue
-		}
-
-		logging.L.Infof("Accepted connection from %s", conn.RemoteAddr())
-		go HandleConnection(conn)
-	}
+	server.Run()
 }

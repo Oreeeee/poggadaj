@@ -1,11 +1,9 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-// SPDX-FileCopyrightText: 2024-2026 Oreeeee
-
-package clients
+package main
 
 import (
 	"bytes"
 	"database/sql"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"net"
@@ -13,24 +11,23 @@ import (
 	"strings"
 	"time"
 
+	"charm.land/log/v2"
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/constants"
-	db "codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/database"
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/protocol"
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/pubdir"
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/structs"
-	uv "codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/universal"
 	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/utils"
 	"codeberg.org/or3e/poggadaj/internal/cache"
-	"codeberg.org/or3e/poggadaj/internal/logging"
-	log "codeberg.org/or3e/poggadaj/internal/logging"
 	"codeberg.org/or3e/poggadaj/internal/statuses"
-	sharedstructs "codeberg.org/or3e/poggadaj/internal/structs"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
 )
 
-type GGClient struct {
-	Conn          net.Conn
+type Client struct {
+	conn   net.Conn
+	server *Server
+	logger *log.Logger
+
 	UIN           uint32
 	Status        uint32
 	Authenticated bool
@@ -41,7 +38,105 @@ type GGClient struct {
 	UserListBuf   []string
 }
 
-func (c *GGClient) HandleLogin(packetType uint32, data *utils.IOStream) bool {
+func (client *Client) Run() {
+	defer client.conn.Close()
+
+	stream := utils.NewIOStream([]byte{}, binary.LittleEndian, charmap.Windows1250)
+
+	// Here we create a GG_WELCOME packet once the client connects to the server
+	ggw := protocol.InitGG_Welcome()
+	packet := protocol.InitGG_Packet(protocol.GG_WELCOME, ggw)
+
+	_, err := packet.Send(client.conn)
+	if err != nil {
+		client.logger.Errorf("Error: %s", err)
+	}
+
+	// Wait for the next packet, which will tell us the protocol version handler we need
+	pRecv, err := protocol.ReceivePacket(client.conn)
+	if err != nil {
+		client.logger.Errorf("Error receiving data, dropping connection!: %s", err)
+		return
+	}
+	switch pRecv.PacketType {
+	case protocol.GG_LOGIN30:
+		client.logger.Infof("Ancient Gadu-Gadu protocol detected")
+	case protocol.GG_LOGIN:
+		client.logger.Infof("Gadu-Gadu late 4.x - 6.0 protocol detected")
+	case protocol.GG_LOGIN60:
+		client.logger.Infof("Gadu-Gadu 6.0 protocol detected")
+	case protocol.GG_LOGIN70:
+		client.logger.Infof("Gadu-Gadu 7.0 protocol detected")
+	default:
+		client.logger.Infof("Unknown protocol version!")
+	}
+
+	client.HandleLogin(pRecv.PacketType, utils.NewIOStream(pRecv.Data, binary.LittleEndian, charmap.Windows1250))
+
+	if !client.Authenticated {
+		return
+	}
+
+	//defer client.Clean()
+
+	// Start send channels
+	runMsgChannel := true
+	runStatusChannel := true
+	go MsgChannel(client, &runMsgChannel)
+	go StatusChannel(client, &runStatusChannel)
+	defer utils.CloseChannel(&runMsgChannel)
+	defer utils.CloseChannel(&runStatusChannel)
+
+	// Connection loop
+	for {
+		pRecv, err := protocol.ReceivePacket(client.conn)
+		if err != nil {
+			client.logger.Errorf("Error receiving data, dropping connection!: %s", err)
+			return
+		}
+
+		stream.Reset(pRecv.Data)
+
+		switch pRecv.PacketType {
+		case protocol.GG_NOTIFY30:
+			client.logger.Debugf("Received GG_NOTIFY30")
+			client.HandleNotify30(stream)
+		case protocol.GG_NOTIFY_FIRST:
+			client.logger.Debugf("Received GG_NOTIFY_FIRST")
+			client.HandleNotifyFirst(stream)
+		case protocol.GG_NOTIFY_LAST:
+			client.logger.Debugf("Received GG_NOTIFY_LAST")
+			client.HandleNotifyLast(stream)
+		case protocol.GG_ADD_NOTIFY:
+			client.logger.Debugf("Received GG_ADD_NOTIFY")
+			client.HandleAddNotify(stream)
+		case protocol.GG_REMOVE_NOTIFY:
+			client.logger.Debugf("Received GG_REMOVE_NOTIFY")
+			client.HandleRemoveNotify(stream)
+		case protocol.GG_LIST_EMPTY:
+			client.logger.Debugf("Received GG_LIST_EMPTY")
+		case protocol.GG_NEW_STATUS:
+			client.logger.Debugf("Received GG_NEW_STATUS")
+			client.HandleNewStatus(stream)
+		case protocol.GG_SEND_MSG:
+			client.logger.Debugf("Client is sending a message...")
+			client.HandleSendMsg(stream)
+		case protocol.GG_USERLIST_REQUEST:
+			client.logger.Debugf("Received GG_USERLIST_REQUEST")
+			client.HandleUserlistReq(stream)
+		case protocol.GG_PUBDIR50_REQUEST:
+			client.logger.Debugf("Received GG_PUBDIR50_REQUEST")
+			client.HandlePubdirReq(stream)
+		case protocol.GG_PING:
+			client.logger.Debugf("Received GG_PING")
+			client.SendPong()
+		default:
+			client.logger.Warnf("Received unknown packet, ignoring: 0x00%x\n", pRecv.PacketType)
+		}
+	}
+}
+
+func (c *Client) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 	switch packetType {
 	case protocol.GG_LOGIN30:
 		c.ProtocolLevel = 30
@@ -51,13 +146,13 @@ func (c *GGClient) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 
 		c.UIN = p.UIN
 
-		log.L.Debugf("Sending login response")
-		passHash, _ := db.GetAncientHash(c.UIN)
+		c.logger.Debugf("Sending login response")
+		passHash, _ := c.server.db.GetAncientHash(c.UIN)
 		if p.Hash == passHash {
 			c.Authenticated = true
 			c.Status = p.Status
 
-			log.L.Debugf("Sending GG_LOGIN_OK")
+			c.logger.Debugf("Sending GG_LOGIN_OK")
 			c.SendLoginOK()
 
 			cache.SetUserStatus(sharedstructs.StatusChangeMsg{
@@ -75,13 +170,13 @@ func (c *GGClient) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 
 		c.UIN = p.UIN
 
-		log.L.Debugf("Sending login response")
-		passHash, _ := db.GetGG32Hash(c.UIN)
+		c.logger.Debugf("Sending login response")
+		passHash, _ := c.server.db.GetGG32Hash(c.UIN)
 		if p.Hash == passHash {
 			c.Authenticated = true
 			c.Status = p.Status
 
-			log.L.Debugf("Sending GG_LOGIN_OK")
+			c.logger.Debugf("Sending GG_LOGIN_OK")
 			c.SendLoginOK()
 
 			// Set user's status
@@ -94,7 +189,7 @@ func (c *GGClient) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 
 			return true
 		} else {
-			log.L.Debugf("Sending GG_LOGIN_FAILED")
+			c.logger.Debugf("Sending GG_LOGIN_FAILED")
 			c.SendLoginFail()
 			return false
 		}
@@ -106,13 +201,13 @@ func (c *GGClient) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 
 		c.UIN = p.UIN
 
-		log.L.Debugf("Sending login response")
-		passHash, _ := db.GetGG32Hash(c.UIN)
+		c.logger.Debugf("Sending login response")
+		passHash, _ := c.server.db.GetGG32Hash(c.UIN)
 		if p.Hash == passHash {
 			c.Authenticated = true
 			c.Status = p.Status
 
-			log.L.Debugf("Sending GG_LOGIN_OK")
+			c.logger.Debugf("Sending GG_LOGIN_OK")
 			c.SendLoginOK()
 
 			// Set user's status
@@ -125,7 +220,7 @@ func (c *GGClient) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 
 			return true
 		} else {
-			log.L.Debugf("Sending GG_LOGIN_FAILED")
+			c.logger.Debugf("Sending GG_LOGIN_FAILED")
 			c.SendLoginFail()
 			return false
 		}
@@ -137,13 +232,13 @@ func (c *GGClient) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 
 		c.UIN = p.UIN
 
-		log.L.Debugf("Sending login response")
-		passHash, _ := db.GetSHA1Hash(c.UIN)
+		c.logger.Debugf("Sending login response")
+		passHash, _ := c.server.db.GetSHA1Hash(c.UIN)
 		if utils.StringifySHA1(p.Hash) == passHash {
 			c.Authenticated = true
 			c.Status = p.Status
 
-			log.L.Debugf("Sending GG_LOGIN_OK")
+			c.logger.Debugf("Sending GG_LOGIN_OK")
 			c.SendLoginOK()
 
 			// Set user's status
@@ -156,18 +251,18 @@ func (c *GGClient) HandleLogin(packetType uint32, data *utils.IOStream) bool {
 
 			return true
 		} else {
-			log.L.Debugf("Sending GG_LOGIN_FAILED")
+			c.logger.Debugf("Sending GG_LOGIN_FAILED")
 			c.SendLoginFail()
 			return false
 		}
 		return false
 	default:
-		log.L.Errorf("HandleLogin received unknown packetType: 0x%x", packetType)
+		c.logger.Errorf("HandleLogin received unknown packetType: 0x%x", packetType)
 		return false
 	}
 }
 
-func (c *GGClient) HandleNotify30(pRecv *utils.IOStream) {
+func (c *Client) HandleNotify30(pRecv *utils.IOStream) {
 	p := protocol.GG_Notify30{}
 	p.Deserialize(pRecv)
 	log.StructPPrint("GG_NOTIFY30", p.PrettyPrint())
@@ -180,11 +275,11 @@ func (c *GGClient) HandleNotify30(pRecv *utils.IOStream) {
 	}
 }
 
-func (c *GGClient) HandleNotifyFirst(pRecv *utils.IOStream) {
+func (c *Client) HandleNotifyFirst(pRecv *utils.IOStream) {
 	uv.GG_NotifyContactDeserialize(pRecv, &c.NotifyList)
 }
 
-func (c *GGClient) HandleNotifyLast(pRecv *utils.IOStream) {
+func (c *Client) HandleNotifyLast(pRecv *utils.IOStream) {
 	uv.GG_NotifyContactDeserialize(pRecv, &c.NotifyList)
 
 	var packet protocol.GG_Packet_Iface
@@ -214,26 +309,26 @@ func (c *GGClient) HandleNotifyLast(pRecv *utils.IOStream) {
 	c.SendNotifyReply(packet)
 }
 
-func (c *GGClient) HandleAddNotify(pRecv *utils.IOStream) {
+func (c *Client) HandleAddNotify(pRecv *utils.IOStream) {
 	contact := uv.GG_AddNotify(pRecv, &c.NotifyList)
 	c.SendStatus(cache.FetchUserStatus(contact.UIN))
 }
 
-func (c *GGClient) HandleRemoveNotify(pRecv *utils.IOStream) {
+func (c *Client) HandleRemoveNotify(pRecv *utils.IOStream) {
 	p := protocol.GG_Remove_Notify{}
 	p.Deserialize(pRecv)
 
 	// Look for the contact that matches
 	for i, notify := range c.NotifyList {
 		if notify.UIN == p.UIN {
-			log.L.Debugf("Removed UIN: %d", notify.UIN)
+			c.logger.Debugf("Removed UIN: %d", notify.UIN)
 			c.NotifyList[i] = uv.GG_NotifyContact{}
 			return // We don't need to look further
 		}
 	}
 }
 
-func (c *GGClient) HandleNewStatus(pRecv *utils.IOStream) {
+func (c *Client) HandleNewStatus(pRecv *utils.IOStream) {
 	p := protocol.GG_New_Status{}
 	p.Deserialize(pRecv)
 
@@ -243,17 +338,17 @@ func (c *GGClient) HandleNewStatus(pRecv *utils.IOStream) {
 		Description: p.Description,
 	})
 
-	log.L.Debugf("New status: 0x00%x, Description: %s", p.Status, p.Description)
+	c.logger.Debugf("New status: 0x00%x, Description: %s", p.Status, p.Description)
 }
 
-func (c *GGClient) HandleSendMsg(pRecv *utils.IOStream) {
+func (c *Client) HandleSendMsg(pRecv *utils.IOStream) {
 	p := protocol.GG_Send_MSG{}
 	p.Deserialize(pRecv)
 	log.StructPPrint("GG_SEND_MSG", p.PrettyPrint())
 	cache.PublishMessageChannel(p.Recipient, sharedstructs.Message{c.UIN, p.MsgClass, []byte(p.Content)})
 }
 
-func (c *GGClient) HandleUserlistReq(pRecv *utils.IOStream) {
+func (c *Client) HandleUserlistReq(pRecv *utils.IOStream) {
 	packetLength := pRecv.Len()
 	p := protocol.GG_Userlist_Request{}
 	p.Deserialize(pRecv)
@@ -263,9 +358,9 @@ func (c *GGClient) HandleUserlistReq(pRecv *utils.IOStream) {
 	case constants.GG_USERLIST_PUT, constants.GG_USERLIST_PUT_MORE:
 		if packetLength == 1 {
 			// Client sends 1-sized userlist on userlist delete
-			err := db.DeleteUserList(c.UIN)
+			err := c.server.db.DeleteUserList(c.UIN)
 			if err != nil {
-				log.L.Errorf("Failed to delete userlist: %s", err)
+				c.logger.Errorf("Failed to delete userlist: %s", err)
 				return
 			}
 
@@ -275,9 +370,9 @@ func (c *GGClient) HandleUserlistReq(pRecv *utils.IOStream) {
 			}
 			log.StructPPrint("GG_USERLIST_REPLY", p.PrettyPrint())
 			pOut := protocol.InitGG_Packet(protocol.GG_USERLIST_REPLY, &p)
-			_, err = pOut.Send(c.Conn)
+			_, err = pOut.Send(c.conn)
 			if err != nil {
-				log.L.Errorf("Error: %s", err)
+				c.logger.Errorf("Error: %s", err)
 			}
 		}
 		c.UserListBuf = append(c.UserListBuf, string(p.Request))
@@ -289,20 +384,20 @@ func (c *GGClient) HandleUserlistReq(pRecv *utils.IOStream) {
 		// The client has sent the final part of the request, we can now process this
 		c.PutUserList()
 	case constants.GG_USERLIST_GET:
-		log.L.Debugf("Fetching contact list for UIN %d", c.UIN)
-		userList := db.GetUserList(c.UIN)
+		c.logger.Debugf("Fetching contact list for UIN %d", c.UIN)
+		userList := c.server.db.GetUserList(c.UIN)
 		var userListBuf string
 		for _, user := range userList {
 			userListBuf += user.Write() + "\r\n"
 		}
-		log.L.Debugf("Generated userlist: %s", strconv.Quote(userListBuf))
-		log.L.Debugf("Sending userlist back to the client...")
+		c.logger.Debugf("Generated userlist: %s", strconv.Quote(userListBuf))
+		c.logger.Debugf("Sending userlist back to the client...")
 
 		c.SendGetUserListResp(userListBuf)
 	}
 }
 
-func (c *GGClient) HandlePubdirReq(pRecv *utils.IOStream) {
+func (c *Client) HandlePubdirReq(pRecv *utils.IOStream) {
 	p := protocol.GG_Pubdir50_Request{}
 	p.Deserialize(pRecv)
 	log.StructPPrint("GG_PUBDIR50_REQUEST", p.PrettyPrint())
@@ -312,14 +407,14 @@ func (c *GGClient) HandlePubdirReq(pRecv *utils.IOStream) {
 		req := pubdir.PubdirEntry{}
 		err := req.Read(p.Request)
 		if err != nil {
-			log.L.Errorf("Failed to read pubdir entry: %s", err)
+			c.logger.Errorf("Failed to read pubdir entry: %s", err)
 			return
 		}
-		log.L.Debugf("Received pubdir query: %+v", req)
+		c.logger.Debugf("Received pubdir query: %+v", req)
 
-		resp, nextStart, err := db.SearchInPubdir(&req)
+		resp, nextStart, err := c.server.db.SearchInPubdir(&req)
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
-			logging.L.Errorf("Failed to search through the pubdir: %v", err)
+			c.logger.Errorf("Failed to search through the pubdir: %v", err)
 			c.SendPubdirResp(
 				constants.GG_PUBDIR50_ERROR,
 				p.Seq,
@@ -327,7 +422,7 @@ func (c *GGClient) HandlePubdirReq(pRecv *utils.IOStream) {
 			)
 			return
 		}
-		logging.L.Debugf("Pubdir lookup returned %d rows", len(resp))
+		c.logger.Debugf("Pubdir lookup returned %d rows", len(resp))
 
 		if len(resp) == 0 {
 			c.SendPubdirResp(
@@ -352,13 +447,13 @@ func (c *GGClient) HandlePubdirReq(pRecv *utils.IOStream) {
 			respBuilder.Bytes(),
 		)
 	case constants.GG_PUBDIR50_READ:
-		resp, err := db.GetPubdirDataByUin(c.UIN)
+		resp, err := c.server.db.GetPubdirDataByUin(c.UIN)
 		if errors.Is(err, sql.ErrNoRows) {
-			logging.L.Infof("Creating empty pubdir entry for UIN %d", c.UIN)
+			c.logger.Infof("Creating empty pubdir entry for UIN %d", c.UIN)
 			resp = &pubdir.PubdirEntry{}
-			db.WritePubdirData(c.UIN, resp)
+			c.server.db.WritePubdirData(c.UIN, resp)
 		} else if err != nil {
-			logging.L.Errorf("Failed to retreive pubdir data for UIN %d: %v", c.UIN, err)
+			c.logger.Errorf("Failed to retreive pubdir data for UIN %d: %v", c.UIN, err)
 			c.SendPubdirResp(
 				constants.GG_PUBDIR50_ERROR,
 				p.Seq,
@@ -384,10 +479,10 @@ func (c *GGClient) HandlePubdirReq(pRecv *utils.IOStream) {
 		req := pubdir.PubdirEntry{}
 		err := req.Read(p.Request)
 		if err != nil {
-			log.L.Errorf("Failed to read pubdir entry: %s", err)
+			c.logger.Errorf("Failed to read pubdir entry: %s", err)
 			return
 		}
-		log.L.Debugf("Received pubdir entry: %+v", req)
+		c.logger.Debugf("Received pubdir entry: %+v", req)
 
 		// Swap the gender
 		switch req.Gender {
@@ -397,9 +492,9 @@ func (c *GGClient) HandlePubdirReq(pRecv *utils.IOStream) {
 			req.Gender = 1
 		}
 
-		err = db.WritePubdirData(c.UIN, &req)
+		err = c.server.db.WritePubdirData(c.UIN, &req)
 		if err != nil {
-			log.L.Errorf("Failed to update pubdir data for %d: %v", c.UIN, err)
+			c.logger.Errorf("Failed to update pubdir data for %d: %v", c.UIN, err)
 			c.SendPubdirResp(
 				constants.GG_PUBDIR50_ERROR,
 				p.Seq,
@@ -420,10 +515,10 @@ func (c *GGClient) HandlePubdirReq(pRecv *utils.IOStream) {
 	}
 }
 
-func (c *GGClient) PutUserList() {
-	err := db.DeleteUserList(c.UIN) // Delete user's contact list, as we are writing to the list and not appending to it
+func (c *Client) PutUserList() {
+	err := c.server.db.DeleteUserList(c.UIN) // Delete user's contact list, as we are writing to the list and not appending to it
 	if err != nil {
-		log.L.Errorf("Failed to delete user list: %s", err)
+		c.logger.Errorf("Failed to delete user list: %s", err)
 	}
 
 	userListStr := strings.Join(c.UserListBuf, "")                   // Combine the buffer into one string
@@ -433,18 +528,18 @@ func (c *GGClient) PutUserList() {
 	// Convert all the strings to UserListRequest objects
 	var userlist []structs.UserListRequest
 	for _, str := range userListSeparated {
-		log.L.Debugf("Read userlist: %s", strconv.Quote(str))
+		c.logger.Debugf("Read userlist: %s", strconv.Quote(str))
 		user := structs.UserListRequest{}
 		err := user.Read(str)
 		if err != nil {
-			log.L.Errorf("Error parsing userlist line: %v", err)
+			c.logger.Errorf("Error parsing userlist line: %v", err)
 		}
 		userlist = append(userlist, user)
 	}
 
-	log.L.Debugf("Received userlist put: %v", userlist)
-	log.L.Debugf("Putting userlist into the database")
-	db.PutUserList(userlist, c.UIN)
+	c.logger.Debugf("Received userlist put: %v", userlist)
+	c.logger.Debugf("Putting userlist into the database")
+	c.server.db.PutUserList(userlist, c.UIN)
 
 	// Send acknowledgement that the server received the list
 	for i, _ := range c.UserListBuf {
@@ -455,7 +550,7 @@ func (c *GGClient) PutUserList() {
 	c.UserListBuf = []string{}
 }
 
-func (c *GGClient) SendPubdirResp(Type uint8, seq uint32, contents []byte) {
+func (c *Client) SendPubdirResp(Type uint8, seq uint32, contents []byte) {
 	p := protocol.GG_Pubdir50_Reply{
 		Type:  Type,
 		Seq:   seq,
@@ -463,13 +558,13 @@ func (c *GGClient) SendPubdirResp(Type uint8, seq uint32, contents []byte) {
 	}
 	log.StructPPrint("GG_PUBDIR50_REPLY", p.PrettyPrint())
 	pOut := protocol.InitGG_Packet(protocol.GG_PUBDIR50_REPLY, &p)
-	_, err := pOut.Send(c.Conn)
+	_, err := pOut.Send(c.conn)
 	if err != nil {
-		log.L.Errorf("Error: %s", err)
+		c.logger.Errorf("Error: %s", err)
 	}
 }
 
-func (c *GGClient) SendPutUserListAck(i int) {
+func (c *Client) SendPutUserListAck(i int) {
 	var reqType uint8
 	if i == 0 {
 		reqType = constants.GG_USERLIST_PUT_REPLY
@@ -483,13 +578,13 @@ func (c *GGClient) SendPutUserListAck(i int) {
 	}
 	log.StructPPrint("GG_USERLIST_REPLY", p.PrettyPrint())
 	pOut := protocol.InitGG_Packet(protocol.GG_USERLIST_REPLY, &p)
-	_, err := pOut.Send(c.Conn)
+	_, err := pOut.Send(c.conn)
 	if err != nil {
-		log.L.Errorf("Error: %s", err)
+		c.logger.Errorf("Error: %s", err)
 	}
 }
 
-func (c *GGClient) SendGetUserListResp(userListBuf string) {
+func (c *Client) SendGetUserListResp(userListBuf string) {
 	chunkedList := utils.ChunkString(userListBuf, 2048)
 	lastIndex := len(chunkedList) - 1
 	for i, str := range chunkedList {
@@ -504,30 +599,30 @@ func (c *GGClient) SendGetUserListResp(userListBuf string) {
 		}
 		log.StructPPrint("GG_USERLIST_REPLY", p.PrettyPrint())
 		pOut := protocol.InitGG_Packet(protocol.GG_USERLIST_REPLY, &p)
-		_, err := pOut.Send(c.Conn)
+		_, err := pOut.Send(c.conn)
 		if err != nil {
-			log.L.Errorf("Error: %s", err)
+			c.logger.Errorf("Error: %s", err)
 		}
 	}
 }
 
-func (c *GGClient) SendLoginOK() {
+func (c *Client) SendLoginOK() {
 	pOut := protocol.InitEmptyGG_Packet(protocol.GG_LOGIN_OK)
-	_, err := pOut.Send(c.Conn)
+	_, err := pOut.Send(c.conn)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 }
 
-func (c *GGClient) SendLoginFail() {
+func (c *Client) SendLoginFail() {
 	pOut := protocol.InitEmptyGG_Packet(protocol.GG_LOGIN_FAILED)
-	_, err := pOut.Send(c.Conn)
+	_, err := pOut.Send(c.conn)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 }
 
-func (c *GGClient) SendStatus(statusChange sharedstructs.StatusChangeMsg) {
+func (c *Client) SendStatus(statusChange sharedstructs.StatusChangeMsg) {
 	if c.Version >= 0x2a {
 		c.SendStatus77(statusChange)
 	} else if c.Version >= 0x20 {
@@ -537,7 +632,7 @@ func (c *GGClient) SendStatus(statusChange sharedstructs.StatusChangeMsg) {
 	}
 }
 
-func (c *GGClient) SendStatus50(statusChange sharedstructs.StatusChangeMsg) {
+func (c *Client) SendStatus50(statusChange sharedstructs.StatusChangeMsg) {
 	p := protocol.GG_Status{
 		UIN:         statusChange.UIN,
 		Status:      statusChange.Status,
@@ -545,13 +640,13 @@ func (c *GGClient) SendStatus50(statusChange sharedstructs.StatusChangeMsg) {
 	}
 	log.StructPPrint("GG_STATUS", p.PrettyPrint())
 	pOut := protocol.InitGG_Packet(protocol.GG_STATUS, &p)
-	_, err := pOut.Send(c.Conn)
+	_, err := pOut.Send(c.conn)
 	if err != nil {
-		log.L.Errorf("Error: %s", err)
+		c.logger.Errorf("Error: %s", err)
 	}
 }
 
-func (c *GGClient) SendStatus60(statusChange sharedstructs.StatusChangeMsg) {
+func (c *Client) SendStatus60(statusChange sharedstructs.StatusChangeMsg) {
 	p := protocol.GG_Status60{
 		UIN:         statusChange.UIN,
 		Status:      uint8(statusChange.Status),
@@ -563,13 +658,13 @@ func (c *GGClient) SendStatus60(statusChange sharedstructs.StatusChangeMsg) {
 	}
 	log.StructPPrint("GG_STATUS60", p.PrettyPrint())
 	pOut := protocol.InitGG_Packet(protocol.GG_STATUS60, &p)
-	_, err := pOut.Send(c.Conn)
+	_, err := pOut.Send(c.conn)
 	if err != nil {
-		log.L.Errorf("Error: %s", err)
+		c.logger.Errorf("Error: %s", err)
 	}
 }
 
-func (c *GGClient) SendStatus77(statusChange sharedstructs.StatusChangeMsg) {
+func (c *Client) SendStatus77(statusChange sharedstructs.StatusChangeMsg) {
 	p := protocol.GG_Status77{
 		UIN:         statusChange.UIN,
 		Status:      uint8(statusChange.Status),
@@ -581,13 +676,13 @@ func (c *GGClient) SendStatus77(statusChange sharedstructs.StatusChangeMsg) {
 	}
 	log.StructPPrint("GG_STATUS77", p.PrettyPrint())
 	pOut := protocol.InitGG_Packet(protocol.GG_STATUS77, &p)
-	_, err := pOut.Send(c.Conn)
+	_, err := pOut.Send(c.conn)
 	if err != nil {
-		log.L.Errorf("Error: %s", err)
+		c.logger.Errorf("Error: %s", err)
 	}
 }
 
-func (c *GGClient) SendRecvMsg(msg sharedstructs.Message) {
+func (c *Client) SendRecvMsg(msg sharedstructs.Message) {
 	pS := protocol.GG_Recv_MSG{
 		Sender:   msg.From,
 		Seq:      0,
@@ -597,37 +692,45 @@ func (c *GGClient) SendRecvMsg(msg sharedstructs.Message) {
 	}
 	log.StructPPrint("GG_RECV_MSG", pS.PrettyPrint())
 	pOut := protocol.InitGG_Packet(protocol.GG_RECV_MSG, &pS)
-	_, err := pOut.Send(c.Conn)
+	_, err := pOut.Send(c.conn)
 	if err != nil {
-		log.L.Errorf("Error: %s", err)
+		c.logger.Errorf("Error: %s", err)
 	}
 }
 
-func (c *GGClient) SendNotifyReply(data protocol.GG_Packet_Iface) {
+func (c *Client) SendNotifyReply(data protocol.GG_Packet_Iface) {
 	var pOut *protocol.GG_Packet
 	if c.Version >= 0x2a {
 		pOut = protocol.InitGG_Packet(protocol.GG_NOTIFY_REPLY77, data)
 	} else {
 		pOut = protocol.InitGG_Packet(protocol.GG_NOTIFY_REPLY60, data)
 	}
-	_, err := pOut.Send(c.Conn)
+	_, err := pOut.Send(c.conn)
 	if err != nil {
-		log.L.Debugf("Error: %s", err)
+		c.logger.Debugf("Error: %s", err)
 	}
 }
 
-func (c *GGClient) SendPong() {
+func (c *Client) SendPong() {
 	pOut := protocol.InitEmptyGG_Packet(protocol.GG_PONG)
-	_, err := pOut.Send(c.Conn)
+	_, err := pOut.Send(c.conn)
 	if err != nil {
-		log.L.Errorf("Error: %s", err)
+		c.logger.Errorf("Error: %s", err)
 	}
 }
 
-func (c *GGClient) Clean() {
+func (c *Client) Clean() {
 	// Change user's status to not available
 	cache.SetUserStatus(sharedstructs.StatusChangeMsg{
 		UIN:    c.UIN,
 		Status: statuses.GG_STATUS_NOT_AVAIL,
 	})
+}
+
+func NewClient(conn net.Conn, server *Server, logger *log.Logger) (*Client, error) {
+	return &Client{
+		conn:   conn,
+		server: server,
+		logger: logger,
+	}, nil
 }

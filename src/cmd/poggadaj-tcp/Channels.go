@@ -4,13 +4,12 @@
 package main
 
 import (
-	"codeberg.org/or3e/poggadaj/cmd/poggadaj-tcp/clients"
 	"codeberg.org/or3e/poggadaj/internal/cache"
 	"codeberg.org/or3e/poggadaj/internal/logging"
 	"codeberg.org/or3e/poggadaj/internal/statuses"
 )
 
-func MsgChannel(c *clients.GGClient, run *bool) {
+func MsgChannel(c *Client, run *bool) {
 	defer logging.L.Debugf("Quitting message channel")
 	pubsub := cache.GetMessageChannel(c.UIN)
 	for *run {
@@ -25,7 +24,7 @@ func MsgChannel(c *clients.GGClient, run *bool) {
 	}
 }
 
-func StatusChannel(c *clients.GGClient, run *bool) {
+func StatusChannel(c *Client, run *bool) {
 	defer logging.L.Debugf("Quitting status channel")
 	pubsub := cache.GetStatusChannel()
 	for *run {
