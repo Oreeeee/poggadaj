@@ -330,6 +330,16 @@ func (c *Client) SendNotifyReply(data protocol.GG_Packet_Iface) {
 	}
 }
 
+// SendMsgAck send back an ACK packet to the client
+func (c *Client) SendMsgAck(data protocol.GG_Send_Msg_Ack) error {
+	ggp := protocol.InitGG_Packet(protocol.GG_SEND_MSG_ACK, &data)
+	_, err := ggp.Send(c.conn)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c *Client) SendPong() {
 	pOut := protocol.InitEmptyGG_Packet(protocol.GG_PONG)
 	_, err := pOut.Send(c.conn)
