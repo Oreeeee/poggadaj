@@ -5,22 +5,22 @@ Open Source reimplementation of the Gadu-Gadu backend services written in Go
 
 ### Client features
 
-| Feature                                 | Gadu-Gadu 3.x | Gadu-Gadu 4.0-4.6 | Gadu-Gadu 6.x | Gadu-Gadu 7.0-7.1 | Gadu-Gadu 7.5-7.6 | Gadu-Gadu 7.7 |
-| --------------------------------------- | :-----------: | ------------- | :-----------: | :---------------: | :---------------: | :-----------: |
-| Logging in                              | ✅             | ✅             | ✅             | ✅                 | ✅                 | ✅             |
-| Getting statuses on log in              | ✅             | ❌             | ✅             | ✅                 | ✅                 | ✅             |
-| Adding contacts (in the same session)   | ✅             | ✅             | ✅             | ✅                 | ✅                 | ✅             |
-| Removing contacts (in the same session) | N/A           | N/A           | ✅             | ✅                 | ✅                 | ✅             |
-| Saving contacts on the server           | N/A           | N/A           | ✅             | ✅                 | ✅                 | ✅             |
-| Realtime status updates                 | ✅             | ✅             | ✅             | ✅                 | ✅                 | ✅             |
-| Simple statuses                         | ✅             | ✅             | ✅             | ✅                 | ✅                 | ✅             |
-| Statuses with descriptions              | N/A           | N/A           | ✅             | ✅                 | ✅                 | ✅             |
-| Status masks                            | N/A           | N/A           | ❌             | ❌                 | ❌                 | ❌             |
-| Sending messages                        | ✅             | ✅             | ✅             | ✅                 | ✅                 | ✅             |
-| Receiving messages                      | ✅             | ✅             | ✅             | ✅                 | ✅                 | ✅             |
-| P2P                                     | N/A           | N/A           | ❌             | ❌                 | ❌                 | ❌             |
-| P2P over a relay                        | N/A           | N/A           | ❌             | ❌                 | ❌                 | ❌             |
-| Public directory                        | ❌             | ❌             | ✅[^1]         | ✅[^1]             | ✅[^1]             | ✅[^1]         |
+| Feature                                 | Gadu-Gadu 3.x | Gadu-Gadu 4.0-4.6 | Gadu-Gadu 4.8.x | Gadu-Gadu 6.x | Gadu-Gadu 7.0-7.1 | Gadu-Gadu 7.5-7.6 | Gadu-Gadu 7.7 |
+| --------------------------------------- | :-----------: | -------------     | : --------:     | :-----------: | :---------------: | :---------------: | :-----------: |
+| Logging in                              | ✅             | ✅                 | ✅               | ✅             | ✅                 | ✅                 | ✅             |
+| Getting statuses on log in              | ✅             | ❌                 | ❌               | ✅             | ✅                 | ✅                 | ✅             |
+| Adding contacts (in the same session)   | ✅             | ✅                 | ✅               | ✅             | ✅                 | ✅                 | ✅             |
+| Removing contacts (in the same session) | N/A           | N/A               | N/A             | ✅             | ✅                 | ✅                 | ✅             |
+| Saving contacts on the server           | N/A           | N/A               | N/A             | ✅             | ✅                 | ✅                 | ✅             |
+| Realtime status updates                 | ✅             | ✅                 | ✅               | ✅             | ✅                 | ✅                 | ✅             |
+| Simple statuses                         | ✅             | ✅                 | ✅               | ✅             | ✅                 | ✅                 | ✅             |
+| Statuses with descriptions              | N/A           | N/A               | N/A             | ✅             | ✅                 | ✅                 | ✅             |
+| Status masks                            | N/A           | N/A               | N/A             | ❌             | ❌                 | ❌                 | ❌             |
+| Sending messages                        | ✅             | ✅                 | ✅               | ✅             | ✅                 | ✅                 | ✅             |
+| Receiving messages                      | ✅             | ✅                 | ✅               | ✅             | ✅                 | ✅                 | ✅             |
+| P2P                                     | N/A           | N/A               | N/A             | ❌             | ❌                 | ❌                 | ❌             |
+| P2P over a relay                        | N/A           | N/A               | N/A             | ❌             | ❌                 | ❌                 | ❌             |
+| Public directory                        | ❌             | ❌                 | ❌               | ✅[^1]         | ✅[^1]             | ✅[^1]             | ✅[^1]         |
 
 [^1]: Statuses are not displayed correctly. Everything else works.
 
