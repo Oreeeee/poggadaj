@@ -321,8 +321,10 @@ func (c *Client) SendNotifyReply(data protocol.GG_Packet_Iface) {
 	var pOut *protocol.GG_Packet
 	if c.Version >= 0x2a {
 		pOut = protocol.InitGG_Packet(protocol.GG_NOTIFY_REPLY77, data)
-	} else {
+	} else if c.Version >= 0x20 {
 		pOut = protocol.InitGG_Packet(protocol.GG_NOTIFY_REPLY60, data)
+	} else {
+		pOut = protocol.InitGG_Packet(protocol.GG_NOTIFY_REPLY40, data)
 	}
 	_, err := pOut.Send(c.conn)
 	if err != nil {

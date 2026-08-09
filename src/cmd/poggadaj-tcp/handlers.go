@@ -57,13 +57,22 @@ func handleNotifyLast(c *Client, pRecv *utils.IOStream) error {
 			}
 			logging.StructPPrint(c.logger, "GG_NOTIFY_REPLY77", notifyReply.PrettyPrint())
 			packet = &notifyReply
-		} else {
+		} else if c.Version >= 0x20 {
 			notifyReply := protocol.GG_Notify_Reply60{
 				UIN:         statusChange.UIN,
 				Status:      uint8(statusChange.Status),
 				Description: statusChange.Description,
 			}
 			logging.StructPPrint(c.logger, "GG_NOTIFY_REPLY60", notifyReply.PrettyPrint())
+			packet = &notifyReply
+		} else {
+			// TODO: Verify if this works correctly with multiple contacts
+			notifyReply := protocol.GG_Notify_Reply{
+				UIN:         statusChange.UIN,
+				Status:      uint8(statusChange.Status),
+				Description: statusChange.Description,
+			}
+			logging.StructPPrint(c.logger, "GG_NOTIFY_REPLY40", notifyReply.PrettyPrint())
 			packet = &notifyReply
 		}
 	}
