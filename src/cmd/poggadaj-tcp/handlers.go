@@ -358,7 +358,7 @@ func handleLogin(c *Client, stream *utils.IOStream) error {
 	c.UIN = p.UIN
 
 	var passHash uint32
-	if p.Version < 0x0f {
+	if p.Version < 0x10 {
 		// GG 4.0 used the GG Ancient hash
 		passHash, _ = c.server.db.GetAncientHash(c.UIN)
 	} else {
