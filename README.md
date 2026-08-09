@@ -6,7 +6,7 @@ Open Source reimplementation of the Gadu-Gadu backend services written in Go
 ### Client features
 
 | Feature                                 | Gadu-Gadu 3.x | Gadu-Gadu 4.0-4.6 | Gadu-Gadu 4.8.x | Gadu-Gadu 5.0 | Gadu-Gadu 6.x | Gadu-Gadu 7.0-7.1 | Gadu-Gadu 7.5-7.6 | Gadu-Gadu 7.7 |
-| --------------------------------------- | :-----------: | -------------     | : --------:     | :-----------: | :-----------: | :---------------: | :---------------: | :-----------: |
+| --------------------------------------- | :-----------: | :-------------:     | :--------:     | :-----------: | :-----------: | :---------------: | :---------------: | :-----------: |
 | Logging in                              | ✅             | ✅                 | ✅               | ✅             | ✅             | ✅                 | ✅                 | ✅             |
 | Getting statuses on log in              | ✅             | ❌                 | ❌               | ❌             | ✅             | ✅                 | ✅                 | ✅             |
 | Adding contacts (in the same session)   | ✅             | ✅                 | ✅               | ~             | ✅             | ✅                 | ✅                 | ✅             |
