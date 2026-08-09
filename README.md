@@ -43,6 +43,5 @@ The project is consisted of a few components in different directories of this mo
 
 ## TODOs
 - Add more client support
-- Gadu-Gadu 3.0 support. It came out before reverse engineering on Gadu-Gadu was done by the libgadu team so we have to figure stuff on our own. We have the login packet implemented and that's it.
 - Rewrite the website
 - P2P support
