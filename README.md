@@ -9,8 +9,8 @@ Open Source reimplementation of the Gadu-Gadu backend services written in Go
 |:----------------------------------------|:-------------:|:-------------:|:-----------------:|:-----------------:|:-------------:|
 | Logging in                              |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Getting statuses on log in              |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
-| Adding contacts (in the same session)   |       ?       |       ✅       |         ✅         |         ✅         |       ✅       |
-| Removing contacts (in the same session) |       ?       |       ✅       |         ✅         |         ✅         |       ✅       |
+| Adding contacts (in the same session)   |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
+| Removing contacts (in the same session) |       N/A       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Saving contacts on the server           |       N/A       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Realtime status updates                 |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Simple statuses                         |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
