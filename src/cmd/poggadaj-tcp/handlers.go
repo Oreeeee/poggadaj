@@ -337,8 +337,17 @@ func handleLogin(c *Client, stream *utils.IOStream) error {
 
 	c.UIN = p.UIN
 
+	var passHash uint32
+	if p.Version < 0x0f {
+		// GG 4.0 used the GG Ancient hash
+		passHash, _ = c.server.db.GetAncientHash(c.UIN)
+	} else {
+		// Later 4.x versions used GG32
+		passHash, _ = c.server.db.GetGG32Hash(c.UIN)
+	}
+
 	c.logger.Debugf("Sending login response")
-	passHash, _ := c.server.db.GetGG32Hash(c.UIN)
+
 	if p.Hash == passHash {
 		c.Status = p.Status
 		c.Version, c.VOIP = utils.GetVersionAndVOIP(p.Version)
