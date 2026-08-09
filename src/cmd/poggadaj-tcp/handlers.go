@@ -25,16 +25,14 @@ var Handlers = map[uint32]func(*Client, *utils.IOStream) error{}
 var LoginHandlers = map[uint32]func(*Client, *utils.IOStream) error{}
 
 func handleNotify30(c *Client, pRecv *utils.IOStream) error {
-	p := protocol.GG_Notify30{}
-	p.Deserialize(pRecv)
-	logging.StructPPrint(c.logger, "GG_NOTIFY30", p.PrettyPrint())
-	for _, uin := range p.UINs {
-		contact := structs.GG_NotifyContact{
-			UIN:  uin,
-			Type: 0x03,
-		}
-		c.NotifyList = append(c.NotifyList, contact)
+	uin := pRecv.ReadU32()
+	contact := structs.GG_NotifyContact{
+		UIN:  uin,
+		Type: 0x03,
 	}
+	c.NotifyList = append(c.NotifyList, contact)
+
+	c.SendStatus(c.server.cache.FetchUserStatus(uin))
 	return nil
 }
 

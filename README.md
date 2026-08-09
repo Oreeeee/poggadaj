@@ -8,7 +8,7 @@ Open Source reimplementation of the Gadu-Gadu backend services written in Go
 | Feature                                 | Gadu-Gadu 3.x | Gadu-Gadu 6.x | Gadu-Gadu 7.0-7.1 | Gadu-Gadu 7.5-7.6 | Gadu-Gadu 7.7 |
 |:----------------------------------------|:-------------:|:-------------:|:-----------------:|:-----------------:|:-------------:|
 | Logging in                              |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
-| Getting statuses on log in              |       ❌       |       ✅       |         ✅         |         ✅         |       ✅       |
+| Getting statuses on log in              |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Adding contacts (in the same session)   |       ?       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Removing contacts (in the same session) |       ?       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Saving contacts on the server           |       N/A       |       ✅       |         ✅         |         ✅         |       ✅       |
