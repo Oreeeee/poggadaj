@@ -136,6 +136,19 @@ func handleSendMsg(c *Client, pRecv *utils.IOStream) error {
 	p.Deserialize(pRecv)
 	logging.StructPPrint(c.logger, "GG_SEND_MSG", p.PrettyPrint())
 	c.server.cache.PublishMessageChannel(p.Recipient, structs.Message{c.UIN, p.MsgClass, []byte(p.Content)})
+
+	// Send back ACK to the client.
+	// TODO: If 0x0020 bitmask is set on MsgClass field, then we shouldn't send an ACK
+	resp := protocol.GG_Send_Msg_Ack{
+		Status:    constants.GG_ACK_DELIVERED,
+		Recipient: p.Recipient,
+		Seq:       p.Seq,
+	}
+	ggp := protocol.InitGG_Packet(protocol.GG_SEND_MSG_ACK, &resp)
+	_, err := ggp.Send(c.conn)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
