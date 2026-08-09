@@ -12,12 +12,12 @@ Open Source reimplementation of the Gadu-Gadu backend services written in Go
 | Adding contacts (in the same session)   |       ?       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Removing contacts (in the same session) |       ?       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Saving contacts on the server           |       ?       |       ✅       |         ✅         |         ✅         |       ✅       |
-| Realtime status updates                 |       ~       |       ✅       |         ✅         |         ✅         |       ✅       |
+| Realtime status updates                 |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Simple statuses                         |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
 | Statuses with descriptions              |      N/A      |       ✅       |         ✅         |         ✅         |       ✅       |
 | Status masks                            |      N/A      |       ❌       |         ❌         |         ❌         |       ❌       |
 | Sending messages                        |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
-| Receiving messages                      |       ❌       |       ✅       |         ✅         |         ✅         |       ✅       |
+| Receiving messages                      |       ✅       |       ✅       |         ✅         |         ✅         |       ✅       |
 | P2P                                     |       ❌       |       ❌       |         ❌         |         ❌         |       ❌       |
 | P2P over a relay                        |       ❌       |       ❌       |         ❌         |         ❌         |       ❌       |
 | Public directory                        |       ❌       |       ✅[^1]       |         ✅[^1]         |         ✅[^1]         |       ✅[^1]       |

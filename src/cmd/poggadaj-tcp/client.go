@@ -289,15 +289,28 @@ func (c *Client) SendStatus77(statusChange structs.StatusChangeMsg) {
 }
 
 func (c *Client) SendRecvMsg(msg structs.Message) {
-	pS := protocol.GG_Recv_MSG{
-		Sender:   msg.From,
-		Seq:      0,
-		Time:     uint32(time.Now().Unix()),
-		MsgClass: msg.MsgClass,
-		Content:  string(msg.Content),
+	var messagePacket protocol.GG_Packet_Iface
+	var packetId uint32
+
+	if c.ProtocolLevel == 30 {
+		messagePacket = &protocol.GG_Recv_MSG30{
+			Sender:  msg.From,
+			Content: string(msg.Content),
+		}
+		packetId = protocol.GG_RECV_MSG30
+	} else {
+		messagePacket = &protocol.GG_Recv_MSG{
+			Sender:   msg.From,
+			Seq:      0,
+			Time:     uint32(time.Now().Unix()),
+			MsgClass: msg.MsgClass,
+			Content:  string(msg.Content),
+		}
+		packetId = protocol.GG_RECV_MSG
 	}
-	logging.StructPPrint(c.logger, "GG_RECV_MSG", pS.PrettyPrint())
-	pOut := protocol.InitGG_Packet(protocol.GG_RECV_MSG, &pS)
+
+	//logging.StructPPrint(c.logger, "GG_RECV_MSG", messagePacket.PrettyPrint())
+	pOut := protocol.InitGG_Packet(packetId, messagePacket)
 	_, err := pOut.Send(c.conn)
 	if err != nil {
 		c.logger.Errorf("Error: %s", err)
