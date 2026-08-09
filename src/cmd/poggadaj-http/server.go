@@ -91,7 +91,11 @@ func NewServer(dbCfg *database.DatabaseConfig) (*Server, error) {
 		server.AppMSG_Handler,
 	)
 	server.e.GET("/appsvc/appmsg2.asp",
-		server.AppMSG_Handler,
+		func(c *echo.Context) error {
+			ip := os.Getenv("GG_SERVICE_IP")
+			port := os.Getenv("GG_SERVICE_PORT")
+			return c.String(http.StatusOK, fmt.Sprintf("0 %s:%s %s", ip, port, ip))
+		},
 	)
 	server.e.GET("/appsvc/appmsg.asp",
 		func(c *echo.Context) error {
