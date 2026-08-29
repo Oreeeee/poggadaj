@@ -1,0 +1,39 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024-2026 Oreeeee
+
+package constants
+
+const (
+	GG32_HASH_TYPE        = 0x01 // I'm not sure, just a guess, it's not used anyway probably
+	SHA1_HASH_TYPE        = 0x02
+	GG_NOTIFYCONTACT_SIZE = 5
+
+	GG_USERLIST_PUT      = 0x00
+	GG_USERLIST_PUT_MORE = 0x01
+	GG_USERLIST_GET      = 0x02
+
+	GG_USERLIST_PUT_REPLY      = 0x00
+	GG_USERLIST_PUT_MORE_REPLY = 0x02
+	GG_USERLIST_GET_MORE_REPLY = 0x04
+	GG_USERLIST_GET_REPLY      = 0x06
+
+	GG_PUBDIR50_WRITE        = 0x01 // When sent in response to a write, it marks success
+	GG_PUBDIR50_READ         = 0x02
+	GG_PUBDIR50_SEARCH       = 0x03
+	GG_PUBDIR50_ERROR        = 0x04 // Server to Client only
+	GG_PUBDIR50_SEARCH_REPLY = 0x05
+
+	GG_HAS_AUDIO_MASK = 0x40000000
+
+	GG_ACK_BLOCKED       = 0x0001
+	GG_ACK_DELIVERED     = 0x0002
+	GG_ACK_QUEUED        = 0x0003
+	GG_ACK_MBOXFULL      = 0x0004
+	GG_ACK_NOT_DELIVERED = 0x0006
+
+	GG_CLASS_QUEUED = 0x0001
+	GG_CLASS_MSG    = 0x0004
+	GG_CLASS_CHAT   = 0x0008
+	GG_CLASS_CTCP   = 0x0010
+	GG_CLASS_ACK    = 0x0020
+)
