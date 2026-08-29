@@ -1,6 +1,6 @@
 {{extends "./base.jet"}}
 
-{* {{define "title"}}Main page{{end}} *}
+{{ block title() }} {{ t("en", "main-page") }} {{ end }}
 
 {{block documentBody()}}
 {*<h2 id="mainpage-h2">{{translate .i18n "mainpage-p1"}}</h2>*}
