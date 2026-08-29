@@ -49,8 +49,8 @@
   {
     "label": "Debug poggadaj-frontend",
     "adapter": "Delve",
-    "program": ".",
-    "cwd": "${ZED_WORKTREE_ROOT}/poggadaj-frontend",
+    "program": "${ZED_WORKTREE_ROOT}/src/cmd/poggadaj-frontend",
+    "cwd": "${ZED_WORKTREE_ROOT}/src",
     "request": "launch",
     "mode": "debug",
     "envFile": "${ZED_WORKTREE_ROOT}/.env",

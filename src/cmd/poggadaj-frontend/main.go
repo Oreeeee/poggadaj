@@ -11,12 +11,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	_ "poggadaj-shared"
-	"time"
 
-	"poggadaj-shared/logging"
-
-	"charm.land/log/v2"
+	"codeberg.org/or3e/poggadaj/internal/logging"
+	"codeberg.org/or3e/poggadaj/internal/utils/utilshttp"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 )
@@ -102,15 +99,10 @@ func (t *TemplateRenderer) Render(c *echo.Context, w io.Writer, name string, pas
 }
 
 func main() {
-	logging.L = log.NewWithOptions(os.Stdout, log.Options{
-		ReportCaller:    true,
-		ReportTimestamp: true,
-		TimeFormat:      time.DateTime,
-		Level:           log.DebugLevel,
-	})
+	logger := logging.NewLogger()
 
 	e := echo.New()
-	e.Logger = slog.New(logging.L)
+	utilshttp.SetUpLogger(e, logger)
 
 	var err error
 	e.Renderer, err = newTemplateRenderer()
