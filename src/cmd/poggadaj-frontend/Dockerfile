@@ -19,7 +19,7 @@ WORKDIR /app
 
 COPY ./cmd/poggadaj-frontend/static ./static
 COPY ./cmd/poggadaj-frontend/i18n ./i18n
-COPY ./cmd/poggadaj-frontend/html ./html
+COPY ./cmd/poggadaj-frontend/views ./views
 COPY --from=build /app/poggadaj-frontend .
 
 CMD ["./poggadaj-frontend"]

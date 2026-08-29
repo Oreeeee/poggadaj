@@ -1,102 +1,18 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024-2026 Oreeeee
+
 package main
 
 import (
 	"context"
-	"html/template"
-	"io"
 	"log/slog"
 	"net/http"
 
 	"codeberg.org/or3e/poggadaj/internal/logging"
 	"codeberg.org/or3e/poggadaj/internal/utils/utilshttp"
-	"github.com/CloudyKit/jet/v6"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 )
-
-var views = jet.NewSet(
-	jet.NewOSFileSystemLoader("./views"),
-	jet.DevelopmentMode(true),
-)
-
-type TemplateRenderer struct {
-	templates map[string]*template.Template
-	i18n      map[string]*map[string]string
-}
-
-func newTemplateRenderer() (*TemplateRenderer, error) {
-	/*
-		// Load templates
-		templates := map[string]*template.Template{}
-		templateNames := []string{"html/home.html", "html/downloads.html", "html/login.html"}
-		for _, v := range templateNames {
-			tmpl, err := template.New("").Funcs(template.FuncMap{
-				"translate": func(m map[string]string, key string) string {
-					// First try to get from selected mapping
-					if val, ok := m[key]; ok {
-						return val
-					}
-					// TODO: fallback to other language
-					return key
-				},
-			}).ParseFiles("html/base.html", v)
-			if err != nil {
-				return nil, fmt.Errorf("failed to render template %s: %w", v, err)
-			}
-
-			templates[v] = tmpl
-		}
-
-		// Load i18n data
-		i18n := map[string]*map[string]string{}
-		files, err := filepath.Glob("i18n/*.json")
-		if err != nil {
-			return nil, fmt.Errorf("failed to load translations: %w", err)
-		}
-
-		for _, v := range files {
-			file, err := os.Open(v)
-			if err != nil {
-				// Ignore for now
-				continue
-			}
-
-			defer file.Close()
-
-			data, err := io.ReadAll(file)
-			if err != nil {
-				continue
-			}
-
-			key := ""
-
-			// TODO: Parse filenames here instead of hardcoding these
-			switch v {
-			case "i18n/en.json":
-				key = "en"
-			case "i18n/pl.json":
-				key = "pl"
-			}
-
-			i18n[key] = &map[string]string{}
-
-			err = json.Unmarshal(data, i18n[key])
-			if err != nil {
-				continue
-			}
-		}
-
-	*/
-	return &TemplateRenderer{ /*templates: templates, i18n: i18n*/ }, nil
-}
-
-func (t *TemplateRenderer) Render(c *echo.Context, w io.Writer, name string, passedData any) error {
-	view, err := views.GetTemplate(name)
-	if err != nil {
-		return err
-	}
-	return view.Execute(w, nil, passedData)
-}
 
 func main() {
 	logger := logging.NewLogger()
@@ -105,7 +21,7 @@ func main() {
 	utilshttp.SetUpLogger(e, logger)
 
 	var err error
-	e.Renderer, err = newTemplateRenderer()
+	e.Renderer, err = NewTemplateRenderer("./views", true)
 	if err != nil {
 		panic(err)
 	}
