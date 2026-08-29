@@ -1,12 +1,13 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <title>{{template "title" .}} - poGGadaj</title>
+        <title>{{ isset(title) ? title : "" }} - poGGadaj</title>
         <link rel="stylesheet" href="static/style.css" />
     </head>
     <body>
         <div id="main">
             <div id="header">
+                {*
                 <hgroup>
                     <h1>poGGadaj</h1>
                     <h2>{{translate .i18n "header-subtext"}}</h2>
@@ -19,9 +20,10 @@
 
                     <a href="/login"> {{translate .i18n "account"}} </a>
                 </div>
+                *}
             </div>
 
-            <div id="content">{{template "content" .}}</div>
+            <div id="content">{{block documentBody()}}{{end}}</div>
         </div>
     </body>
 </html>

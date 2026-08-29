@@ -1,6 +1,8 @@
+{{extends "./base.jet"}}
+
 {{define "title"}}{{translate .i18n "downloads"}}{{end}}
 
-{{define "content"}}
+{{block documentBody()}}
 <h1>{{translate .i18n "avail-clients"}}</h1>
 
 {{range .data.Clients}}

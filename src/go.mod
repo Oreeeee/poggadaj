@@ -4,6 +4,7 @@ go 1.26.5
 
 require (
 	charm.land/log/v2 v2.0.0
+	github.com/CloudyKit/jet/v6 v6.3.2
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/labstack/echo/v5 v5.3.1
 	github.com/redis/go-redis/v9 v9.22.0
@@ -13,6 +14,7 @@ require (
 
 require (
 	charm.land/lipgloss/v2 v2.0.1 // indirect
+	github.com/CloudyKit/fastprinter v0.0.0-20200109182630-33d98a066a53 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/colorprofile v0.4.2 // indirect
 	github.com/charmbracelet/ultraviolet v0.0.0-20251205161215-1948445e3318 // indirect

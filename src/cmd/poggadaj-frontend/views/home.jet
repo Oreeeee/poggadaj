@@ -1,7 +1,12 @@
-{{define "title"}}Main page{{end}} {{define "content"}}
-<h2 id="mainpage-h2">{{translate .i18n "mainpage-p1"}}</h2>
+{{extends "./base.jet"}}
+
+{* {{define "title"}}Main page{{end}} *}
+
+{{block documentBody()}}
+{*<h2 id="mainpage-h2">{{translate .i18n "mainpage-p1"}}</h2>*}
 
 <div>
+    {*
     <div class="column">
         <h4 class="feature-list">{{translate .i18n "features"}}:</h4>
         <ul class="feature-list">
@@ -36,6 +41,7 @@
             alt="Example screenshot of Gadu-Gadu 6.1 connected to poGGadaj"
         />
     </div>
+    *}
 </div>
 
 <style>
