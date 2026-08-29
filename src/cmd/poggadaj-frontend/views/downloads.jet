@@ -5,12 +5,11 @@
 {{block documentBody()}}
 <h1>{{ t(.Language, "avail-clients") }}</h1>
 
-{*
-{{range .data.Clients}}
+{{ range id, client := .Data.Clients }}
 <div class="client">
-    <h1 class="client-name">{{.Name}}</h1>
+    <h1 class="client-name">{{client.Name}}</h1>
     <div class="column">
-        <p class="client-description">{{translate $.i18n .DescriptionI18nTag }}</p>
+        <p class="client-description">{{ t(.Language, client.DescriptionI18nTag ) }}</p>
 
         <!--
         {#if noSSL}
@@ -29,16 +28,15 @@
         -->
     </div>
     <div class="column">
-        <img src={{.ImageUrl}} alt="Screenshot of {{.Name}} connected to poGGadaj">
+        <img src={{client.ImageUrl}} alt="Screenshot of {{client.Name}} connected to poGGadaj">
     </div>
-    <form action="{{.DownloadUrl}}">
-        <button type="submit" class="dl-button">{{translate $.i18n "download" }}</button>
+    <form action="{{client.DownloadUrl}}">
+        <button type="submit" class="dl-button">{{ t(.Language, "download") }}</button>
     </form>
 </div>
 
 <br>
 {{end}}
-*}
 
 <style>
     .client {
