@@ -7,20 +7,18 @@
     <body>
         <div id="main">
             <div id="header">
-                {*
                 <hgroup>
                     <h1>poGGadaj</h1>
-                    <h2>{{translate .i18n "header-subtext"}}</h2>
+                    <h2>{{ t("en", "header-subtext") }}</h2>
                 </hgroup>
 
                 <div>
-                    <a href="/"> {{translate .i18n "home"}} </a>
+                    <a href="/"> {{ t("en", "home") }} </a>
 
-                    <a href="/download"> {{translate .i18n "download"}} </a>
+                    <a href="/download"> {{ t("en", "download") }} </a>
 
-                    <a href="/login"> {{translate .i18n "account"}} </a>
+                    <a href="/login"> {{ t("en", "account") }} </a>
                 </div>
-                *}
             </div>
 
             <div id="content">{{block documentBody()}}{{end}}</div>

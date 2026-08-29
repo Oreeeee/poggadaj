@@ -20,8 +20,12 @@ func main() {
 	e := echo.New()
 	utilshttp.SetUpLogger(e, logger)
 
-	var err error
-	e.Renderer, err = NewTemplateRenderer("./views", true)
+	translator, err := NewTranslator("i18n")
+	if err != nil {
+		panic(err)
+	}
+
+	e.Renderer, err = NewTemplateRenderer("./views", true, translator)
 	if err != nil {
 		panic(err)
 	}

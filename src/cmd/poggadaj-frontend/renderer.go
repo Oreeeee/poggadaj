@@ -11,16 +11,20 @@ import (
 )
 
 type TemplateRenderer struct {
-	set  *jet.Set
-	i18n map[string]*map[string]string
+	set        *jet.Set
+	translator *Translator
 }
 
-func NewTemplateRenderer(baseDir string, devMode bool) (*TemplateRenderer, error) {
+func NewTemplateRenderer(baseDir string, devMode bool, translator *Translator) (*TemplateRenderer, error) {
 	renderer := &TemplateRenderer{}
 	renderer.set = jet.NewSet(
 		jet.NewOSFileSystemLoader(baseDir),
 		jet.DevelopmentMode(devMode),
 	)
+
+	renderer.translator = translator
+
+	renderer.set.AddGlobalFunc("t", renderer.translator.JetTranslate)
 	return renderer, nil
 }
 
