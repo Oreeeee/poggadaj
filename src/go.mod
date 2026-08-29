@@ -8,6 +8,7 @@ require (
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/labstack/echo/v5 v5.3.1
 	github.com/redis/go-redis/v9 v9.22.0
+	github.com/strukturag/goacceptlanguageparser v0.0.0-20160314151936-7224a0cc2c17
 	golang.org/x/crypto v0.54.0
 	golang.org/x/text v0.40.0
 )
@@ -32,7 +33,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/strukturag/goacceptlanguageparser v0.0.0-20160314151936-7224a0cc2c17 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
