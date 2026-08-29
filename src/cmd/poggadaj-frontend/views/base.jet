@@ -9,15 +9,15 @@
             <div id="header">
                 <hgroup>
                     <h1>poGGadaj</h1>
-                    <h2>{{ t("en", "header-subtext") }}</h2>
+                    <h2>{{ t(.Language, "header-subtext") }}</h2>
                 </hgroup>
 
                 <div>
-                    <a href="/"> {{ t("en", "home") }} </a>
+                    <a href="/"> {{ t(.Language, "home") }} </a>
 
-                    <a href="/download"> {{ t("en", "download") }} </a>
+                    <a href="/download"> {{ t(.Language, "download") }} </a>
 
-                    <a href="/login"> {{ t("en", "account") }} </a>
+                    <a href="/login"> {{ t(.Language, "account") }} </a>
                 </div>
             </div>
 

@@ -1,9 +1,9 @@
 {{extends "./base.jet"}}
 
-{{ block title() }} {{ t("en", "downloads") }} {{ end }}
+{{ block title() }} {{ t(.Language, "downloads") }} {{ end }}
 
 {{block documentBody()}}
-<h1>{{ t("en", "avail-clients") }}</h1>
+<h1>{{ t(.Language, "avail-clients") }}</h1>
 
 {*
 {{range .data.Clients}}

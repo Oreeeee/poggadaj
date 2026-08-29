@@ -55,11 +55,11 @@ func main() {
 
 	e.GET("/", func(c *echo.Context) error {
 		return c.Render(http.StatusOK, "home.jet", nil)
-	})
+	}, LanguageMiddleware)
 
 	e.GET("/login", func(c *echo.Context) error {
 		return c.Render(http.StatusOK, "login.jet", nil)
-	})
+	}, LanguageMiddleware)
 
 	e.GET("/download", func(c *echo.Context) error {
 		clients := []HtmlClient{
@@ -77,7 +77,7 @@ func main() {
 			},
 		}
 		return c.Render(http.StatusOK, "downloads.jet", map[string]any{"Clients": clients})
-	})
+	}, LanguageMiddleware)
 
 	if err := e.Start(":3000"); err != nil {
 		e.Logger.Error("shutting down the server", "error", err)

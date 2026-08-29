@@ -1,17 +1,17 @@
 {{extends "./base.jet"}}
 
-{{ block title() }} {{ t("en", "login") }} {{ end }}
+{{ block title() }} {{ t(.Language, "login") }} {{ end }}
 
 {{block documentBody()}}
-<h1>{{ t("en", "login") }}</h1>
+<h1>{{ t(.Language, "login") }}</h1>
 <form action="/do-login" class="login-form">
-  <label for="username">{{ t("en", "web-username") }}</label>
+  <label for="username">{{ t(.Language, "web-username") }}</label>
   <input type="text" id="username">
   <br><br>
-  <label for="password">{{ t("en", "web-password") }}</label>
+  <label for="password">{{ t(.Language, "web-password") }}</label>
   <input type="password" id="password">
   <br><br>
-  <input type="submit" value="{{ t("en", "login") }}">
+  <input type="submit" value="{{ t(.Language, "login") }}">
 </form>
-<p>{{ t("en", "no-account") }}</p><a href="/register">{{ t("en", "register") }}!</a>
+<p>{{ t(.Language, "no-account") }}</p><a href="/register">{{ t(.Language, "register") }}!</a>
 {{end}}

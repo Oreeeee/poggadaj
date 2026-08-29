@@ -1,28 +1,28 @@
 {{extends "./base.jet"}}
 
-{{ block title() }} {{ t("en", "main-page") }} {{ end }}
+{{ block title() }} {{ t(.Language, "main-page") }} {{ end }}
 
 {{block documentBody()}}
-<h2 id="mainpage-h2">{{ t("en", "mainpage-p1") }}</h2>
+<h2 id="mainpage-h2">{{ t(.Language, "mainpage-p1") }}</h2>
 
 <div>
     <div class="column">
-        <h4 class="feature-list">{{ t("en", "features") }}:</h4>
+        <h4 class="feature-list">{{ t(.Language, "features") }}:</h4>
         <ul class="feature-list">
-            <li>{{ t("en", "gg6-support") }}</li>
-            <li>{{ t("en", "no-annoying-ads") }}</li>
-            <li>{{ t("en", "easy-installation") }}</li>
+            <li>{{ t(.Language, "gg6-support") }}</li>
+            <li>{{ t(.Language, "no-annoying-ads") }}</li>
+            <li>{{ t(.Language, "easy-installation") }}</li>
             <li>
                 <a href="https://codeberg.org/or3e/poggadaj" target="_blank"
-                    >{{ t("en", "open-source") }}</a
+                    >{{ t(.Language, "open-source") }}</a
                 >
-                {{ t("en", "open-source-text") }}
+                {{ t(.Language, "open-source-text") }}
             </li>
-            <li>{{ t("en", "bot-compatibility") }}</li>
-            <li>{{ t("en", "more-clients") }}</li>
+            <li>{{ t(.Language, "bot-compatibility") }}</li>
+            <li>{{ t(.Language, "more-clients") }}</li>
         </ul>
         <br />
-        <h4 class="feature-list">{{ t("en", "supported-clients") }}:</h4>
+        <h4 class="feature-list">{{ t(.Language, "supported-clients") }}:</h4>
         <ul class="feature-list">
             <li>Gadu-Gadu 5.0</li>
             <li>Gadu-Gadu 6.0</li>

@@ -33,5 +33,15 @@ func (t *TemplateRenderer) Render(c *echo.Context, w io.Writer, name string, pas
 	if err != nil {
 		return err
 	}
-	return view.Execute(w, nil, passedData)
+
+	// Retrieve the language for i18n
+	lang := "en"
+	if langRaw := c.Get("poggadaj-lang"); langRaw != nil {
+		lang = langRaw.(string)
+	}
+
+	return view.Execute(w, nil, TemplateArgs{
+		Language: lang,
+		Data:     passedData,
+	})
 }
