@@ -21,7 +21,7 @@
                 </div>
             </div>
 
-            <div id="content">{{block documentBody()}}{{end}}</div>
+            <div id="content">{{ yield documentBody() }}</div>
         </div>
     </body>
 </html>

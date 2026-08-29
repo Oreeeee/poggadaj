@@ -1,15 +1,17 @@
+{{extends "./base.jet"}}
+
 {{ block title() }} {{ t("en", "login") }} {{ end }}
 
-{{define "content"}}
-<h1>{{translate .i18n "login"}}</h1>
+{{block documentBody()}}
+<h1>{{ t("en", "login") }}</h1>
 <form action="/do-login" class="login-form">
-  <label for="username">{{translate .i18n "web-username"}}</label>
+  <label for="username">{{ t("en", "web-username") }}</label>
   <input type="text" id="username">
   <br><br>
-  <label for="password">{{translate .i18n "web-password"}}</label>
+  <label for="password">{{ t("en", "web-password") }}</label>
   <input type="password" id="password">
   <br><br>
-  <input type="submit" value="{{translate .i18n "login"}}">
+  <input type="submit" value="{{ t("en", "login") }}">
 </form>
-<p>{{translate .i18n "no-account"}}</p><a href="/register">{{translate .i18n "register"}}!</a>
+<p>{{ t("en", "no-account") }}</p><a href="/register">{{ t("en", "register") }}!</a>
 {{end}}

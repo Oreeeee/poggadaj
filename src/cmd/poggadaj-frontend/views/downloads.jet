@@ -3,8 +3,9 @@
 {{ block title() }} {{ t("en", "downloads") }} {{ end }}
 
 {{block documentBody()}}
-<h1>{{translate .i18n "avail-clients"}}</h1>
+<h1>{{ t("en", "avail-clients") }}</h1>
 
+{*
 {{range .data.Clients}}
 <div class="client">
     <h1 class="client-name">{{.Name}}</h1>
@@ -37,6 +38,7 @@
 
 <br>
 {{end}}
+*}
 
 <style>
     .client {
