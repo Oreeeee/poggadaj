@@ -21,6 +21,8 @@
                 </div>
             </div>
 
+            <hr />
+
             <div id="content">{{ yield documentBody() }}</div>
         </div>
     </body>
