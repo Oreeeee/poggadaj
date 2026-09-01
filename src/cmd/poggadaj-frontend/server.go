@@ -49,7 +49,7 @@ func (s *Server) handleDownloads(c *echo.Context) error {
 }
 
 func (s *Server) Run() error {
-	return s.e.Start(":3000")
+	return s.e.Start(s.ip)
 }
 
 func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer) (*Server, error) {
