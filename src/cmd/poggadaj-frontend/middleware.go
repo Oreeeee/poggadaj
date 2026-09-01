@@ -8,8 +8,12 @@ import (
 	"github.com/strukturag/goacceptlanguageparser"
 )
 
+type MiddlewareController struct {
+	server *Server
+}
+
 // LanguageMiddleware selects a best-fit language for the user, and sets it to the "poggadaj-lang" key of the Echo context
-func LanguageMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func (mc *MiddlewareController) LanguageMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		acceptLanguageHdr := c.Request().Header.Get("Accept-Language")
 		browserLanguages := goacceptlanguageparser.ParseAcceptLanguage(acceptLanguageHdr, []string{"en", "pl"}) // TODO: Properly retrieve the list of supported languages
@@ -22,4 +26,8 @@ func LanguageMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		c.Set("poggadaj-lang", browserLanguages[0])
 		return next(c)
 	}
+}
+
+func NewMiddlewareController(server *Server) (*MiddlewareController, error) {
+	return &MiddlewareController{server: server}, nil
 }
