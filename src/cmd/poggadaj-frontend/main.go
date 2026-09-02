@@ -4,6 +4,9 @@
 package main
 
 import (
+	"os"
+
+	"codeberg.org/or3e/poggadaj/internal/database"
 	"codeberg.org/or3e/poggadaj/internal/logging"
 )
 
@@ -20,7 +23,18 @@ func main() {
 		panic(err)
 	}
 
-	server, err := NewServer(":3000", logger, renderer)
+	dbCfg := &database.DatabaseConfig{
+		Host:     os.Getenv("DB_ADDRESS"),
+		Port:     "5432",
+		Username: "poggadaj",
+		Password: os.Getenv("DB_PASSWORD"),
+	}
+	db, err := database.NewDatabase(dbCfg, logger)
+	if err != nil {
+		panic(err)
+	}
+
+	server, err := NewServer(":3000", logger, renderer, db)
 	if err != nil {
 		panic(err)
 	}

@@ -54,5 +54,10 @@
     "request": "launch",
     "mode": "debug",
     "envFile": "${ZED_WORKTREE_ROOT}/.env",
+    "env": {
+      "LISTEN_ADDRESS": "0.0.0.0",
+      "LISTEN_PORT": "8080",
+      "DB_ADDRESS": "127.0.0.1",
+    },
   },
 ]

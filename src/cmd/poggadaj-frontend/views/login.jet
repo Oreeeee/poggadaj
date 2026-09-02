@@ -4,14 +4,20 @@
 
 {{block documentBody()}}
 <h1>{{ t(.Language, "login") }}</h1>
-<form action="/do-login" class="login-form">
+<form action="/login" class="login-form" method="post">
   <label for="username">{{ t(.Language, "web-username") }}</label>
-  <input type="text" id="username">
+  <input type="text" id="username" name="username">
   <br><br>
   <label for="password">{{ t(.Language, "web-password") }}</label>
-  <input type="password" id="password">
+  <input type="password" id="password" name="password">
   <br><br>
   <input type="submit" value="{{ t(.Language, "login") }}">
 </form>
 <p>{{ t(.Language, "no-account") }}</p><a href="/register">{{ t(.Language, "register") }}!</a>
+
+{* TODO: Show some kind of HTML message here instead of a JS popup *}
+{{ if .Data["showLoginFail"] == true }}
+<script>alert("Wrong username or password")</script>
+{{ end }}
+
 {{end}}

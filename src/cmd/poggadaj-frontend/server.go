@@ -5,12 +5,16 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 
 	"charm.land/log/v2"
 
+	"codeberg.org/or3e/poggadaj/internal/database"
+	"codeberg.org/or3e/poggadaj/internal/security/argon2"
 	"codeberg.org/or3e/poggadaj/internal/utils/utilshttp"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 )
@@ -19,6 +23,7 @@ type Server struct {
 	e      *echo.Echo
 	ip     string
 	mc     *MiddlewareController
+	db     *database.Database
 	logger *log.Logger
 }
 
@@ -27,7 +32,45 @@ func (s *Server) handleHome(c *echo.Context) error {
 }
 
 func (s *Server) handleLogin(c *echo.Context) error {
-	return c.Render(http.StatusOK, "login.jet", nil)
+	data := map[string]any{}
+
+	failedLogin := c.QueryParamOr("fail", "0")
+	if failedLogin == "1" {
+		data["showLoginFail"] = true
+	}
+
+	return c.Render(http.StatusOK, "login.jet", data)
+}
+
+func (s *Server) handleLoginAction(c *echo.Context) error {
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+
+	// Get the actual password hash from the database
+	passwordHash, err := s.db.GetUserPasswordHash(username)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		// The user doesn't even exist
+		return c.Redirect(http.StatusSeeOther, "/login?fail=1")
+	}
+
+	if err != nil {
+		s.logger.Error("failed to get password from database", "err", err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	// And then verify if it matches with the one the user provided
+	match, err := argon2.ComparePasswords(password, passwordHash)
+	if err != nil {
+		s.logger.Error("failed to compare passwords", "err", err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	if !match {
+		return c.Redirect(http.StatusSeeOther, "/login?fail=1")
+	}
+
+	return c.NoContent(http.StatusNotImplemented)
 }
 
 func (s *Server) handleDownloads(c *echo.Context) error {
@@ -52,11 +95,14 @@ func (s *Server) Run() error {
 	return s.e.Start(s.ip)
 }
 
-func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer) (*Server, error) {
+func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer, db *database.Database) (*Server, error) {
 	server := &Server{}
+	server.ip = ip
+	server.db = db
+	server.logger = logger
 
 	server.e = echo.New()
-	utilshttp.SetUpLogger(server.e, logger)
+	utilshttp.SetUpLogger(server.e, server.logger)
 
 	var err error
 	server.mc, err = NewMiddlewareController(server)
@@ -90,6 +136,7 @@ func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer) (*Serv
 	server.e.Static("/static", "static")
 	server.e.GET("/", server.handleHome, server.mc.LanguageMiddleware)
 	server.e.GET("/login", server.handleLogin, server.mc.LanguageMiddleware)
+	server.e.POST("/login", server.handleLoginAction)
 	server.e.GET("/download", server.handleDownloads, server.mc.LanguageMiddleware)
 
 	return server, nil
