@@ -1,0 +1,24 @@
+{{ extends "./base.jet" }}
+
+{{ block title() }} {{ t(.Language, "gg-changepass") }} {{ end }}
+
+{{ block documentBody() }}
+<h1>{{ t(.Language, "gg-changepass") }}</h1>
+
+<form action="/dashboard/changePassword" class="changepass-form" method="post">
+  <label for="currentPassword">{{ t(.Language, "current-password") }}</label>
+  <input type="password" id="currentPassword" name="currentPassword">
+  <br><br>
+
+
+  <label for="newPassword">{{ t(.Language, "new-password") }}</label>
+  <input type="password" id="newPassword" name="newPassword">
+  <br><br>
+
+  <label for="confirmPassword">{{ t(.Language, "confirm-password") }}</label>
+  <input type="password" id="confirmPassword" name="confirmPassword">
+  <br><br>
+
+  <input type="submit" value="{{ t(.Language, "submit") }}">
+</form>
+{{ end }}

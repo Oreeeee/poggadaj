@@ -80,6 +80,10 @@ func (s *Server) handleDashboard(c *echo.Context) error {
 	return c.Render(http.StatusOK, "dashboard.jet", nil)
 }
 
+func (s *Server) handleChangePassword(c *echo.Context) error {
+	return c.Render(http.StatusOK, "changepass.jet", nil)
+}
+
 func (s *Server) handleDownloads(c *echo.Context) error {
 	clients := []HtmlClient{
 		{
@@ -145,6 +149,7 @@ func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer, db *da
 	server.e.GET("/login", server.handleLogin, server.mc.LanguageMiddleware)
 	server.e.POST("/login", server.handleLoginAction)
 	server.e.GET("/dashboard", server.handleDashboard, server.mc.LanguageMiddleware) // TODO: Add authentication middleware
+	server.e.GET("/dashboard/changePassword", server.handleChangePassword, server.mc.LanguageMiddleware)
 	server.e.GET("/download", server.handleDownloads, server.mc.LanguageMiddleware)
 
 	return server, nil

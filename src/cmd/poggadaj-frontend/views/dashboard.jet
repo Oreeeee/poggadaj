@@ -11,4 +11,9 @@
     {{ t(.Language, "joined-date") }}: 1999-01-01 12:01:59
 </p>
 
+<div>
+    <a href="/dashboard/changePassword">{{ t(.Language, "gg-changepass") }}</a> <br />
+    {*<a href="/dashboard/changePassword">My details</a>*}
+</div>
+
 {{ end }}
