@@ -1,0 +1,6 @@
+{{ block warning(wType="info", message="") }}
+<div class="warning warning-{{ wType }}">
+    <img class="warning-symbol" src="/static/warning-{{ wType }}.gif" alt="{{ wType }}-level warning symbol">
+    {{ message }}
+</div>
+{{ end }}

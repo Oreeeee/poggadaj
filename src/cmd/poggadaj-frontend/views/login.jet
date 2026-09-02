@@ -1,9 +1,15 @@
-{{extends "./base.jet"}}
+{{ extends "./base.jet" }}
+{{ import "widgets/warning.jet" }}
 
 {{ block title() }} {{ t(.Language, "login") }} {{ end }}
 
 {{block documentBody()}}
 <h1>{{ t(.Language, "login") }}</h1>
+
+{{ if .Data["showLoginFail"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "wrong-uop")) }} <br>
+{{ end }}
+
 <form action="/login" class="login-form" method="post">
   <label for="username">{{ t(.Language, "web-username") }}</label>
   <input type="text" id="username" name="username">
@@ -14,10 +20,5 @@
   <input type="submit" value="{{ t(.Language, "login") }}">
 </form>
 <p>{{ t(.Language, "no-account") }}</p><a href="/register">{{ t(.Language, "register") }}!</a>
-
-{* TODO: Show some kind of HTML message here instead of a JS popup *}
-{{ if .Data["showLoginFail"] == true }}
-<script>alert("Wrong username or password")</script>
-{{ end }}
 
 {{end}}

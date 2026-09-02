@@ -22,3 +22,30 @@ body {
 #header {
     font-family: "Patrick Hand";
 }
+
+.warning {
+    border: 1px solid black;
+    text-align: left;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.warning-symbol {
+    object-fit: scale-down;
+    width: 40px;
+    height: 18px;
+}
+
+.warning-info {
+    background-color: aqua;
+}
+
+.warning-warn {
+    background-color: yellow;
+}
+
+.warning-serious {
+    background-color: firebrick;
+}
