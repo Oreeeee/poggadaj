@@ -330,6 +330,17 @@ func (db *Database) GetUserPasswordHash(name string) (string, error) {
 	return passwordHash, nil
 }
 
+func (db *Database) GetUserPasswordHashWithUin(name string) (uint, string, error) {
+	query := "SELECT uin, password FROM gguser WHERE name=$1"
+	var uin uint
+	var passwordHash string
+	err := db.conn.QueryRow(context.Background(), query, name).Scan(&uin, &passwordHash)
+	if err != nil {
+		return 0, "", err
+	}
+	return uin, passwordHash, nil
+}
+
 func (db *Database) UpdateWebsitePassword(name string, password string) error {
 	hashedPassword, err := argon2.HashPassword(password)
 	if err != nil {

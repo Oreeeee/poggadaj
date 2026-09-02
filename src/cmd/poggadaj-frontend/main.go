@@ -6,6 +6,7 @@ package main
 import (
 	"os"
 
+	"codeberg.org/or3e/poggadaj/internal/cache"
 	"codeberg.org/or3e/poggadaj/internal/database"
 	"codeberg.org/or3e/poggadaj/internal/logging"
 )
@@ -34,7 +35,12 @@ func main() {
 		panic(err)
 	}
 
-	server, err := NewServer(":3000", logger, renderer, db)
+	cache, err := cache.NewCache(logger)
+	if err != nil {
+		panic(err)
+	}
+
+	server, err := NewServer(":3000", logger, renderer, db, cache)
 	if err != nil {
 		panic(err)
 	}

@@ -40,8 +40,14 @@ func (t *TemplateRenderer) Render(c *echo.Context, w io.Writer, name string, pas
 		lang = langRaw.(string)
 	}
 
+	hasAuth := false
+	if hasAuthRaw := c.Get("poggadaj-has-auth"); hasAuthRaw != nil {
+		hasAuth = hasAuthRaw.(bool)
+	}
+
 	return view.Execute(w, nil, TemplateArgs{
 		Language: lang,
+		HasAuth:  hasAuth,
 		Data:     passedData,
 	})
 }

@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
+	"time"
 
 	"charm.land/log/v2"
 	"codeberg.org/or3e/poggadaj/internal/statuses"
@@ -56,6 +58,37 @@ func (cache *Cache) SetUserStatus(statusChange structs.StatusChangeMsg) {
 	if err != nil {
 		cache.logger.Error("Failed to publish status", "err", err)
 	}
+}
+
+func (cache *Cache) CreateFrontendSession(token string, uin uint, ttl time.Duration) error {
+	status := cache.conn.Set(
+		context.Background(),
+		fmt.Sprintf("session:%s", token),
+		uin,
+		ttl,
+	)
+
+	return status.Err()
+}
+
+func (cache *Cache) GetSessionTokenOwner(token string) (uint, error) {
+	command := cache.conn.Get(
+		context.Background(),
+		fmt.Sprintf("session:%s", token),
+	)
+
+	err := command.Err()
+	if err != nil {
+		return 0, err
+	}
+
+	uinStr := command.Val()
+	uin64, err := strconv.ParseUint(uinStr, 10, 32)
+	if err != nil {
+		return 0, err
+	}
+
+	return uint(uin64), nil
 }
 
 func (cache *Cache) GetStatusChannel() *redis.PubSub {

@@ -16,5 +16,6 @@ type HtmlClient struct {
 // TemplateArgs represents the data structure that the templates expect
 type TemplateArgs struct {
 	Language string // The name of the language to use for i18n
-	Data     any    // Any other arbitrary data
+	HasAuth  bool
+	Data     any // Any other arbitrary data
 }

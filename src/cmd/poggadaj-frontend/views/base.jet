@@ -17,7 +17,11 @@
 
                     <a href="/download"> {{ t(.Language, "download") }} </a>
 
-                    <a href="/login"> {{ t(.Language, "account") }} </a>
+                    {{ if .HasAuth }}
+                        <a href="/dashboard"> {{ t(.Language, "my-acc") }} </a>
+                    {{ else }}
+                        <a href="/login"> {{ t(.Language, "login") }} </a>
+                    {{ end }}
                 </div>
             </div>
 

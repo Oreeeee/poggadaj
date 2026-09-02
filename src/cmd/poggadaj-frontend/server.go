@@ -8,9 +8,12 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"strconv"
+	"time"
 
 	"charm.land/log/v2"
 
+	"codeberg.org/or3e/poggadaj/internal/cache"
 	"codeberg.org/or3e/poggadaj/internal/database"
 	"codeberg.org/or3e/poggadaj/internal/security/argon2"
 	"codeberg.org/or3e/poggadaj/internal/utils/utilshttp"
@@ -24,6 +27,7 @@ type Server struct {
 	ip     string
 	mc     *MiddlewareController
 	db     *database.Database
+	cache  *cache.Cache
 	logger *log.Logger
 }
 
@@ -47,7 +51,7 @@ func (s *Server) handleLoginAction(c *echo.Context) error {
 	password := c.FormValue("password")
 
 	// Get the actual password hash from the database
-	passwordHash, err := s.db.GetUserPasswordHash(username)
+	uin, passwordHash, err := s.db.GetUserPasswordHashWithUin(username)
 
 	if errors.Is(err, pgx.ErrNoRows) {
 		// The user doesn't even exist
@@ -70,7 +74,33 @@ func (s *Server) handleLoginAction(c *echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/login?fail=1")
 	}
 
-	// TODO: Add some token here
+	// Generate, cache, and send a session token
+	var ttl time.Duration = time.Hour * 7 * 24
+	token, err := GenerateAuthToken()
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	err = s.cache.CreateFrontendSession(token, uin, ttl)
+	if err != nil {
+		s.logger.Error("failed to save the session token", "err", err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	c.SetCookie(&http.Cookie{
+		Name:    "token",
+		Value:   token,
+		Expires: time.Now().Add(ttl),
+	})
+
+	c.SetCookie(&http.Cookie{
+		Name:    "uin",
+		Value:   strconv.FormatUint(uint64(uin), 10),
+		Expires: time.Now().Add(ttl),
+	})
+
+	s.logger.Info("created new session", "uin", uin)
+
 	return c.Redirect(http.StatusSeeOther, "/dashboard")
 }
 
@@ -106,11 +136,12 @@ func (s *Server) Run() error {
 	return s.e.Start(s.ip)
 }
 
-func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer, db *database.Database) (*Server, error) {
+func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer, db *database.Database, cache *cache.Cache) (*Server, error) {
 	server := &Server{}
 	server.ip = ip
 	server.db = db
 	server.logger = logger
+	server.cache = cache
 
 	server.e = echo.New()
 	utilshttp.SetUpLogger(server.e, server.logger)
@@ -145,12 +176,12 @@ func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer, db *da
 	}))
 
 	server.e.Static("/static", "static")
-	server.e.GET("/", server.handleHome, server.mc.LanguageMiddleware)
-	server.e.GET("/login", server.handleLogin, server.mc.LanguageMiddleware)
+	server.e.GET("/", server.handleHome, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
+	server.e.GET("/login", server.handleLogin, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.POST("/login", server.handleLoginAction)
-	server.e.GET("/dashboard", server.handleDashboard, server.mc.LanguageMiddleware) // TODO: Add authentication middleware
-	server.e.GET("/dashboard/changePassword", server.handleChangePassword, server.mc.LanguageMiddleware)
-	server.e.GET("/download", server.handleDownloads, server.mc.LanguageMiddleware)
+	server.e.GET("/dashboard", server.handleDashboard, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware) // TODO: Add authentication middleware
+	server.e.GET("/dashboard/changePassword", server.handleChangePassword, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
+	server.e.GET("/download", server.handleDownloads, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 
 	return server, nil
 }

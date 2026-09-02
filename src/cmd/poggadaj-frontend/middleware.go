@@ -4,6 +4,8 @@
 package main
 
 import (
+	"strconv"
+
 	"github.com/labstack/echo/v5"
 	"github.com/strukturag/goacceptlanguageparser"
 )
@@ -24,6 +26,53 @@ func (mc *MiddlewareController) LanguageMiddleware(next echo.HandlerFunc) echo.H
 		}
 
 		c.Set("poggadaj-lang", browserLanguages[0])
+		return next(c)
+	}
+}
+
+// HasAuthMiddleware checks whether the user has a valid login session and sets a flag in the echo context.
+// It does not enforce security for protected resources! It only checks if the session is valid.
+func (mc *MiddlewareController) HasAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c *echo.Context) error {
+		c.Set("poggadaj-has-auth", false)
+		c.Set("poggadaj-uin", 0)
+
+		authCookie, err := c.Cookie("token")
+		if err != nil {
+			mc.server.logger.Warn("couldn't get the session cookie", "err", err)
+			return next(c)
+		}
+
+		uinCookie, err := c.Cookie("uin")
+		if err != nil {
+			mc.server.logger.Warn("couldn't get the uin cookie", "err", err)
+			return next(c)
+		}
+
+		uin64, err := strconv.ParseUint(uinCookie.Value, 10, 32)
+		if err != nil {
+			mc.server.logger.Error("couldn't read uin from cookie", "err", err)
+			return next(c)
+		}
+		uin := uint(uin64)
+
+		authToken := authCookie.Value
+
+		tokenOwnerUin, err := mc.server.cache.GetSessionTokenOwner(authToken)
+		if err != nil {
+			mc.server.logger.Error("couldn't verify the token", "err", err)
+			return next(c)
+		}
+
+		// Verify the token ownership
+		if uin != tokenOwnerUin {
+			mc.server.logger.Warn("mismatch between uin cookie and token owner", "uin", uinCookie)
+			return next(c)
+		}
+
+		c.Set("poggadaj-has-auth", true)
+		c.Set("poggadaj-uin", tokenOwnerUin)
+
 		return next(c)
 	}
 }
