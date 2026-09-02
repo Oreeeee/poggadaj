@@ -70,7 +70,14 @@ func (s *Server) handleLoginAction(c *echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/login?fail=1")
 	}
 
-	return c.NoContent(http.StatusNotImplemented)
+	// TODO: Add some token here
+	return c.Redirect(http.StatusSeeOther, "/dashboard")
+}
+
+func (s *Server) handleDashboard(c *echo.Context) error {
+	// TODO: once authentication middleware exists, insert the data as a param.
+	// Or actually add some thing to TemplateArgs for this
+	return c.Render(http.StatusOK, "dashboard.jet", nil)
 }
 
 func (s *Server) handleDownloads(c *echo.Context) error {
@@ -137,6 +144,7 @@ func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer, db *da
 	server.e.GET("/", server.handleHome, server.mc.LanguageMiddleware)
 	server.e.GET("/login", server.handleLogin, server.mc.LanguageMiddleware)
 	server.e.POST("/login", server.handleLoginAction)
+	server.e.GET("/dashboard", server.handleDashboard, server.mc.LanguageMiddleware) // TODO: Add authentication middleware
 	server.e.GET("/download", server.handleDownloads, server.mc.LanguageMiddleware)
 
 	return server, nil

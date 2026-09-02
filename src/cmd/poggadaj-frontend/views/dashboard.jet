@@ -1,0 +1,14 @@
+{{ extends "./base.jet" }}
+
+{{ block title() }} {{ t(.Language, "account-panel") }} {{ end }}
+
+{{ block documentBody() }}
+<h1>{{ t(.Language, "account-panel") }}</h1>
+<br />
+
+<p>
+    {{ t(.Language, "your-uin") }}: 1111111 <br />
+    {{ t(.Language, "joined-date") }}: 1999-01-01 12:01:59
+</p>
+
+{{ end }}
