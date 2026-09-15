@@ -390,10 +390,21 @@ func (db *Database) UpdateUserPassword(name string, chgreq structs.ChangePasswor
 	}
 }
 
-func (db *Database) GetUserData(name string) (int, time.Time, error) {
+func (db *Database) GetUserDataByName(name string) (int, time.Time, error) {
 	query := "SELECT uin, joined FROM gguser WHERE name=$1"
 	var uin int
 	var joined time.Time
 	err := db.conn.QueryRow(context.Background(), query, name).Scan(&uin, &joined)
 	return uin, joined, err
+}
+
+func (db *Database) GetUserDataByUin(uin uint) (*structs.UserData, error) {
+	data := &structs.UserData{}
+	err := db.conn.QueryRow(context.Background(), "SELECT uin, name, joined FROM gguser WHERE uin = $1", uin).Scan(
+		&data.UIN,
+		&data.WebUsername,
+		&data.JoinedDate,
+	)
+
+	return data, err
 }

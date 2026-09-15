@@ -7,8 +7,8 @@
 <br />
 
 <p>
-    {{ t(.Language, "your-uin") }}: 1111111 <br />
-    {{ t(.Language, "joined-date") }}: 1999-01-01 12:01:59
+    {{ t(.Language, "your-uin") }}: {{ .Data.UIN }} <br />
+    {{ t(.Language, "joined-date") }}: {{ .Data.JoinedDate }}
 </p>
 
 <div>

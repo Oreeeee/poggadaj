@@ -107,7 +107,21 @@ func (s *Server) handleLoginAction(c *echo.Context) error {
 func (s *Server) handleDashboard(c *echo.Context) error {
 	// TODO: once authentication middleware exists, insert the data as a param.
 	// Or actually add some thing to TemplateArgs for this
-	return c.Render(http.StatusOK, "dashboard.jet", nil)
+
+	// Get data for the current user
+	var uin uint
+	if uinRaw := c.Get("poggadaj-uin"); uinRaw != nil {
+		uin = uinRaw.(uint)
+	} else {
+		return c.Redirect(http.StatusSeeOther, "/login")
+	}
+	data, err := s.db.GetUserDataByUin(uin)
+	if err != nil {
+		s.logger.Error("failed to get data for user", "uin", uin, "err", err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	return c.Render(http.StatusOK, "dashboard.jet", data)
 }
 
 func (s *Server) handleChangePassword(c *echo.Context) error {

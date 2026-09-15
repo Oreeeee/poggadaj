@@ -139,7 +139,7 @@ func (server *Server) userData(c *echo.Context) error {
 	if !sessionValid {
 		return c.String(http.StatusUnauthorized, "")
 	}
-	uin, joined, err := server.db.GetUserData(username)
+	uin, joined, err := server.db.GetUserDataByName(username)
 	if err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusBadRequest, "{}")
