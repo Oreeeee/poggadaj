@@ -5,6 +5,8 @@ package main
 
 import (
 	"io"
+	"reflect"
+	"time"
 
 	"github.com/CloudyKit/jet/v6"
 	"github.com/labstack/echo/v5"
@@ -25,6 +27,18 @@ func NewTemplateRenderer(baseDir string, devMode bool, translator *Translator) (
 	renderer.translator = translator
 
 	renderer.set.AddGlobalFunc("t", renderer.translator.JetTranslate)
+	renderer.set.AddGlobalFunc("formatDate", func(args jet.Arguments) reflect.Value {
+		args.RequireNumOfArguments("formatDate", 1, 1)
+		dateArg := args.Get(0)
+
+		date, ok := dateArg.Interface().(time.Time)
+		if !ok {
+			// The arg wasn't a time.Time
+			return reflect.ValueOf(dateArg)
+		}
+
+		return reflect.ValueOf(date.Format("2006-01-02 15:04:05"))
+	})
 	return renderer, nil
 }
 
