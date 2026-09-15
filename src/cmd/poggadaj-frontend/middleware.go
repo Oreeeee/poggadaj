@@ -70,6 +70,7 @@ func (mc *MiddlewareController) HasAuthMiddleware(next echo.HandlerFunc) echo.Ha
 			return next(c)
 		}
 
+		c.Set("poggadaj-auth-token", authToken)
 		c.Set("poggadaj-has-auth", true)
 		c.Set("poggadaj-uin", tokenOwnerUin)
 

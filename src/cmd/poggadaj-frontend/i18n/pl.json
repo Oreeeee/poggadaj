@@ -56,5 +56,7 @@
   "experimental": "eksperymentalne",
   "client-password": "Hasło do klientów",
   "avail-clients": "Dostępne klienty",
-  "downloads": "Pobieranie"
+  "downloads": "Pobieranie",
+  "logout": "Wyloguj się",
+  "logged-out": "Wylogowano!"
 }

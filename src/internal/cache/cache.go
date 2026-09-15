@@ -91,6 +91,13 @@ func (cache *Cache) GetSessionTokenOwner(token string) (uint, error) {
 	return uint(uin64), nil
 }
 
+func (cache *Cache) DeleteSession(token string) error {
+	return cache.conn.Del(
+		context.Background(),
+		fmt.Sprintf("session:%s", token),
+	).Err()
+}
+
 func (cache *Cache) GetStatusChannel() *redis.PubSub {
 	return cache.conn.Subscribe(context.Background(), "ggstatus")
 }

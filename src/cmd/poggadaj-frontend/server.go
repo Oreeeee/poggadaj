@@ -43,6 +43,11 @@ func (s *Server) handleLogin(c *echo.Context) error {
 		data["showLoginFail"] = true
 	}
 
+	loggedOut := c.QueryParamOr("loggedOut", "0")
+	if loggedOut == "1" {
+		data["showLogoutSuccessful"] = true
+	}
+
 	return c.Render(http.StatusOK, "login.jet", data)
 }
 
@@ -128,6 +133,27 @@ func (s *Server) handleChangePassword(c *echo.Context) error {
 	return c.Render(http.StatusOK, "changepass.jet", nil)
 }
 
+func (s *Server) handleLogout(c *echo.Context) error {
+	authToken := c.Get("poggadaj-auth-token").(string)
+
+	// First off, delete the session token from the cache server
+	err := s.cache.DeleteSession(authToken)
+	if err != nil {
+		s.logger.Error("failed to delete session token", "err", err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	// Next, delete the session cookie from the client
+	c.SetCookie(&http.Cookie{
+		Name:   "token",
+		Value:  "",
+		MaxAge: -1,
+	})
+
+	// Now, redirect the user to the login page with the correct message
+	return c.Redirect(http.StatusSeeOther, "/login?loggedOut=1")
+}
+
 func (s *Server) handleDownloads(c *echo.Context) error {
 	clients := []HtmlClient{
 		{
@@ -193,8 +219,9 @@ func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer, db *da
 	server.e.GET("/", server.handleHome, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.GET("/login", server.handleLogin, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.POST("/login", server.handleLoginAction)
-	server.e.GET("/dashboard", server.handleDashboard, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware) // TODO: Add authentication middleware
-	server.e.GET("/dashboard/changePassword", server.handleChangePassword, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
+	server.e.GET("/dashboard", server.handleDashboard, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)                     // TODO: Add authentication middleware
+	server.e.GET("/dashboard/changePassword", server.handleChangePassword, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware) // TODO: Add authentication middleware
+	server.e.POST("/logout", server.handleLogout, server.mc.HasAuthMiddleware)                                                        // TODO: Add authentication middleware
 	server.e.GET("/download", server.handleDownloads, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 
 	return server, nil

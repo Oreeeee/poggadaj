@@ -13,6 +13,11 @@
 
 <div>
     <a href="/dashboard/changePassword">{{ t(.Language, "gg-changepass") }}</a> <br />
+    <form action="/logout" method="POST" style="display: inline;">
+      <button type="submit" style="border: 0; background: none; padding: 0; color: blue; text-decoration: underline; cursor: pointer;">
+        {{ t(.Language, "logout") }}
+      </button>
+    </form>
     {*<a href="/dashboard/changePassword">My details</a>*}
 </div>
 
