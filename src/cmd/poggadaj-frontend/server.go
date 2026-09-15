@@ -109,6 +109,13 @@ func (s *Server) handleLoginAction(c *echo.Context) error {
 	return c.Redirect(http.StatusSeeOther, "/dashboard")
 }
 
+func (s *Server) handleRegister(c *echo.Context) error {
+	// TODO: If user is logged in, redirect to dashboard
+	// TODO: Implement logic
+
+	return c.Render(http.StatusOK, "register.jet", nil)
+}
+
 func (s *Server) handleDashboard(c *echo.Context) error {
 	// TODO: once authentication middleware exists, insert the data as a param.
 	// Or actually add some thing to TemplateArgs for this
@@ -219,6 +226,7 @@ func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer, db *da
 	server.e.GET("/", server.handleHome, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.GET("/login", server.handleLogin, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.POST("/login", server.handleLoginAction)
+	server.e.GET("/register", server.handleRegister, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.GET("/dashboard", server.handleDashboard, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)                     // TODO: Add authentication middleware
 	server.e.GET("/dashboard/changePassword", server.handleChangePassword, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware) // TODO: Add authentication middleware
 	server.e.POST("/logout", server.handleLogout, server.mc.HasAuthMiddleware)                                                        // TODO: Add authentication middleware

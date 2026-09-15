@@ -1,0 +1,25 @@
+{{extends "./base.jet"}}
+{{ block title() }} {{ t(.Language, "registration") }} {{ end }}
+
+{{ block documentBody() }}
+<h1>{{ t(.Language, "register") }}</h1>
+<form action="/register" method="post">
+    <label for="username">{{ t(.Language, "web-username") }}</label>
+    <input type="text" id="username" name="username">
+    <br><br>
+
+    <label for="email">E-mail</label>
+    <input type="email" id="email" name="email">
+    <br><br>
+
+    <label for="password">{{ t(.Language, "web-password") }}</label>
+    <input type="password" id="password" name="password">
+    <br><br>
+
+    <label for="confirm-password">{{ t(.Language, "confirm-pwd") }}</label>
+    <input type="password" id="confirm-password" name="confirm-password">
+    <br><br>
+
+    <input type="submit" value="{{ t(.Language, "register") }}">
+</form>
+{{ end }}
