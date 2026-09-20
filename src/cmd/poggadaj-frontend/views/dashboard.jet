@@ -8,7 +8,12 @@
 
 <p>
     {{ t(.Language, "your-uin") }}: {{ .Data.UIN }} <br />
-    {{ t(.Language, "joined-date") }}: {{ formatDate(.Data.JoinedDate) }}
+    {{ t(.Language, "joined-date") }}: {{ formatDate(.Data.JoinedDate) }} <br />
+    {{ if .Data.Email != "" }}
+        E-mail: {{ .Data.Email }}
+    {{ else }}
+        {{ t(.Language, "no-provided-email") }}
+    {{ end }}
 </p>
 
 <div>

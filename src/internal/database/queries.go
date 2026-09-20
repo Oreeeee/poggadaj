@@ -431,11 +431,19 @@ func (db *Database) GetUserDataByName(name string) (int, time.Time, error) {
 
 func (db *Database) GetUserDataByUin(uin uint) (*structs.UserData, error) {
 	data := &structs.UserData{}
-	err := db.conn.QueryRow(context.Background(), "SELECT uin, name, joined FROM gguser WHERE uin = $1", uin).Scan(
+	var emailTmp *string
+	err := db.conn.QueryRow(context.Background(), "SELECT uin, name, email, joined FROM gguser WHERE uin = $1", uin).Scan(
 		&data.UIN,
 		&data.WebUsername,
+		&emailTmp,
 		&data.JoinedDate,
 	)
+
+	if emailTmp == nil {
+		data.Email = ""
+	} else {
+		data.Email = *emailTmp
+	}
 
 	return data, err
 }

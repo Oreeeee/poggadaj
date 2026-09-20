@@ -53,6 +53,7 @@
   "login": "Zaloguj się",
   "my-acc": "Moje konto",
   "account-panel": "Panel zarządzania kontem",
+  "no-provided-email": "Nie podano adresu e-mail przy rejestracji",
   "register": "Zarejestruj się",
   "gg-changepass": "Zmień swoje hasło do GG",
   "current-password": "Aktualne hasło",

@@ -8,5 +8,6 @@ import "time"
 type UserData struct {
 	UIN         uint32
 	WebUsername string
+	Email       string
 	JoinedDate  time.Time
 }
