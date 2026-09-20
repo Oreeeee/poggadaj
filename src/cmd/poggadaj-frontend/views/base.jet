@@ -13,7 +13,7 @@
                     <h2>{{ t(.Language, "header-subtext") }}</h2>
                 </hgroup>
 
-                <div>
+                <div class="linksbar">
                     <a href="/"> {{ t(.Language, "home") }} </a>
 
                     <a href="/download"> {{ t(.Language, "download") }} </a>
