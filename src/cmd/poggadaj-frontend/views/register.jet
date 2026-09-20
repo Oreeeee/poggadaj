@@ -55,6 +55,14 @@
     <input type="password" id="confirm-password" name="confirm-password">
     <br><br>
 
+    <ul>
+        <li>{{ t(.Language, "reg-note-1") }}</li>
+        <li>{{ t(.Language, "reg-note-2") }}</li>
+        <li>{{ t(.Language, "reg-note-3") }}</li>
+        <li>{{ t(.Language, "reg-note-4") }}</li>
+    </ul>
+    <br />
+
     <input type="submit" value="{{ t(.Language, "register") }}">
 </form>
 {{ end }}
