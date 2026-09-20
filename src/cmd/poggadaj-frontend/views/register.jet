@@ -1,7 +1,30 @@
-{{extends "./base.jet"}}
+{{ extends "./base.jet" }}
+{{ import "widgets/warning.jet" }}
+
 {{ block title() }} {{ t(.Language, "registration") }} {{ end }}
 
 {{ block documentBody() }}
+
+{{ if .Data["missingValues"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "reg-missing-values")) }} <br>
+{{ end }}
+
+{{ if .Data["usernameTooLong"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "reg-username-long")) }} <br>
+{{ end }}
+
+{{ if .Data["badEmail"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "reg-bad-email")) }} <br>
+{{ end }}
+
+{{ if .Data["badPasswordLen"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "reg-bad-password-len")) }} <br>
+{{ end }}
+
+{{ if .Data["passwordMismatch"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "reg-password-mismatch")) }} <br>
+{{ end }}
+
 <h1>{{ t(.Language, "register") }}</h1>
 <form action="/register" method="post">
     <label for="username">{{ t(.Language, "web-username") }}</label>

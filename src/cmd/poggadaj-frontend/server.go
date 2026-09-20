@@ -38,15 +38,9 @@ func (s *Server) handleHome(c *echo.Context) error {
 func (s *Server) handleLogin(c *echo.Context) error {
 	data := map[string]any{}
 
-	failedLogin := c.QueryParamOr("fail", "0")
-	if failedLogin == "1" {
-		data["showLoginFail"] = true
-	}
-
-	loggedOut := c.QueryParamOr("loggedOut", "0")
-	if loggedOut == "1" {
-		data["showLogoutSuccessful"] = true
-	}
+	data["showLoginFail"] = QueryParamBool(c, "fail")
+	data["showLogoutSuccessful"] = QueryParamBool(c, "loggedOut")
+	data["showRegisterSuccess"] = QueryParamBool(c, "registerSuccess")
 
 	return c.Render(http.StatusOK, "login.jet", data)
 }
@@ -110,10 +104,54 @@ func (s *Server) handleLoginAction(c *echo.Context) error {
 }
 
 func (s *Server) handleRegister(c *echo.Context) error {
-	// TODO: If user is logged in, redirect to dashboard
-	// TODO: Implement logic
+	hasAuth := false
+	if hasAuthRaw := c.Get("poggadaj-has-auth"); hasAuthRaw != nil {
+		hasAuth = hasAuthRaw.(bool)
+	}
 
-	return c.Render(http.StatusOK, "register.jet", nil)
+	if hasAuth {
+		return c.Redirect(http.StatusSeeOther, "/dashboard")
+	}
+
+	data := map[string]any{}
+	data["missingValues"] = QueryParamBool(c, "missingValues")
+	data["usernameTooLong"] = QueryParamBool(c, "usernameTooLong")
+	data["badEmail"] = QueryParamBool(c, "badEmail")
+	data["badPasswordLen"] = QueryParamBool(c, "badPasswordLen")
+	data["passwordMismatch"] = QueryParamBool(c, "passwordMismatch")
+
+	return c.Render(http.StatusOK, "register.jet", data)
+}
+
+func (s *Server) handleRegisterAction(c *echo.Context) error {
+	username := c.FormValue("username")
+	email := c.FormValue("email")
+	password := c.FormValue("password")
+	confirmPassword := c.FormValue("confirm-password")
+
+	// Verify if all values are present
+	if username == "" || email == "" || password == "" || confirmPassword == "" {
+		return c.Redirect(http.StatusSeeOther, "/register?missingValues=1")
+	}
+
+	if len(username) > 24 {
+		return c.Redirect(http.StatusSeeOther, "/register?usernameTooLong=1")
+	}
+
+	if !VerifyEmail(email) {
+		return c.Redirect(http.StatusSeeOther, "/register?badEmail=1")
+	}
+
+	passwordLen := len(password)
+	if passwordLen < 8 || passwordLen > 48 {
+		return c.Redirect(http.StatusSeeOther, "/register?badPasswordLen=1")
+	}
+
+	if password != confirmPassword {
+		return c.Redirect(http.StatusSeeOther, "/register?passwordMismatch=1")
+	}
+
+	return c.Redirect(http.StatusSeeOther, "/login?registerSuccess=1")
 }
 
 func (s *Server) handleDashboard(c *echo.Context) error {
@@ -227,6 +265,7 @@ func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer, db *da
 	server.e.GET("/login", server.handleLogin, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.POST("/login", server.handleLoginAction)
 	server.e.GET("/register", server.handleRegister, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
+	server.e.POST("/register", server.handleRegisterAction)
 	server.e.GET("/dashboard", server.handleDashboard, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)                     // TODO: Add authentication middleware
 	server.e.GET("/dashboard/changePassword", server.handleChangePassword, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware) // TODO: Add authentication middleware
 	server.e.POST("/logout", server.handleLogout, server.mc.HasAuthMiddleware)                                                        // TODO: Add authentication middleware

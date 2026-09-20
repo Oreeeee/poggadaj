@@ -7,6 +7,9 @@ import (
 	crand "crypto/rand"
 	"encoding/base64"
 	"errors"
+	"net/mail"
+
+	"github.com/labstack/echo/v5"
 )
 
 const AuthCookieSize = 64
@@ -18,4 +21,19 @@ func GenerateAuthToken() (string, error) {
 		return "", errors.New("failed to generate auth token")
 	}
 	return base64.RawURLEncoding.EncodeToString(authCookie), nil
+}
+
+// VerifyEmail checks if the email format is correct
+func VerifyEmail(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
+}
+
+// Gets a query param by name and parses it into a bool if name is "1"
+func QueryParamBool(c *echo.Context, name string) bool {
+	value := c.QueryParamOr(name, "0")
+	if value == "1" {
+		return true
+	}
+	return false
 }
