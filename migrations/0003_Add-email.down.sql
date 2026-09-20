@@ -1,0 +1,1 @@
+ALTER TABLE gguser DROP COLUMN IF EXISTS email;

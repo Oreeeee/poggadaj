@@ -16,8 +16,11 @@ import (
 	"codeberg.org/or3e/poggadaj/internal/cache"
 	"codeberg.org/or3e/poggadaj/internal/database"
 	"codeberg.org/or3e/poggadaj/internal/security/argon2"
+	"codeberg.org/or3e/poggadaj/internal/security/gg"
+	"codeberg.org/or3e/poggadaj/internal/utils"
 	"codeberg.org/or3e/poggadaj/internal/utils/utilshttp"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 )
@@ -119,6 +122,9 @@ func (s *Server) handleRegister(c *echo.Context) error {
 	data["badEmail"] = QueryParamBool(c, "badEmail")
 	data["badPasswordLen"] = QueryParamBool(c, "badPasswordLen")
 	data["passwordMismatch"] = QueryParamBool(c, "passwordMismatch")
+	data["serverError"] = QueryParamBool(c, "serverError")
+	data["usernameNotUnique"] = QueryParamBool(c, "usernameNotUnique")
+	data["emailNotUnique"] = QueryParamBool(c, "emailNotUnique")
 
 	return c.Render(http.StatusOK, "register.jet", data)
 }
@@ -150,6 +156,38 @@ func (s *Server) handleRegisterAction(c *echo.Context) error {
 	if password != confirmPassword {
 		return c.Redirect(http.StatusSeeOther, "/register?passwordMismatch=1")
 	}
+
+	// Create all of the required password hashes
+	pwdHash, err := argon2.HashPassword(password)
+	if err != nil {
+		s.logger.Error("failed to argon2 hash password", "err", err)
+		return c.Redirect(http.StatusSeeOther, "/register?serverError=1")
+	}
+
+	ggAncientHash := gg.GGAncientLoginHash(password, utils.GetSeed())
+	gg32Hash := gg.GG32LoginHash(password, utils.GetSeed())
+	ggSha1Hash := gg.GGSHA1LoginHash(password, utils.GetSeed())
+
+	newUin, err := s.db.CreateUserNew(username, email, pwdHash, ggAncientHash, gg32Hash, ggSha1Hash)
+	if err != nil {
+		// Check if it's an unique value constraint violation
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			switch pgErr.ConstraintName {
+			case "gguser_name_key":
+				s.logger.Warn("username was not unique", "username", username)
+				return c.Redirect(http.StatusSeeOther, "/register?usernameNotUnique=1")
+			case "gguser_email_key":
+				s.logger.Warn("email was not unique", "email", email)
+				return c.Redirect(http.StatusSeeOther, "/register?emailNotUnique=1")
+			}
+		}
+
+		s.logger.Error("failed to create new user", "err", err)
+		return c.Redirect(http.StatusSeeOther, "/register?serverError=1")
+	}
+
+	s.logger.Info("new user registered!", "username", username, "uin", newUin)
 
 	return c.Redirect(http.StatusSeeOther, "/login?registerSuccess=1")
 }

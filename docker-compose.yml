@@ -32,6 +32,8 @@ services:
     restart: always
     ports:
       - "3000:3000"
+    environment:
+      - GG_SEED=${GG_SEED}
     depends_on:
       migrate:
         condition: service_completed_successfully

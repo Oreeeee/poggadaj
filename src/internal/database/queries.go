@@ -273,7 +273,7 @@ func (db *Database) GetAds(bannerType int) []structs.Ad {
 	return ads
 }
 
-func (db *Database) CreateUser(regBody structs.RegisterRequest) (int, error) {
+func (db *Database) CreateUser(regBody structs.RegisterRequest) (int, error) { // TODO: nuke
 	var GGAncientHash uint32
 	var GG32Hash uint32
 	var GGSHA1Hash string
@@ -318,6 +318,37 @@ func (db *Database) CreateUser(regBody structs.RegisterRequest) (int, error) {
 	}
 
 	return newUserUIN, nil
+}
+
+func (db *Database) CreateUserNew(name string, email string, password string, ggAncientHash uint32, gg32Hash uint32, ggSha1Hash string) (int, error) {
+	// TODO: use transation here in case something goes wrong
+
+	_, err := db.conn.Exec(context.Background(),
+		"INSERT INTO gguser (name, email, password, password_gg_ancient, password_gg32, password_sha1) VALUES ($1, $2, $3, $4, $5, $6)",
+		name,
+		email,
+		password,
+		ggAncientHash,
+		gg32Hash,
+		ggSha1Hash,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	// Allocate a new UIN for the user
+	var newUserUin int
+	err = db.conn.QueryRow(
+		context.Background(),
+		"UPDATE gguser SET uin=nextval('uin_seq') WHERE name=$1 RETURNING uin",
+		name,
+	).Scan(&newUserUin)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return newUserUin, nil
 }
 
 func (db *Database) GetUserPasswordHash(name string) (string, error) {

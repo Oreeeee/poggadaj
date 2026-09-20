@@ -25,6 +25,18 @@
     {{ yield warning(wType="serious", message=t(.Language, "reg-password-mismatch")) }} <br>
 {{ end }}
 
+{{ if .Data["serverError"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "reg-server-error")) }} <br>
+{{ end }}
+
+{{ if .Data["usernameNotUnique"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "reg-username-exists")) }} <br>
+{{ end }}
+
+{{ if .Data["emailNotUnique"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "reg-email-exists")) }} <br>
+{{ end }}
+
 <h1>{{ t(.Language, "register") }}</h1>
 <form action="/register" method="post">
     <label for="username">{{ t(.Language, "web-username") }}</label>
