@@ -5,6 +5,7 @@ package main
 
 import (
 	"io"
+	"os"
 	"reflect"
 	"time"
 
@@ -39,6 +40,7 @@ func NewTemplateRenderer(baseDir string, devMode bool, translator *Translator) (
 
 		return reflect.ValueOf(date.Format("2006-01-02 15:04:05"))
 	})
+	renderer.set.AddGlobal("adminEmail", os.Getenv("GG_INSTANCE_ADMIN_EMAIL"))
 	return renderer, nil
 }
 

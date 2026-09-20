@@ -27,6 +27,16 @@
   <br><br>
   <input type="submit" value="{{ t(.Language, "login") }}">
 </form>
-<p>{{ t(.Language, "no-account") }}</p><a href="/register">{{ t(.Language, "register") }}!</a>
+
+<ul>
+    <li>
+        {{ t(.Language, "no-account") }}
+        <a href="/register">{{ t(.Language, "register") }}</a>
+    </li>
+    <li>
+        {{ t(.Language, "forgot-password") }}
+        <a href="/resetpass">{{ t(.Language, "reset-password") }}</a>
+    </li>
+</ul>
 
 {{end}}

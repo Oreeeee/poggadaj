@@ -34,6 +34,7 @@ services:
       - "3000:3000"
     environment:
       - GG_SEED=${GG_SEED}
+      - GG_INSTANCE_ADMIN_EMAIL=${GG_INSTANCE_ADMIN_EMAIL}
     depends_on:
       migrate:
         condition: service_completed_successfully

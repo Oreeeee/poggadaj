@@ -106,6 +106,10 @@ func (s *Server) handleLoginAction(c *echo.Context) error {
 	return c.Redirect(http.StatusSeeOther, "/dashboard")
 }
 
+func (s *Server) handleResetPass(c *echo.Context) error {
+	return c.Render(http.StatusOK, "resetpass.jet", nil)
+}
+
 func (s *Server) handleRegister(c *echo.Context) error {
 	hasAuth := false
 	if hasAuthRaw := c.Get("poggadaj-has-auth"); hasAuthRaw != nil {
@@ -302,6 +306,7 @@ func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer, db *da
 	server.e.GET("/", server.handleHome, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.GET("/login", server.handleLogin, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.POST("/login", server.handleLoginAction)
+	server.e.GET("/resetpass", server.handleResetPass, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.GET("/register", server.handleRegister, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.POST("/register", server.handleRegisterAction)
 	server.e.GET("/dashboard", server.handleDashboard, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)                     // TODO: Add authentication middleware
