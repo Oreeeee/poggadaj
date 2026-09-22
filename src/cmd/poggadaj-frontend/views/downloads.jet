@@ -7,9 +7,9 @@
 
 {{ range id, client := .Data.Clients }}
 <div class="client">
-    <h1 class="client-name">{{client.Name}}</h1>
+    <h1 class="client-name">{{ client.Name }}</h1>
     <div class="column">
-        <p class="client-description">{{ t(.Language, client.DescriptionI18nTag ) }}</p>
+        <p class="client-description">{{ client.Description }}</p>
 
         <!--
         {#if noSSL}
@@ -30,9 +30,10 @@
     <div class="column">
         <img src={{client.ImageUrl}} alt="Screenshot of {{client.Name}} connected to poGGadaj">
     </div>
+    {*
     <form action="{{client.DownloadUrl}}">
         <button type="submit" class="dl-button">{{ t(.Language, "download") }}</button>
-    </form>
+    </form>*}
 </div>
 
 <br>

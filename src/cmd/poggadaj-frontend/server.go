@@ -242,19 +242,25 @@ func (s *Server) handleLogout(c *echo.Context) error {
 }
 
 func (s *Server) handleDownloads(c *echo.Context) error {
-	clients := []HtmlClient{
-		{
-			Name:               "Gadu-Gadu 6.0",
-			DescriptionI18nTag: "gg60-description",
-			ImageUrl:           "../static/gg60.png",
-			DownloadUrl:        "https://example.com",
-		},
-		{
-			Name:               "Gadu-Gadu 7.7",
-			DescriptionI18nTag: "gg77-description",
-			ImageUrl:           "../static/gg77.png",
-			DownloadUrl:        "https://example.com",
-		},
+	/*
+		clients := []HtmlClient{
+			{
+				Name:               "Gadu-Gadu 6.0",
+				DescriptionI18nTag: "gg60-description",
+				ImageUrl:           "../static/gg60.png",
+				DownloadUrl:        "https://example.com",
+			},
+			{
+				Name:               "Gadu-Gadu 7.7",
+				DescriptionI18nTag: "gg77-description",
+				ImageUrl:           "../static/gg77.png",
+				DownloadUrl:        "https://example.com",
+			},
+			}*/
+	lang := c.Get("poggadaj-lang").(string)
+	clients, err := s.db.GetClients(lang)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
 	}
 	return c.Render(http.StatusOK, "downloads.jet", map[string]any{"Clients": clients})
 }
