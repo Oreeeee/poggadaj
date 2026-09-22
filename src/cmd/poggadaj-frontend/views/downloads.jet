@@ -1,4 +1,5 @@
-{{extends "./base.jet"}}
+{{ extends "./base.jet" }}
+{{ import "widgets/button.jet" }}
 
 {{ block title() }} {{ t(.Language, "downloads") }} {{ end }}
 
@@ -10,30 +11,21 @@
     <h1 class="client-name">{{ client.Name }}</h1>
     <div class="column">
         <p class="client-description">{{ client.Description }}</p>
-
-        <!--
-        {#if noSSL}
-        <Warning wType="serious" message={$_("no-ssl")} />
-        <br>
-        {/if}
-
-        {#if insecureHash}
-        <Warning wType="warn" message={$_("insecure-hash")} />
-        <br>
-        {/if}
-
-        {#if modernWinProblems}
-        <Warning wType="info" message={$_("modern-win-problems")} />
-        {/if}
-        -->
     </div>
     <div class="column">
         <img src={{client.ImageUrl}} alt="Screenshot of {{client.Name}} connected to poGGadaj">
     </div>
-    {*
-    <form action="{{client.DownloadUrl}}">
-        <button type="submit" class="dl-button">{{ t(.Language, "download") }}</button>
-    </form>*}
+
+    {{ range i, downloadLink := client.Downloads }}
+        {{ buttonText := "" }}
+        {{ if downloadLink.Type == 0 }}
+            {{ buttonText = t(.Language, "dl-installer") }}
+        {{ else if downloadLink.Type == 1 }}
+            {{ buttonText = t(.Language, "dl-unpacked") }}
+        {{ end }}
+
+        {{ yield button(link=downloadLink.Url, text=buttonText, btnClass="dl-button") }}
+    {{ end }}
 </div>
 
 <br>

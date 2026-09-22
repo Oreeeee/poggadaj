@@ -1,0 +1,7 @@
+{* This implements a button with a redirect using a form, as putting a href into a button is incompatible with IE and not compliant with HTML standard *}
+
+{{ block button(link="", text="", btnClass="") }}
+<form action="{{ link }}">
+    <button type="submit" class="{{ btnClass }}">{{ text }}</button>
+</form>
+{{ end }}

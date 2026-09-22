@@ -77,5 +77,7 @@
   "avail-clients": "Available clients",
   "downloads": "Downloads",
   "logout": "Log out",
-  "logged-out": "Logged out successfully!"
+  "logged-out": "Logged out successfully!",
+  "dl-installer": "Download original installer",
+  "dl-unpacked": "Download portable unpacked version"
 }

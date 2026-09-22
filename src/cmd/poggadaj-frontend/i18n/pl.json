@@ -77,5 +77,7 @@
   "avail-clients": "Dostępne klienty",
   "downloads": "Pobieranie",
   "logout": "Wyloguj się",
-  "logged-out": "Wylogowano!"
+  "logged-out": "Wylogowano!",
+  "dl-installer": "Pobierz oryginalny instalator",
+  "dl-unpacked": "Pobierz wypakowaną przenośną wersję"
 }
