@@ -456,7 +456,7 @@ func (db *Database) GetClients(language string) ([]*structs.WebClient, error) {
 
 	rows, err := db.conn.Query(
 		context.Background(),
-		"SELECT c.id, c.name, c.image_url, d.description FROM clients c JOIN client_descriptions d ON c.id = d.client_id WHERE d.language = $1",
+		"SELECT c.id, c.name, c.image_url, d.description FROM clients c JOIN client_descriptions d ON c.id = d.client_id WHERE d.language = $1 ORDER BY c.priority ASC",
 		language,
 	)
 	if err != nil {

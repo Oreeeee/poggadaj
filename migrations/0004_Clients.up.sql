@@ -1,7 +1,8 @@
 CREATE TABLE clients (
-    id INT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     name TEXT,
-    image_url TEXT
+    image_url TEXT,
+    priority INT NOT NULL
 );
 
 CREATE TABLE client_downloads (
