@@ -23,11 +23,9 @@ body {
     font-family: "Patrick Hand";
 }
 
-.linksbar {
-    a {
-        padding-right: 10px;
-        padding-left: 10px;
-    }
+.linksbar a {
+    padding-right: 10px;
+    padding-left: 10px;
 }
 
 .warning {
