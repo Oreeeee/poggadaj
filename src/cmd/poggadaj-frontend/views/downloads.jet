@@ -34,9 +34,8 @@
 <style>
     .client {
         padding: 10px;
-        background-color: darkgrey;
-        height: auto;
-        overflow-y: auto;
+        background: #a9a9a9;
+        overflow: auto;
         border: 2px solid black;
     }
 
