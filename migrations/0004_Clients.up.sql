@@ -1,15 +1,15 @@
 CREATE TABLE clients (
     id SERIAL PRIMARY KEY,
-    name TEXT,
+    name TEXT NOT NULL,
     image_url TEXT,
     priority INT NOT NULL
 );
 
 CREATE TABLE client_downloads (
     id SERIAL PRIMARY KEY,
-    client_id INT,
-    file_variant SMALLINT,
-    url TEXT,
+    client_id INT NOT NULL,
+    file_variant SMALLINT NOT NULL,
+    url TEXT NOT NULL,
 
     CONSTRAINT fk_client_downloads_client
         FOREIGN KEY (client_id)
@@ -19,9 +19,9 @@ CREATE TABLE client_downloads (
 
 CREATE TABLE client_descriptions (
     id SERIAL PRIMARY KEY,
-    client_id INT,
-    language VARCHAR(2),
-    description TEXT,
+    client_id INT NOT NULL,
+    language VARCHAR(2) NOT NULL,
+    description TEXT NOT NULL,
 
     CONSTRAINT fk_client_descriptions_client
         FOREIGN KEY (client_id)
