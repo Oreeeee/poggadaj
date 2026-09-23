@@ -13,7 +13,10 @@
         <p class="client-description">{{ client.Description }}</p>
     </div>
     <div class="column">
-        <img src={{client.ImageUrl}} alt="Screenshot of {{client.Name}} connected to poGGadaj">
+        <a href="{{ client.ImageUrl }}" target="_blank">
+            {* TODO: Make images smaller. IE hates this *}
+            <img src={{client.ImageUrl}} alt="Screenshot of {{client.Name}} connected to poGGadaj">
+        </a>
     </div>
 
     {{ range i, downloadLink := client.Downloads }}
