@@ -2,7 +2,7 @@ CREATE TABLE clients (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     image_url TEXT,
-    priority INT NOT NULL
+    priority SMALLINT NOT NULL
 );
 
 CREATE TABLE client_downloads (
