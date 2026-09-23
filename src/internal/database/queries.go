@@ -9,13 +9,9 @@ import (
 	"fmt"
 	"maps"
 	"slices"
-	"time"
 
-	perrors "codeberg.org/or3e/poggadaj/internal/errors"
 	"codeberg.org/or3e/poggadaj/internal/security/argon2"
-	"codeberg.org/or3e/poggadaj/internal/security/gg"
 	"codeberg.org/or3e/poggadaj/internal/structs"
-	"codeberg.org/or3e/poggadaj/internal/utils"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -275,53 +271,6 @@ func (db *Database) GetAds(bannerType int) []structs.Ad {
 	return ads
 }
 
-func (db *Database) CreateUser(regBody structs.RegisterRequest) (int, error) { // TODO: nuke
-	var GGAncientHash uint32
-	var GG32Hash uint32
-	var GGSHA1Hash string
-
-	// Hash the password
-	pwdHash, err := argon2.HashPassword(regBody.Password)
-	if err != nil {
-		return 0, err
-	}
-
-	dbArgs := pgx.NamedArgs{
-		"name":     regBody.Username,
-		"password": pwdHash,
-	}
-
-	if regBody.GGAncientPassword != "" {
-		GGAncientHash = gg.GGAncientLoginHash(regBody.GGAncientPassword, utils.GetSeed())
-		dbArgs["password_gg_ancient"] = GGAncientHash
-	}
-	if regBody.GG32Password != "" {
-		GG32Hash = gg.GG32LoginHash(regBody.GG32Password, utils.GetSeed())
-		dbArgs["password_gg32"] = GG32Hash
-	}
-	if regBody.GGSHA1Password != "" {
-		GGSHA1Hash = gg.GGSHA1LoginHash(regBody.GGSHA1Password, utils.GetSeed())
-		dbArgs["password_sha1"] = GGSHA1Hash
-	}
-
-	// Create the user
-	query := "INSERT INTO gguser (name, password, password_gg_ancient, password_gg32, password_sha1) VALUES (@name, @password, @password_gg_ancient, @password_gg32, @password_sha1)"
-	_, err2 := db.conn.Exec(context.Background(), query, dbArgs)
-	if err2 != nil {
-		return 0, err2
-	}
-
-	// Allocate a new UIN for the user
-	var newUserUIN int
-	query = "UPDATE gguser SET uin=nextval('uin_seq') WHERE name=$1 RETURNING uin"
-	err3 := db.conn.QueryRow(context.Background(), query, regBody.Username).Scan(&newUserUIN)
-	if err3 != nil {
-		return 0, err3
-	}
-
-	return newUserUIN, nil
-}
-
 func (db *Database) CreateUserNew(name string, email string, password string, ggAncientHash uint32, gg32Hash uint32, ggSha1Hash string) (int, error) {
 	// TODO: use transation here in case something goes wrong
 
@@ -353,16 +302,6 @@ func (db *Database) CreateUserNew(name string, email string, password string, gg
 	return newUserUin, nil
 }
 
-func (db *Database) GetUserPasswordHash(name string) (string, error) {
-	query := "SELECT password FROM gguser WHERE name=$1"
-	var passwordHash string
-	err := db.conn.QueryRow(context.Background(), query, name).Scan(&passwordHash)
-	if err != nil {
-		return "", err
-	}
-	return passwordHash, nil
-}
-
 func (db *Database) GetUserPasswordHashWithUin(name string) (uint, string, error) {
 	query := "SELECT uin, password FROM gguser WHERE name=$1"
 	var uin uint
@@ -382,53 +321,6 @@ func (db *Database) UpdateWebsitePassword(name string, password string) error {
 	query := "UPDATE gguser SET password=$1 WHERE name=$2"
 	_, err2 := db.conn.Exec(context.Background(), query, hashedPassword, name)
 	return err2
-}
-
-func (db *Database) UpdateAncientPassword(name string, password string) error {
-	hashedPassword := gg.GGAncientLoginHash(password, utils.GetSeed())
-	query := "UPDATE gguser SET password_gg_ancient=$1 WHERE name=$2"
-	_, err := db.conn.Exec(context.Background(), query, hashedPassword, name)
-	return err
-}
-
-func (db *Database) UpdateGG32Password(name string, password string) error {
-	hashedPassword := gg.GG32LoginHash(password, utils.GetSeed())
-	query := "UPDATE gguser SET password_gg32=$1 WHERE name=$2"
-	_, err := db.conn.Exec(context.Background(), query, hashedPassword, name)
-	return err
-}
-
-func (db *Database) UpdateSHA1Password(name string, password string) error {
-	hashedPassword := gg.GGSHA1LoginHash(password, utils.GetSeed())
-	query := "UPDATE gguser SET password_sha1=$1 WHERE name=$2"
-	_, err := db.conn.Exec(context.Background(), query, hashedPassword, name)
-	return err
-}
-
-func (db *Database) UpdateUserPassword(name string, chgreq structs.ChangePasswordRequest) error {
-	switch chgreq.PasswordType {
-	case 0:
-		// Website password
-		return db.UpdateWebsitePassword(name, chgreq.Password)
-	case 1:
-		// Ancient password
-		return db.UpdateAncientPassword(name, chgreq.Password)
-	case 2:
-		// GG32 password
-		return db.UpdateGG32Password(name, chgreq.Password)
-	case 3:
-		return db.UpdateSHA1Password(name, chgreq.Password)
-	default:
-		return perrors.WrongPasswordType{PasswordType: chgreq.PasswordType}
-	}
-}
-
-func (db *Database) GetUserDataByName(name string) (int, time.Time, error) {
-	query := "SELECT uin, joined FROM gguser WHERE name=$1"
-	var uin int
-	var joined time.Time
-	err := db.conn.QueryRow(context.Background(), query, name).Scan(&uin, &joined)
-	return uin, joined, err
 }
 
 func (db *Database) GetUserDataByUin(uin uint) (*structs.UserData, error) {
