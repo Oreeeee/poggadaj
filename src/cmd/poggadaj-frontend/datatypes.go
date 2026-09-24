@@ -3,16 +3,6 @@
 
 package main
 
-// HtmlClient represents an entry in the website's client list
-type HtmlClient struct {
-	Name string
-
-	// Name of the translation key for the description
-	DescriptionI18nTag string
-	ImageUrl           string
-	DownloadUrl        string
-}
-
 // TemplateArgs represents the data structure that the templates expect
 type TemplateArgs struct {
 	Language string // The name of the language to use for i18n
