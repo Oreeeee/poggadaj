@@ -51,15 +51,8 @@ func (t *TemplateRenderer) Render(c *echo.Context, w io.Writer, name string, pas
 	}
 
 	// Retrieve the language for i18n
-	lang := "en"
-	if langRaw := c.Get("poggadaj-lang"); langRaw != nil {
-		lang = langRaw.(string)
-	}
-
-	hasAuth := false
-	if hasAuthRaw := c.Get("poggadaj-has-auth"); hasAuthRaw != nil {
-		hasAuth = hasAuthRaw.(bool)
-	}
+	lang := GetLang(c)
+	hasAuth := GetHasAuth(c)
 
 	return view.Execute(w, nil, TemplateArgs{
 		Language: lang,

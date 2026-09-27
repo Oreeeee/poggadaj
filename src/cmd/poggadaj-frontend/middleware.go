@@ -21,11 +21,11 @@ func (mc *MiddlewareController) LanguageMiddleware(next echo.HandlerFunc) echo.H
 		browserLanguages := goacceptlanguageparser.ParseAcceptLanguage(acceptLanguageHdr, []string{"en", "pl"}) // TODO: Properly retrieve the list of supported languages
 
 		if len(browserLanguages) == 0 { // Couldn't find a best fit language
-			c.Set("poggadaj-lang", "en")
+			SetLang(c, "en")
 			return next(c)
 		}
 
-		c.Set("poggadaj-lang", browserLanguages[0])
+		SetLang(c, browserLanguages[0])
 		return next(c)
 	}
 }
@@ -34,8 +34,8 @@ func (mc *MiddlewareController) LanguageMiddleware(next echo.HandlerFunc) echo.H
 // It does not enforce security for protected resources! It only checks if the session is valid.
 func (mc *MiddlewareController) HasAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c *echo.Context) error {
-		c.Set("poggadaj-has-auth", false)
-		c.Set("poggadaj-uin", 0)
+		SetHasAuth(c, false)
+		SetUin(c, 0)
 
 		authCookie, err := c.Cookie("token")
 		if err != nil {
@@ -70,9 +70,9 @@ func (mc *MiddlewareController) HasAuthMiddleware(next echo.HandlerFunc) echo.Ha
 			return next(c)
 		}
 
-		c.Set("poggadaj-auth-token", authToken)
-		c.Set("poggadaj-has-auth", true)
-		c.Set("poggadaj-uin", tokenOwnerUin)
+		SetAuthToken(c, authToken)
+		SetHasAuth(c, true)
+		SetUin(c, tokenOwnerUin)
 
 		return next(c)
 	}

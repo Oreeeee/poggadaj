@@ -111,12 +111,7 @@ func (s *Server) handleResetPass(c *echo.Context) error {
 }
 
 func (s *Server) handleRegister(c *echo.Context) error {
-	hasAuth := false
-	if hasAuthRaw := c.Get("poggadaj-has-auth"); hasAuthRaw != nil {
-		hasAuth = hasAuthRaw.(bool)
-	}
-
-	if hasAuth {
+	if GetHasAuth(c) {
 		return c.Redirect(http.StatusSeeOther, "/dashboard")
 	}
 
@@ -201,10 +196,8 @@ func (s *Server) handleDashboard(c *echo.Context) error {
 	// Or actually add some thing to TemplateArgs for this
 
 	// Get data for the current user
-	var uin uint
-	if uinRaw := c.Get("poggadaj-uin"); uinRaw != nil {
-		uin = uinRaw.(uint)
-	} else {
+	uin := GetUin(c)
+	if uin == 0 {
 		return c.Redirect(http.StatusSeeOther, "/login")
 	}
 	data, err := s.db.GetUserDataByUin(uin)
@@ -221,7 +214,11 @@ func (s *Server) handleChangePassword(c *echo.Context) error {
 }
 
 func (s *Server) handleLogout(c *echo.Context) error {
-	authToken := c.Get("poggadaj-auth-token").(string)
+	authToken := GetAuthToken(c)
+	if authToken == "" {
+		s.logger.Warn("attempted log out without auth token")
+		return c.NoContent(http.StatusBadRequest)
+	}
 
 	// First off, delete the session token from the cache server
 	err := s.cache.DeleteSession(authToken)
@@ -242,7 +239,12 @@ func (s *Server) handleLogout(c *echo.Context) error {
 }
 
 func (s *Server) handleDownloads(c *echo.Context) error {
-	lang := c.Get("poggadaj-lang").(string)
+	lang := GetLang(c)
+	if lang == "" {
+		s.logger.Warn("didn't get a value for lang, using en")
+		lang = "en"
+	}
+
 	clients, err := s.db.GetClients(lang)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
