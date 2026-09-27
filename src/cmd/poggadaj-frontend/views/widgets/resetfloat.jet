@@ -1,0 +1,3 @@
+{{ block resetFloat() }}
+<div style="clear: both;"></div>
+{{ end }}

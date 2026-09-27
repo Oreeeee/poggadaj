@@ -54,3 +54,7 @@ body {
 .warning-serious {
     background-color: firebrick;
 }
+
+#footer {
+    font-size: 12px;
+}

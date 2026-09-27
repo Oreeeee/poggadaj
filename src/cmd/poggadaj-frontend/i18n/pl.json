@@ -82,5 +82,10 @@
   "logout": "Wyloguj się",
   "logged-out": "Wylogowano!",
   "dl-installer": "Pobierz oryginalny instalator",
-  "dl-unpacked": "Pobierz wypakowaną przenośną wersję"
+  "dl-unpacked": "Pobierz wypakowaną przenośną wersję",
+  "footer-line-1": "Stworzone przez Oreeeee na licencji AGPLv3",
+  "footer-line-2": "Jest to nieoficjalny projekt stworzony w celu prezerwacji platformy Gadu-Gadu w celach edukacyjnych i niekomercyjnych.",
+  "footer-line-3": "Nie jest on powiązany z Gadu-Gadu, GG Network, ani Fintecom.",
+  "footer-line-4": "Klienty dostępne na tej stronie służą wyłącznie do celów archiwizacyjnych.",
+  "source-code": "Kod źródłowy"
 }

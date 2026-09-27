@@ -1,4 +1,5 @@
 {{extends "./base.jet"}}
+{{ import "widgets/resetfloat.jet" }}
 
 {{ block title() }} {{ t(.Language, "main-page") }} {{ end }}
 
@@ -41,6 +42,8 @@
         />
     </div>
 </div>
+
+{{ yield resetFloat() }}
 
 <style>
     #mainpage-h2 {

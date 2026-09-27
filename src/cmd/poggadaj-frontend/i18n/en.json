@@ -82,5 +82,10 @@
   "logout": "Log out",
   "logged-out": "Logged out successfully!",
   "dl-installer": "Download original installer",
-  "dl-unpacked": "Download portable unpacked version"
+  "dl-unpacked": "Download portable unpacked version",
+  "footer-line-1": "Created by Oreeeee under the AGPLv3 license",
+  "footer-line-2": "This is an unofficial project created to preserve the Gadu-Gadu platform for educational and non-commercial purposes.",
+  "footer-line-3": "It's not affiliated with Gadu-Gadu, GG Network, or Fintecom in any way.",
+  "footer-line-4": "Clients provided on this website are for archival purposes only.",
+  "source-code": "Source code"
 }

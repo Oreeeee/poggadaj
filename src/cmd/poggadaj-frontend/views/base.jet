@@ -29,6 +29,18 @@
             <hr />
 
             <div id="content">{{ yield documentBody() }}</div>
+
+            <br/ ><hr />
+
+            <div id="footer">
+                <p>
+                    {{ t(.Language, "footer-line-1") }} <br/>
+                    {{ t(.Language, "footer-line-2") }} <br/>
+                    {{ t(.Language, "footer-line-3") }} <br/>
+                    {{ t(.Language, "footer-line-4") }} <br/>
+                    <a href="https://codeberg.org/or3e/poggadaj">{{ t(.Language, "source-code") }}</a>
+                </p>
+            </div>
         </div>
     </body>
 </html>
