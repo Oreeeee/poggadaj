@@ -87,5 +87,13 @@
   "footer-line-2": "This is an unofficial project created to preserve the Gadu-Gadu platform for educational and non-commercial purposes.",
   "footer-line-3": "It's not affiliated with Gadu-Gadu, GG Network, or Fintecom in any way.",
   "footer-line-4": "Clients provided on this website are for archival purposes only.",
-  "source-code": "Source code"
+  "source-code": "Source code",
+  "polish-only-warn": "Keep in mind, that official Gadu-Gadu clients are only provided in Polish!",
+  "setup-guide-1": "Download the client of your choice from the downloads section. Original installers will make you go through a standard application setup process, while the portable versions will allow you to run gg.exe right away, without installation.",
+  "setup-guide-2": "Open Gadu-Gadu and click \"Next\"",
+  "setup-guide-3": "On the next screen, in the Proxy section, check \"Own proxy settings\" (Własne ustawienia proxy) and click on \"Set\" (Ustaw)",
+  "setup-guide-4": "Set the proxy address to poggadaj.ovh and the port to 80, leave the authorization unchecked, and click OK",
+  "setup-guide-5": "On the next screen, you will need to select \"I already have a number\" (Mam już swój numer). You should create a poGGadaj account if you haven't already!",
+  "setup-guide-6": "Now you can enter your credentials and click on Finish",
+  "setup-guide-7": "Congratulations, you are now logged into poGGadaj!"
 }

@@ -1,4 +1,5 @@
 {{ extends "./base.jet" }}
+{{ import "widgets/warning.jet" }}
 
 {{ block title() }} {{ t(.Language, "connect-guide") }} {{ end }}
 
@@ -6,9 +7,50 @@
 
 <h1>{{ t(.Language, "connect-guide") }}</h1>
 
+{{ if .Language != "pl" }}
+    {{ yield warning(wType="warn", message=t(.Language, "polish-only-warn")) }}
+{{ end }}
+
 <ol>
-    <li>lorem ipsum</li>
-    <li>blablablablabla</li>
+    <li>
+        {{ t(.Language, "setup-guide-1") }}
+    </li>
+    <br />
+
+    <li>
+        {{ t(.Language, "setup-guide-2") }} <br />
+        <img src="/static/setup-images/step2.png" /> <br />
+    </li>
+    <br />
+
+    <li>
+        {{ t(.Language, "setup-guide-3") }} <br />
+        <img src="/static/setup-images/step3.png" /> <br />
+    </li>
+    <br />
+
+    <li>
+        {{ t(.Language, "setup-guide-4") }} <br />
+        <img src="/static/setup-images/step4.png" /> <br />
+    </li>
+    <br />
+
+    <li>
+        {{ t(.Language, "setup-guide-5") }} <br />
+        <img src="/static/setup-images/step5.png" /> <br />
+    </li>
+    <br />
+
+    <li>
+        {{ t(.Language, "setup-guide-6") }} <br />
+        <img src="/static/setup-images/step6.png" /> <br />
+    </li>
+    <br />
+
+    <li>
+        {{ t(.Language, "setup-guide-7") }} <br />
+        <img src="/static/setup-images/step7.png" /> <br />
+    </li>
 </ol>
 
 {{ end }}
