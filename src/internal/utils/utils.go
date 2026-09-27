@@ -56,3 +56,13 @@ func GetSeed() uint32 {
 	seed64, _ := strconv.ParseUint(os.Getenv("GG_SEED"), 10, 32)
 	return uint32(seed64)
 }
+
+// Gets an environment variable in a 0 or >=1 format and parses it as a bool.
+// If the variable is not present, the function returns false.
+func GetenvBool(key string) bool {
+	value := os.Getenv(key)
+	if value == "" || value == "0" {
+		return false
+	}
+	return true
+}

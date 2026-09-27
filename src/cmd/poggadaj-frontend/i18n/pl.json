@@ -98,5 +98,6 @@
   "setup-guide-4": "Ustaw adres na poggadaj.ovh i port na 80. Zostaw pole autoryzacji puste i kliknij \"OK\"",
   "setup-guide-5": "Na następnym ekranie, wybierz \"Mam już swój numer\". Jeżeli tego nie zrobiłeś, stwórz konto poGGadaj na stronie.",
   "setup-guide-6": "Wpisz swoje dane logowania i wciśnij \"Zakończ\"",
-  "setup-guide-7": "Gratulacje! Jesteś teraz zalogowany do poGGadaj!"
+  "setup-guide-7": "Gratulacje! Jesteś teraz zalogowany do poGGadaj!",
+  "third-party-instance": "Nieoficjalna instancja"
 }

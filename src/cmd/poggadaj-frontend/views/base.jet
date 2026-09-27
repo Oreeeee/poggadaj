@@ -11,6 +11,9 @@
                 <hgroup>
                     <h1>poGGadaj</h1>
                     <h2>{{ t(.Language, "header-subtext") }}</h2>
+                    {{ if !isOfficialInstance }} {* Kindly respect this setting, please *}
+                        <h2>{{ "(" + t(.Language, "third-party-instance") + ")" }}</h2>
+                    {{ end }}
                 </hgroup>
 
                 <div class="linksbar">

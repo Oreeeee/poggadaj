@@ -98,5 +98,6 @@
   "setup-guide-4": "Set the proxy address to poggadaj.ovh and the port to 80, leave the authorization unchecked, and click OK",
   "setup-guide-5": "On the next screen, you will need to select \"I already have a number\" (Mam już swój numer). You should create a poGGadaj account if you haven't already!",
   "setup-guide-6": "Now you can enter your credentials and click on Finish",
-  "setup-guide-7": "Congratulations, you are now logged into poGGadaj!"
+  "setup-guide-7": "Congratulations, you are now logged into poGGadaj!",
+  "third-party-instance": "Third party instance"
 }
