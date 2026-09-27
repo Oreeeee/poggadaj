@@ -6,7 +6,7 @@
 {{ block documentBody() }}
 
 {{ if .Data["missingValues"] == true }}
-    {{ yield warning(wType="serious", message=t(.Language, "reg-missing-values")) }} <br>
+    {{ yield warning(wType="serious", message=t(.Language, "missing-values")) }} <br>
 {{ end }}
 
 {{ if .Data["usernameTooLong"] == true }}
@@ -18,15 +18,15 @@
 {{ end }}
 
 {{ if .Data["badPasswordLen"] == true }}
-    {{ yield warning(wType="serious", message=t(.Language, "reg-bad-password-len")) }} <br>
+    {{ yield warning(wType="serious", message=t(.Language, "bad-password-len")) }} <br>
 {{ end }}
 
 {{ if .Data["passwordMismatch"] == true }}
-    {{ yield warning(wType="serious", message=t(.Language, "reg-password-mismatch")) }} <br>
+    {{ yield warning(wType="serious", message=t(.Language, "password-mismatch")) }} <br>
 {{ end }}
 
 {{ if .Data["serverError"] == true }}
-    {{ yield warning(wType="serious", message=t(.Language, "reg-server-error")) }} <br>
+    {{ yield warning(wType="serious", message=t(.Language, "server-error")) }} <br>
 {{ end }}
 
 {{ if .Data["usernameNotUnique"] == true }}
@@ -57,7 +57,7 @@
 
     <ul>
         <li>{{ t(.Language, "reg-note-1") }}</li>
-        <li>{{ t(.Language, "reg-note-2") }}</li>
+        <li>{{ t(.Language, "password-requirements") }}</li>
         <li>{{ t(.Language, "reg-note-3") }}</li>
         <li>{{ t(.Language, "reg-note-4") }}</li>
     </ul>

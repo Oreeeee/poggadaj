@@ -18,6 +18,10 @@
     {{ yield warning(wType="info", message=t(.Language, "reg-success")) }} <br>
 {{ end }}
 
+{{ if .Data["passwordChanged"] == true }}
+    {{ yield warning(wType="info", message=t(.Language, "password-changed")) }} <br>
+{{ end }}
+
 <form action="/login" class="login-form" method="post">
   <label for="username">{{ t(.Language, "web-username") }}</label>
   <input type="text" id="username" name="username">

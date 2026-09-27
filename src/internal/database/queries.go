@@ -313,6 +313,29 @@ func (db *Database) GetUserPasswordHashWithUin(name string) (uint, string, error
 	return uin, passwordHash, nil
 }
 
+func (db *Database) GetUserPasswordByUin(uin uint) (string, error) {
+	query := "SELECT password FROM gguser WHERE uin=$1"
+	var passwordHash string
+	err := db.conn.QueryRow(context.Background(), query, uin).Scan(&passwordHash)
+	if err != nil {
+		return "", err
+	}
+	return passwordHash, nil
+}
+
+func (db *Database) UpdateUserPassword(uin uint, password string, ggAncientHash uint32, gg32Hash uint32, ggSha1Hash string) error {
+	_, err := db.conn.Exec(
+		context.Background(),
+		"UPDATE gguser SET password=$1, password_gg_ancient=$2, password_gg32=$3, password_sha1=$4 WHERE uin=$5",
+		password,
+		ggAncientHash,
+		gg32Hash,
+		ggSha1Hash,
+		uin,
+	)
+	return err
+}
+
 func (db *Database) UpdateWebsitePassword(name string, password string) error {
 	hashedPassword, err := argon2.HashPassword(password)
 	if err != nil {

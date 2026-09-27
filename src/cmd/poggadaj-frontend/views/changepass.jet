@@ -1,9 +1,30 @@
 {{ extends "./base.jet" }}
+{{ import "widgets/warning.jet" }}
 
 {{ block title() }} {{ t(.Language, "gg-changepass") }} {{ end }}
 
 {{ block documentBody() }}
 <h1>{{ t(.Language, "gg-changepass") }}</h1>
+
+{{ if .Data["missingValues"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "missing-values")) }} <br>
+{{ end }}
+
+{{ if .Data["badOriginalPassword"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "bad-original-password")) }} <br>
+{{ end }}
+
+{{ if .Data["badPasswordLen"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "bad-password-len")) }} <br>
+{{ end }}
+
+{{ if .Data["passwordMismatch"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "password-mismatch")) }} <br>
+{{ end }}
+
+{{ if .Data["serverError"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "server-error")) }} <br>
+{{ end }}
 
 <form action="/dashboard/changePassword" class="changepass-form" method="post">
   <label for="currentPassword">{{ t(.Language, "current-password") }}</label>
@@ -18,6 +39,11 @@
   <label for="confirmPassword">{{ t(.Language, "confirm-password") }}</label>
   <input type="password" id="confirmPassword" name="confirmPassword">
   <br><br>
+
+  <ul>
+      <li>{{ t(.Language, "password-requirements") }}</li>
+      <li>{{ t(.Language, "user-will-be-logged-out") }}</li>
+  </ul>
 
   <input type="submit" value="{{ t(.Language, "submit") }}">
 </form>
