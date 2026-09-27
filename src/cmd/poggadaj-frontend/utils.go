@@ -14,6 +14,10 @@ import (
 
 const AuthCookieSize = 64
 
+var (
+	BadPasswordLength = errors.New("bad password length")
+)
+
 // GenerateAuthToken generates a random cryptographically secure auth token with AuthCookieSize bytes of entropy
 func GenerateAuthToken() (string, error) {
 	authCookie := make([]byte, AuthCookieSize)
@@ -36,4 +40,14 @@ func QueryParamBool(c *echo.Context, name string) bool {
 		return true
 	}
 	return false
+}
+
+// Checks whether the password meets the requirements. Returns an error if the check failed.
+// Returns nil if the check passed.
+func PasswordMeetsRequirements(password string) error {
+	passwordLen := len(password)
+	if passwordLen < 8 || passwordLen > 20 {
+		return BadPasswordLength
+	}
+	return nil
 }

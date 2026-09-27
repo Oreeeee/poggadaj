@@ -148,8 +148,8 @@ func (s *Server) handleRegisterAction(c *echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/register?badEmail=1")
 	}
 
-	passwordLen := len(password)
-	if passwordLen < 8 || passwordLen > 20 {
+	if err := PasswordMeetsRequirements(password); err != nil {
+		s.logger.Info("user's password doesn't meet requirements", "err", err)
 		return c.Redirect(http.StatusSeeOther, "/register?badPasswordLen=1")
 	}
 
