@@ -35,6 +35,8 @@ services:
     environment:
       - GG_SEED=${GG_SEED}
       - GG_INSTANCE_ADMIN_EMAIL=${GG_INSTANCE_ADMIN_EMAIL}
+    volumes:
+      - ${GG_FILES_DIR}:/app/files
     depends_on:
       migrate:
         condition: service_completed_successfully

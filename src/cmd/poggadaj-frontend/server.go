@@ -8,6 +8,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -299,7 +300,14 @@ func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer, db *da
 		},
 	}))
 
+	// Ensure that the files directory exists
+	err = os.Mkdir("files", 0777)
+	if err != nil && !os.IsExist(err) {
+		return nil, err
+	}
+
 	server.e.Static("/static", "static")
+	server.e.Static("/files", "files")
 	server.e.GET("/", server.handleHome, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.GET("/login", server.handleLogin, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.POST("/login", server.handleLoginAction)

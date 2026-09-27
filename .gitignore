@@ -2,6 +2,7 @@
 .env
 db/
 **/shared/*
+files/
 
 # Temporary Go executable for debugging
 __debug_bin*
