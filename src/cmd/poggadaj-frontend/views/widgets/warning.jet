@@ -1,6 +1,9 @@
-{{ block warning(wType="info", message="") }}
+{{ block warning(wType="info", message="", linkUrl="", linkText="") }}
 <div class="warning warning-{{ wType }}">
     <img class="warning-symbol" src="/static/warning-{{ wType }}.gif" alt="{{ wType }}-level warning symbol">
     {{ message }}
+    {{ if linkUrl != "" && linkText != "" }}
+        <a href="{{ linkUrl }}">{{ linkText }}</a>
+    {{ end }}
 </div>
 {{ end }}

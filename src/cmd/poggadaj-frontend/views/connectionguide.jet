@@ -1,0 +1,14 @@
+{{ extends "./base.jet" }}
+
+{{ block title() }} {{ t(.Language, "connect-guide") }} {{ end }}
+
+{{ block documentBody() }}
+
+<h1>{{ t(.Language, "connect-guide") }}</h1>
+
+<ol>
+    <li>lorem ipsum</li>
+    <li>blablablablabla</li>
+</ol>
+
+{{ end }}

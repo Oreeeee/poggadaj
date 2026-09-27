@@ -252,6 +252,10 @@ func (s *Server) handleDownloads(c *echo.Context) error {
 	return c.Render(http.StatusOK, "downloads.jet", map[string]any{"Clients": clients})
 }
 
+func (s *Server) handleConnectionGuide(c *echo.Context) error {
+	return c.Render(http.StatusOK, "connectionguide.jet", nil)
+}
+
 func (s *Server) Run() error {
 	return s.e.Start(s.ip)
 }
@@ -306,6 +310,7 @@ func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer, db *da
 	server.e.GET("/dashboard/changePassword", server.handleChangePassword, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware) // TODO: Add authentication middleware
 	server.e.POST("/logout", server.handleLogout, server.mc.HasAuthMiddleware)                                                        // TODO: Add authentication middleware
 	server.e.GET("/download", server.handleDownloads, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
+	server.e.GET("/connection-guide", server.handleConnectionGuide, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 
 	return server, nil
 }

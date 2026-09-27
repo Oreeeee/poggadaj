@@ -1,10 +1,14 @@
 {{ extends "./base.jet" }}
 {{ import "widgets/button.jet" }}
+{{ import "widgets/warning.jet" }}
 
 {{ block title() }} {{ t(.Language, "downloads") }} {{ end }}
 
-{{block documentBody()}}
+{{ block documentBody() }}
 <h1>{{ t(.Language, "avail-clients") }}</h1>
+
+{{ yield warning(wType="info", message=t(.Language, "connection-guide-warn"), linkUrl="/connection-guide", linkText=t(.Language, "connection-guide-href")) }}
+<br/>
 
 {{ range id, client := .Data.Clients }}
 <div class="client">
@@ -56,4 +60,4 @@
         height: 30px;
     }
 </style>
-{{end}}
+{{ end }}
