@@ -9,6 +9,7 @@ import (
 	"errors"
 	"net/http"
 	"net/mail"
+	"strings"
 
 	"github.com/labstack/echo/v5"
 )
@@ -78,4 +79,10 @@ func LogoutUser(c *echo.Context, s *Server) error {
 	})
 
 	return nil
+}
+
+// IsInternetExplorer checks if the given user agent string belongs to Internet Explorer
+func IsInternetExplorer(userAgent string) bool {
+	userAgent = strings.ToLower(userAgent)
+	return strings.Contains(userAgent, "msie") || strings.Contains(userAgent, "trident/")
 }

@@ -1,7 +1,10 @@
 {* This implements a button with a redirect using a form, as putting a href into a button is incompatible with IE and not compliant with HTML standard *}
 
-{{ block button(link="", text="", btnClass="") }}
+{{ block button(link="", text="", btnClass="", fixIE=false) }}
 <form action="{{ link }}">
+    {{ if fixIE }}
+        <input type="text" name="ieHack" value="{{ "." + getFiletype(link) }}" style="display: none;">
+    {{ end }}
     <button type="submit" class="{{ btnClass }}">{{ text }}</button>
 </form>
 {{ end }}

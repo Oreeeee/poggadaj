@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"strings"
 	"time"
 
 	"codeberg.org/or3e/poggadaj/internal/utils"
@@ -41,6 +42,11 @@ func NewTemplateRenderer(baseDir string, devMode bool, translator *Translator) (
 
 		return reflect.ValueOf(date.Format("2006-01-02 15:04:05"))
 	})
+	renderer.set.AddGlobalFunc("getFiletype", func(args jet.Arguments) reflect.Value {
+		args.RequireNumOfArguments("getFiletype", 1, 1)
+		filename := args.Get(0).Interface().(string)
+		return reflect.ValueOf(strings.Split(filename, ".")[1])
+	})
 	renderer.set.AddGlobal("adminEmail", os.Getenv("GG_INSTANCE_ADMIN_EMAIL"))
 	renderer.set.AddGlobal("isOfficialInstance", utils.GetenvBool("GG_IS_OFFICIAL_INSTANCE")) // Kindly respect this value, please
 	return renderer, nil
@@ -55,10 +61,12 @@ func (t *TemplateRenderer) Render(c *echo.Context, w io.Writer, name string, pas
 	// Retrieve the language for i18n
 	lang := GetLang(c)
 	hasAuth := GetHasAuth(c)
+	isIE := IsInternetExplorer(c.Request().UserAgent())
 
 	return view.Execute(w, nil, TemplateArgs{
 		Language: lang,
 		HasAuth:  hasAuth,
+		IsIE:     isIE,
 		Data:     passedData,
 	})
 }

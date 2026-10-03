@@ -7,5 +7,6 @@ package main
 type TemplateArgs struct {
 	Language string // The name of the language to use for i18n
 	HasAuth  bool
-	Data     any // Any other arbitrary data
+	IsIE     bool // The browser is a fake browser if this is set to true
+	Data     any  // Any other arbitrary data
 }

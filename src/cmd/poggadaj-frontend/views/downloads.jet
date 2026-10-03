@@ -31,7 +31,7 @@
             {{ buttonText = t(.Language, "dl-unpacked") }}
         {{ end }}
 
-        {{ yield button(link=downloadLink.Url, text=buttonText, btnClass="dl-button") }}
+        {{ yield button(link=downloadLink.Url, text=buttonText, btnClass="dl-button", fixIE=.IsIE) }}
     {{ end }}
 </div>
 
