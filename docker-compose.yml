@@ -19,12 +19,6 @@ services:
       migrate:
         condition: service_completed_successfully
 
-  nginx:
-    build: poggadaj-nginx
-    restart: always
-    ports:
-      - "8080:8080"
-
   frontend:
     build:
       dockerfile: ./cmd/poggadaj-frontend/Dockerfile
