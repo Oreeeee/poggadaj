@@ -58,6 +58,7 @@
       "LISTEN_ADDRESS": "0.0.0.0",
       "LISTEN_PORT": "8080",
       "DB_ADDRESS": "127.0.0.1",
+      "GG_FRONTEND_DEVELOPMENT": "1"
     },
   },
 ]

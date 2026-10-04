@@ -25,10 +25,15 @@ services:
       context: ./src/
     restart: always
     ports:
-      - "3000:3000"
+      - "${GG_FRONTEND_PORT}:3000"
     environment:
+      - DB_ADDRESS=db
+      - DB_PASSWORD=${DB_PASSWORD}
+      - CACHE_ADDRESS=cache
       - GG_SEED=${GG_SEED}
       - GG_INSTANCE_ADMIN_EMAIL=${GG_INSTANCE_ADMIN_EMAIL}
+      - GG_FRONTEND_DEVELOPMENT=0
+      - GG_IS_OFFICIAL_INSTANCE=${GG_IS_OFFICIAL_INSTANCE}
     volumes:
       - ${GG_FILES_DIR}:/app/files
     depends_on:

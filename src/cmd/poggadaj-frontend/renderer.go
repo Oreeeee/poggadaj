@@ -24,7 +24,7 @@ func NewTemplateRenderer(baseDir string, devMode bool, translator *Translator) (
 	renderer := &TemplateRenderer{}
 	renderer.set = jet.NewSet(
 		jet.NewOSFileSystemLoader(baseDir),
-		jet.DevelopmentMode(devMode),
+		jet.DevelopmentMode(utils.GetenvBool("GG_FRONTEND_DEVELOPMENT")),
 	)
 
 	renderer.translator = translator
