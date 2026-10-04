@@ -38,7 +38,6 @@ The project is consisted of a few components in different directories of this mo
 - `./src/internal` contains shared code between the services.
 - `./src/cmd/poggadaj-tcp` is the main component. It manages the actual connection with Gadu-Gadu clients using its protocol, handles status updates, message sending, etc.
 - `./src/cmd/poggadaj-http` manages the HTTP APIs that the Gadu-Gadu clients use, like `appmsg`, `adserver`, etc.
-- `./src/cmd/poggadaj-api` manages the database accesses for `poggadaj-web`. It's on its way to get rewritten along with `poggadaj-web`.
 - `./src/cmd/poggadaj-frontend` is the new frontend for this project which you can see at https://poggadaj.ovh/. The new frontend offers better stability and compatibility with web browsers of the time.
 
 ## TODOs
