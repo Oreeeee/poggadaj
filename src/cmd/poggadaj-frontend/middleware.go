@@ -4,6 +4,7 @@
 package main
 
 import (
+	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v5"
@@ -74,6 +75,16 @@ func (mc *MiddlewareController) HasAuthMiddleware(next echo.HandlerFunc) echo.Ha
 		SetHasAuth(c, true)
 		SetUin(c, tokenOwnerUin)
 
+		return next(c)
+	}
+}
+
+// RequireAuthMiddleware redirects the user to the login page if the user is not authenticated
+func (mc *MiddlewareController) RequireAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c *echo.Context) error {
+		if !GetHasAuth(c) {
+			return c.Redirect(http.StatusSeeOther, "/login")
+		}
 		return next(c)
 	}
 }

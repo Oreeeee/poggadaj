@@ -194,9 +194,6 @@ func (s *Server) handleRegisterAction(c *echo.Context) error {
 }
 
 func (s *Server) handleDashboard(c *echo.Context) error {
-	// TODO: once authentication middleware exists, insert the data as a param.
-	// Or actually add some thing to TemplateArgs for this
-
 	// Get data for the current user
 	uin := GetUin(c)
 	if uin == 0 {
@@ -382,10 +379,10 @@ func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer, db *da
 	server.e.GET("/resetpass", server.handleResetPass, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.GET("/register", server.handleRegister, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.POST("/register", server.handleRegisterAction)
-	server.e.GET("/dashboard", server.handleDashboard, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)                     // TODO: Add authentication middleware
-	server.e.GET("/dashboard/changePassword", server.handleChangePassword, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware) // TODO: Add authentication middleware
-	server.e.POST("/dashboard/changePassword", server.handleChangePasswordAction, server.mc.HasAuthMiddleware)                        // TODO: Add authentication middleware
-	server.e.POST("/logout", server.handleLogout, server.mc.HasAuthMiddleware)                                                        // TODO: Add authentication middleware
+	server.e.GET("/dashboard", server.handleDashboard, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware, server.mc.RequireAuthMiddleware)
+	server.e.GET("/dashboard/changePassword", server.handleChangePassword, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware, server.mc.RequireAuthMiddleware)
+	server.e.POST("/dashboard/changePassword", server.handleChangePasswordAction, server.mc.HasAuthMiddleware, server.mc.RequireAuthMiddleware)
+	server.e.POST("/logout", server.handleLogout, server.mc.HasAuthMiddleware, server.mc.RequireAuthMiddleware)
 	server.e.GET("/download", server.handleDownloads, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.GET("/connection-guide", server.handleConnectionGuide, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 
