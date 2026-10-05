@@ -172,13 +172,14 @@ func (s *Server) handleRegisterAction(c *echo.Context) error {
 	newUin, err := s.db.CreateUserNew(username, email, pwdHash, ggAncientHash, gg32Hash, ggSha1Hash)
 	if err != nil {
 		// Check if it's an unique value constraint violation
+		// TODO: Move this check to the function call
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			switch pgErr.ConstraintName {
-			case "gguser_name_key":
+			case "gguser_name_unique":
 				s.logger.Warn("username was not unique", "username", username)
 				return c.Redirect(http.StatusSeeOther, "/register?usernameNotUnique=1")
-			case "gguser_email_key":
+			case "gguser_email_unique":
 				s.logger.Warn("email was not unique", "email", email)
 				return c.Redirect(http.StatusSeeOther, "/register?emailNotUnique=1")
 			}
