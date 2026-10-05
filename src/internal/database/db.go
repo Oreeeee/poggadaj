@@ -6,6 +6,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"net/url"
 
 	"charm.land/log/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -22,7 +23,7 @@ type DatabaseConfig struct {
 
 func NewDatabase(cfg *DatabaseConfig, logger *log.Logger) (*Database, error) {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/poggadaj?sslmode=disable",
-		cfg.Username, cfg.Password, cfg.Host, cfg.Port)
+		cfg.Username, url.QueryEscape(cfg.Password), cfg.Host, cfg.Port)
 	conn, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		return nil, err
