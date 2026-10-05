@@ -452,3 +452,13 @@ func (db *Database) GetClientsDownloads(clientIds []int) (map[int][]*structs.Web
 
 	return downloads, nil
 }
+
+func (db *Database) UpdateUserEmail(uin uint, email string) error {
+	_, err := db.conn.Exec(
+		context.Background(),
+		"UPDATE gguser SET email = $1 WHERE uin = $2",
+		email,
+		uin,
+	)
+	return err
+}

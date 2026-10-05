@@ -49,6 +49,7 @@
   "reg-bad-email": "This e-mail address is invalid",
   "bad-password-len": "Your password needs to be between 8 and 20 characters",
   "bad-original-password": "The current password doesn't match",
+  "bad-password": "Password doesn't match!",
   "password-mismatch": "The passwords don't match!",
   "reg-success": "Registered successfully! Log in to check your GG number.",
   "server-error": "Server has encountered a problem when registering the account!",
@@ -99,5 +100,11 @@
   "setup-guide-5": "On the next screen, you will need to select \"I already have a number\" (Mam już swój numer). You should create a poGGadaj account if you haven't already!",
   "setup-guide-6": "Now you can enter your credentials and click on Finish",
   "setup-guide-7": "Congratulations, you are now logged into poGGadaj!",
-  "third-party-instance": "Third party instance"
+  "third-party-instance": "Third party instance",
+  "change-email": "Change e-mail address",
+  "change-email-title": "Change e-mail address",
+  "current-email": "Current e-mail",
+  "new-email": "New e-mail",
+  "none": "none",
+  "email-changed": "E-mail address changed successfully!"
 }

@@ -1,4 +1,5 @@
 {{ extends "./base.jet" }}
+{{ import "widgets/warning.jet" }}
 
 {{ block title() }} {{ t(.Language, "account-panel") }} {{ end }}
 
@@ -6,11 +7,15 @@
 <h1>{{ t(.Language, "account-panel") }}</h1>
 <br />
 
+{{ if .Data["emailChanged"] == true }}
+    {{ yield warning(wType="info", message=t(.Language, "email-changed")) }} <br>
+{{ end }}
+
 <p>
-    {{ t(.Language, "your-uin") }}: {{ .Data.UIN }} <br />
-    {{ t(.Language, "joined-date") }}: {{ formatDate(.Data.JoinedDate) }} <br />
-    {{ if .Data.Email != "" }}
-        E-mail: {{ .Data.Email }}
+    {{ t(.Language, "your-uin") }}: {{ .Data["user"].UIN }} <br />
+    {{ t(.Language, "joined-date") }}: {{ formatDate(.Data["user"].JoinedDate) }} <br />
+    {{ if .Data["user"].Email != "" }}
+        E-mail: {{ .Data["user"].Email }}
     {{ else }}
         {{ t(.Language, "no-provided-email") }}
     {{ end }}
@@ -18,12 +23,12 @@
 
 <div>
     <a href="/dashboard/changePassword">{{ t(.Language, "gg-changepass") }}</a> <br />
+    <a href="/dashboard/changeEmail">{{ t(.Language, "change-email") }}</a> <br />
     <form action="/logout" method="POST" style="display: inline;">
       <button type="submit" style="border: 0; background: none; padding: 0; color: blue; text-decoration: underline; cursor: pointer;">
         {{ t(.Language, "logout") }}
       </button>
     </form>
-    {*<a href="/dashboard/changePassword">My details</a>*}
 </div>
 
 {{ end }}

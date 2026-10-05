@@ -49,6 +49,7 @@
   "reg-bad-email": "Adres e-mail jest niepoprawny!",
   "bad-password-len": "Twoje hasło musi mieć pomiędzy 8 a 20 znaków",
   "bad-original-password": "Oryginalne hasło się nie zgadza",
+  "bad-password": "Hasło się nie zgadza!",
   "password-mismatch": "Hasła się nie zgadzają!",
   "reg-success": "Zarejestrowano pomyślnie! Zaloguj się aby sprawdzić swój numer GG.",
   "server-error": "Serwer napotkał problem!",
@@ -99,5 +100,11 @@
   "setup-guide-5": "Na następnym ekranie, wybierz \"Mam już swój numer\". Jeżeli tego nie zrobiłeś, stwórz konto poGGadaj na stronie.",
   "setup-guide-6": "Wpisz swoje dane logowania i wciśnij \"Zakończ\"",
   "setup-guide-7": "Gratulacje! Jesteś teraz zalogowany do poGGadaj!",
-  "third-party-instance": "Nieoficjalna instancja"
+  "third-party-instance": "Nieoficjalna instancja",
+  "change-email": "Zmień adres e-mail",
+  "change-email-title": "Zmiana adresu e-mail",
+  "current-email": "Aktualny e-mail",
+  "new-email": "Nowy e-mail",
+  "none": "brak",
+  "email-changed": "Pomyślnie zmieniono adres e-mail!"
 }

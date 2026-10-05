@@ -194,16 +194,21 @@ func (s *Server) handleRegisterAction(c *echo.Context) error {
 }
 
 func (s *Server) handleDashboard(c *echo.Context) error {
+	data := map[string]any{}
+
 	// Get data for the current user
 	uin := GetUin(c)
 	if uin == 0 {
 		return c.Redirect(http.StatusSeeOther, "/login")
 	}
-	data, err := s.db.GetUserDataByUin(uin)
+	userData, err := s.db.GetUserDataByUin(uin)
 	if err != nil {
 		s.logger.Error("failed to get data for user", "uin", uin, "err", err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
+
+	data["user"] = userData
+	data["emailChanged"] = QueryParamBool(c, "emailChanged")
 
 	return c.Render(http.StatusOK, "dashboard.jet", data)
 }
@@ -289,6 +294,77 @@ func (s *Server) handleChangePasswordAction(c *echo.Context) error {
 	}
 
 	return c.Redirect(http.StatusSeeOther, "/login?passwordChanged=1")
+}
+
+func (s *Server) handleChangeEmail(c *echo.Context) error {
+	data := map[string]any{}
+
+	uin := GetUin(c)
+	if uin == 0 {
+		return c.Redirect(http.StatusSeeOther, "/login")
+	}
+	userData, err := s.db.GetUserDataByUin(uin)
+	if err != nil {
+		s.logger.Error("failed to get data for user", "uin", uin, "err", err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	data["currentEmail"] = userData.Email
+
+	data["badPassword"] = QueryParamBool(c, "badPassword")
+	data["badEmail"] = QueryParamBool(c, "badEmail")
+	data["missingValues"] = QueryParamBool(c, "missingValues")
+	data["emailNotUnique"] = QueryParamBool(c, "emailNotUnique")
+
+	return c.Render(http.StatusOK, "changeemail.jet", data)
+}
+
+func (s *Server) handleChangeEmailAction(c *echo.Context) error {
+	newEmail := c.FormValueOr("newEmail", "")
+	password := c.FormValueOr("password", "")
+
+	if newEmail == "" || password == "" {
+		return c.Redirect(http.StatusSeeOther, "/dashboard/changeEmail?missingValues=1")
+	}
+
+	if !VerifyEmail(newEmail) {
+		return c.Redirect(http.StatusSeeOther, "/dashboard/changeEmail?badEmail=1")
+	}
+
+	uin := GetUin(c)
+	if uin == 0 {
+		return c.NoContent(http.StatusUnauthorized)
+	}
+
+	originalPassword, err := s.db.GetUserPasswordByUin(uin)
+	if err != nil {
+		s.logger.Error("failed to get user password from the database", "err", err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	match, err := argon2.ComparePasswords(password, originalPassword)
+	if err != nil {
+		s.logger.Error("failed to compare passwords", "err", err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	if !match {
+		return c.Redirect(http.StatusSeeOther, "/dashboard/changeEmail?badPassword=1")
+	}
+
+	err = s.db.UpdateUserEmail(uin, newEmail)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			s.logger.Warn("email was not unique", "newEmail", newEmail)
+			return c.Redirect(http.StatusSeeOther, "/dashboard/changeEmail?emailNotUnique=1")
+		}
+
+		s.logger.Error("failed to change user email", "err", err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	return c.Redirect(http.StatusSeeOther, "/dashboard?emailChanged=1")
 }
 
 func (s *Server) handleLogout(c *echo.Context) error {
@@ -382,6 +458,8 @@ func NewServer(ip string, logger *log.Logger, renderer *TemplateRenderer, db *da
 	server.e.GET("/dashboard", server.handleDashboard, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware, server.mc.RequireAuthMiddleware)
 	server.e.GET("/dashboard/changePassword", server.handleChangePassword, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware, server.mc.RequireAuthMiddleware)
 	server.e.POST("/dashboard/changePassword", server.handleChangePasswordAction, server.mc.HasAuthMiddleware, server.mc.RequireAuthMiddleware)
+	server.e.GET("/dashboard/changeEmail", server.handleChangeEmail, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware, server.mc.RequireAuthMiddleware)
+	server.e.POST("/dashboard/changeEmail", server.handleChangeEmailAction, server.mc.HasAuthMiddleware, server.mc.RequireAuthMiddleware)
 	server.e.POST("/logout", server.handleLogout, server.mc.HasAuthMiddleware, server.mc.RequireAuthMiddleware)
 	server.e.GET("/download", server.handleDownloads, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)
 	server.e.GET("/connection-guide", server.handleConnectionGuide, server.mc.LanguageMiddleware, server.mc.HasAuthMiddleware)

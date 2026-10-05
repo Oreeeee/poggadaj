@@ -1,0 +1,45 @@
+{{ extends "./base.jet" }}
+{{ import "widgets/warning.jet" }}
+
+{{ block title() }} {{ t(.Language, "change-email-title") }} {{ end }}
+
+{{ block documentBody() }}
+<h1>{{ t(.Language, "change-email-title") }}</h1>
+
+{{ if .Data["missingValues"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "missing-values")) }} <br>
+{{ end }}
+
+{{ if .Data["badPassword"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "bad-password")) }} <br>
+{{ end }}
+
+{{ if .Data["badEmail"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "reg-bad-email")) }} <br>
+{{ end }}
+
+{{ if .Data["emailNotUnique"] == true }}
+    {{ yield warning(wType="serious", message=t(.Language, "reg-email-exists")) }} <br>
+{{ end }}
+
+<form action="/dashboard/changeEmail" method="post">
+    {{ currentEmail := "" }}
+    {{ if .Data["currentEmail"] == "" }}
+        {{ currentEmail = t(.Language, "none") }}
+    {{ else }}
+        {{ currentEmail = .Data["currentEmail"] }}
+    {{ end }}
+
+    <p>{{ t(.Language, "current-email") }}: {{ currentEmail }}</p>
+
+    <label for="newEmail">{{ t(.Language, "new-email") }}</label>
+    <input type="email" id="newEmail" name="newEmail">
+    <br><br>
+
+    <label for="password">{{ t(.Language, "web-password") }}</label>
+    <input type="password" id="password" name="password">
+    <br><br>
+
+    <input type="submit" value="{{ t(.Language, "submit") }}">
+</form>
+{{ end }}
