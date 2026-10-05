@@ -6,6 +6,7 @@ package main
 import (
 	"os"
 
+	"codeberg.org/or3e/poggadaj/cmd/poggadaj-frontend/server"
 	"codeberg.org/or3e/poggadaj/internal/cache"
 	"codeberg.org/or3e/poggadaj/internal/database"
 	"codeberg.org/or3e/poggadaj/internal/logging"
@@ -14,12 +15,12 @@ import (
 func main() {
 	logger := logging.NewLogger()
 
-	translator, err := NewTranslator("i18n")
+	translator, err := server.NewTranslator("i18n")
 	if err != nil {
 		panic(err)
 	}
 
-	renderer, err := NewTemplateRenderer("./views", true, translator)
+	renderer, err := server.NewTemplateRenderer("./views", true, translator)
 	if err != nil {
 		panic(err)
 	}
@@ -40,12 +41,12 @@ func main() {
 		panic(err)
 	}
 
-	server, err := NewServer(":3000", logger, renderer, db, cache)
+	s, err := server.NewServer(":3000", logger, renderer, db, cache)
 	if err != nil {
 		panic(err)
 	}
 
-	if err := server.Run(); err != nil {
+	if err := s.Run(); err != nil {
 		logger.Error("shutting down the server", "error", err)
 	}
 }
