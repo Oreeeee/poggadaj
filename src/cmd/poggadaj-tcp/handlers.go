@@ -169,7 +169,7 @@ func handleUserlistReq(c *Client, pRecv *utils.IOStream) error {
 	case constants.GG_USERLIST_PUT, constants.GG_USERLIST_PUT_MORE:
 		if packetLength == 1 {
 			// Client sends 1-sized userlist on userlist delete
-			err := c.server.db.DeleteUserList(c.UIN)
+			err := c.server.db.Pubdir.DeleteUserList(c.UIN)
 			if err != nil {
 				c.logger.Errorf("Failed to delete userlist: %s", err)
 				return err
@@ -196,7 +196,7 @@ func handleUserlistReq(c *Client, pRecv *utils.IOStream) error {
 		c.PutUserList()
 	case constants.GG_USERLIST_GET:
 		c.logger.Debugf("Fetching contact list for UIN %d", c.UIN)
-		userList := c.server.db.GetUserList(c.UIN)
+		userList := c.server.db.Pubdir.GetUserList(c.UIN)
 		var userListBuf string
 		for _, user := range userList {
 			userListBuf += user.Write() + "\r\n"
@@ -224,7 +224,7 @@ func handlePubdirReq(c *Client, pRecv *utils.IOStream) error {
 		}
 		c.logger.Debugf("Received pubdir query: %+v", req)
 
-		resp, nextStart, err := c.server.db.SearchInPubdir(&req)
+		resp, nextStart, err := c.server.db.Pubdir.SearchInPubdir(&req)
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			c.logger.Errorf("Failed to search through the pubdir: %v", err)
 			c.SendPubdirResp(
@@ -259,11 +259,11 @@ func handlePubdirReq(c *Client, pRecv *utils.IOStream) error {
 			respBuilder.Bytes(),
 		)
 	case constants.GG_PUBDIR50_READ:
-		resp, err := c.server.db.GetPubdirDataByUin(c.UIN)
+		resp, err := c.server.db.Pubdir.GetPubdirDataByUin(c.UIN)
 		if errors.Is(err, sql.ErrNoRows) {
 			c.logger.Infof("Creating empty pubdir entry for UIN %d", c.UIN)
 			resp = &structs.PubdirEntry{}
-			c.server.db.WritePubdirData(c.UIN, resp)
+			c.server.db.Pubdir.WritePubdirData(c.UIN, resp)
 		} else if err != nil {
 			c.logger.Errorf("Failed to retreive pubdir data for UIN %d: %v", c.UIN, err)
 			c.SendPubdirResp(
@@ -304,7 +304,7 @@ func handlePubdirReq(c *Client, pRecv *utils.IOStream) error {
 			req.Gender = 1
 		}
 
-		err = c.server.db.WritePubdirData(c.UIN, &req)
+		err = c.server.db.Pubdir.WritePubdirData(c.UIN, &req)
 		if err != nil {
 			c.logger.Errorf("Failed to update pubdir data for %d: %v", c.UIN, err)
 			c.SendPubdirResp(
@@ -341,7 +341,7 @@ func handleLogin30(c *Client, stream *utils.IOStream) error {
 
 	c.UIN = p.UIN
 
-	passHash, _ := c.server.db.GetAncientHash(c.UIN)
+	passHash, _ := c.server.db.Users.GetAncientHash(c.UIN)
 	if p.Hash == passHash {
 		c.Status = p.Status
 		return nil
@@ -360,10 +360,10 @@ func handleLogin(c *Client, stream *utils.IOStream) error {
 	var passHash uint32
 	if p.Version < 0x14 {
 		// GG 4.x used the GG Ancient hash
-		passHash, _ = c.server.db.GetAncientHash(c.UIN)
+		passHash, _ = c.server.db.Users.GetAncientHash(c.UIN)
 	} else {
 		// Later 4.x versions used GG32
-		passHash, _ = c.server.db.GetGG32Hash(c.UIN)
+		passHash, _ = c.server.db.Users.GetGG32Hash(c.UIN)
 	}
 
 	c.logger.Debugf("Sending login response")
@@ -384,7 +384,7 @@ func handleLogin60(c *Client, stream *utils.IOStream) error {
 	c.UIN = p.UIN
 
 	c.logger.Debugf("Sending login response")
-	passHash, _ := c.server.db.GetGG32Hash(c.UIN)
+	passHash, _ := c.server.db.Users.GetGG32Hash(c.UIN)
 	if p.Hash == passHash {
 		c.Status = p.Status
 		c.Version, c.VOIP = utils.GetVersionAndVOIP(p.Version)
@@ -401,7 +401,7 @@ func handleLogin70(c *Client, stream *utils.IOStream) error {
 	c.UIN = p.UIN
 
 	c.logger.Debugf("Sending login response")
-	passHash, _ := c.server.db.GetSHA1Hash(c.UIN)
+	passHash, _ := c.server.db.Users.GetSHA1Hash(c.UIN)
 	if utils.StringifySHA1(p.Hash) == passHash {
 		c.Status = p.Status
 		c.Version, c.VOIP = utils.GetVersionAndVOIP(p.Version)

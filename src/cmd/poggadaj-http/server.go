@@ -30,7 +30,7 @@ func (server *Server) AppMSG_Handler(c *echo.Context) error {
 }
 
 func (server *Server) buildResponse(bannerType int) string {
-	ads := server.db.GetAds(bannerType)
+	ads := server.db.Ads.GetAds(bannerType)
 	// TODO: Give the correct dimensions depending on the banner type once Wayback Machine goes back online
 	imageFmt := "<img src=\"%s\" />"
 	response := ""

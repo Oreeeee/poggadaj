@@ -22,7 +22,7 @@ func (s *Server) handleDashboard(c *echo.Context) error {
 	if uin == 0 {
 		return c.Redirect(http.StatusSeeOther, "/login")
 	}
-	userData, err := s.db.GetUserDataByUin(uin)
+	userData, err := s.db.Users.GetUserDataByUin(uin)
 	if err != nil {
 		s.logger.Error("failed to get data for user", "uin", uin, "err", err)
 		return c.NoContent(http.StatusInternalServerError)
@@ -60,7 +60,7 @@ func (s *Server) handleChangePasswordAction(c *echo.Context) error {
 	}
 
 	// Check if the current password is correct
-	originalPassword, err := s.db.GetUserPasswordByUin(uin)
+	originalPassword, err := s.db.Users.GetUserPasswordByUin(uin)
 	if err != nil {
 		s.logger.Error("failed to get user password from the database", "err", err)
 		return c.NoContent(http.StatusInternalServerError)
@@ -98,7 +98,7 @@ func (s *Server) handleChangePasswordAction(c *echo.Context) error {
 	gg32Hash := gg.GG32LoginHash(newPassword, utils.GetSeed())
 	ggSha1Hash := gg.GGSHA1LoginHash(newPassword, utils.GetSeed())
 
-	err = s.db.UpdateUserPassword(uin, pwdHash, ggAncientHash, gg32Hash, ggSha1Hash)
+	err = s.db.Users.UpdateUserPassword(uin, pwdHash, ggAncientHash, gg32Hash, ggSha1Hash)
 	if err != nil {
 		s.logger.Error("failed to change user's password", "uin", uin, "err", err)
 		return c.Redirect(http.StatusSeeOther, "/dashboard/changePassword?serverError=1")
@@ -124,7 +124,7 @@ func (s *Server) handleChangeEmail(c *echo.Context) error {
 	if uin == 0 {
 		return c.Redirect(http.StatusSeeOther, "/login")
 	}
-	userData, err := s.db.GetUserDataByUin(uin)
+	userData, err := s.db.Users.GetUserDataByUin(uin)
 	if err != nil {
 		s.logger.Error("failed to get data for user", "uin", uin, "err", err)
 		return c.NoContent(http.StatusInternalServerError)
@@ -157,7 +157,7 @@ func (s *Server) handleChangeEmailAction(c *echo.Context) error {
 		return c.NoContent(http.StatusUnauthorized)
 	}
 
-	originalPassword, err := s.db.GetUserPasswordByUin(uin)
+	originalPassword, err := s.db.Users.GetUserPasswordByUin(uin)
 	if err != nil {
 		s.logger.Error("failed to get user password from the database", "err", err)
 		return c.NoContent(http.StatusInternalServerError)
@@ -173,7 +173,7 @@ func (s *Server) handleChangeEmailAction(c *echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/dashboard/changeEmail?badPassword=1")
 	}
 
-	err = s.db.UpdateUserEmail(uin, newEmail)
+	err = s.db.Users.UpdateUserEmail(uin, newEmail)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {

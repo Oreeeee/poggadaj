@@ -122,7 +122,7 @@ func (client *Client) Run() {
 }
 
 func (c *Client) PutUserList() {
-	err := c.server.db.DeleteUserList(c.UIN) // Delete user's contact list, as we are writing to the list and not appending to it
+	err := c.server.db.Pubdir.DeleteUserList(c.UIN) // Delete user's contact list, as we are writing to the list and not appending to it
 	if err != nil {
 		c.logger.Errorf("Failed to delete user list: %s", err)
 	}
@@ -145,7 +145,7 @@ func (c *Client) PutUserList() {
 
 	c.logger.Debugf("Received userlist put: %v", userlist)
 	c.logger.Debugf("Putting userlist into the database")
-	c.server.db.PutUserList(userlist, c.UIN)
+	c.server.db.Pubdir.PutUserList(userlist, c.UIN)
 
 	// Send acknowledgement that the server received the list
 	for i, _ := range c.UserListBuf {

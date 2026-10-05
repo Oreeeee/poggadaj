@@ -20,7 +20,7 @@ func (s *Server) handleDownloads(c *echo.Context) error {
 		lang = "en"
 	}
 
-	clients, err := s.db.GetClients(lang)
+	clients, err := s.db.Clients.GetClients(lang)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}

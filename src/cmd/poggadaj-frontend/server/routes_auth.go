@@ -33,7 +33,7 @@ func (s *Server) handleLoginAction(c *echo.Context) error {
 	password := c.FormValue("password")
 
 	// Get the actual password hash from the database
-	uin, passwordHash, err := s.db.GetUserPasswordHashWithUin(username)
+	uin, passwordHash, err := s.db.Users.GetUserPasswordHashWithUin(username)
 
 	if errors.Is(err, pgx.ErrNoRows) {
 		// The user doesn't even exist
@@ -143,7 +143,7 @@ func (s *Server) handleRegisterAction(c *echo.Context) error {
 	gg32Hash := gg.GG32LoginHash(password, utils.GetSeed())
 	ggSha1Hash := gg.GGSHA1LoginHash(password, utils.GetSeed())
 
-	newUin, err := s.db.CreateUserNew(username, email, pwdHash, ggAncientHash, gg32Hash, ggSha1Hash)
+	newUin, err := s.db.Users.CreateUserNew(username, email, pwdHash, ggAncientHash, gg32Hash, ggSha1Hash)
 	if err != nil {
 		// Check if it's an unique value constraint violation
 		// TODO: Move this check to the function call

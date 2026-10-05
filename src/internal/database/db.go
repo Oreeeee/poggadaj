@@ -13,6 +13,11 @@ import (
 )
 
 type Database struct {
+	Ads     AdsRepository
+	Clients ClientsRepository
+	Pubdir  PubdirRepository
+	Users   UsersRepository
+
 	conn   *pgxpool.Pool
 	logger *log.Logger
 }
@@ -30,6 +35,22 @@ func NewDatabase(cfg *DatabaseConfig, logger *log.Logger) (*Database, error) {
 	}
 
 	db := &Database{
+		Ads: AdsRepository{
+			conn:   conn,
+			logger: logger,
+		},
+		Clients: ClientsRepository{
+			conn:   conn,
+			logger: logger,
+		},
+		Pubdir: PubdirRepository{
+			conn:   conn,
+			logger: logger,
+		},
+		Users: UsersRepository{
+			conn:   conn,
+			logger: logger,
+		},
 		conn:   conn,
 		logger: logger,
 	}
