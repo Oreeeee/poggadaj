@@ -5,7 +5,7 @@ go 1.26.5
 require (
 	charm.land/log/v2 v2.0.1
 	github.com/CloudyKit/jet/v6 v6.3.3
-	github.com/jackc/pgx/v5 v5.11.0
+	github.com/jackc/pgx/v5 v5.10.0
 	github.com/labstack/echo/v5 v5.4.0
 	github.com/redis/go-redis/v9 v9.22.0
 	github.com/strukturag/goacceptlanguageparser v0.0.0-20160314151936-7224a0cc2c17
