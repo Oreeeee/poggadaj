@@ -341,8 +341,8 @@ func handleLogin30(c *Client, stream *utils.IOStream) error {
 
 	c.UIN = p.UIN
 
-	passHash, _ := c.server.db.Users.GetAncientHash(c.UIN)
-	if p.Hash == passHash {
+	passSet, _ := c.server.db.Users.GetPasswords(c.UIN)
+	if p.Hash == passSet.Ancient {
 		c.Status = p.Status
 		return nil
 	}
@@ -357,13 +357,14 @@ func handleLogin(c *Client, stream *utils.IOStream) error {
 
 	c.UIN = p.UIN
 
+	passSet, _ := c.server.db.Users.GetPasswords(c.UIN)
 	var passHash uint32
 	if p.Version < 0x14 {
 		// GG 4.x used the GG Ancient hash
-		passHash, _ = c.server.db.Users.GetAncientHash(c.UIN)
+		passHash = passSet.Ancient
 	} else {
 		// Later 4.x versions used GG32
-		passHash, _ = c.server.db.Users.GetGG32Hash(c.UIN)
+		passHash = passSet.GG32
 	}
 
 	c.logger.Debugf("Sending login response")
@@ -384,8 +385,8 @@ func handleLogin60(c *Client, stream *utils.IOStream) error {
 	c.UIN = p.UIN
 
 	c.logger.Debugf("Sending login response")
-	passHash, _ := c.server.db.Users.GetGG32Hash(c.UIN)
-	if p.Hash == passHash {
+	passSet, _ := c.server.db.Users.GetPasswords(c.UIN)
+	if p.Hash == passSet.GG32 {
 		c.Status = p.Status
 		c.Version, c.VOIP = utils.GetVersionAndVOIP(p.Version)
 		return nil
@@ -401,8 +402,8 @@ func handleLogin70(c *Client, stream *utils.IOStream) error {
 	c.UIN = p.UIN
 
 	c.logger.Debugf("Sending login response")
-	passHash, _ := c.server.db.Users.GetSHA1Hash(c.UIN)
-	if utils.StringifySHA1(p.Hash) == passHash {
+	passSet, _ := c.server.db.Users.GetPasswords(c.UIN)
+	if utils.StringifySHA1(p.Hash) == passSet.SHA1 {
 		c.Status = p.Status
 		c.Version, c.VOIP = utils.GetVersionAndVOIP(p.Version)
 

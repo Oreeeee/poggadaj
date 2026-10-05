@@ -18,34 +18,45 @@ type UsersRepository struct {
 	logger *log.Logger
 }
 
-func (r *UsersRepository) GetAncientHash(uin uint32) (uint32, error) {
-	var GGAncientHash int64
-	err := r.conn.QueryRow(
-		context.Background(),
-		"SELECT password_gg_ancient FROM gguser WHERE uin=$1",
-		uin,
-	).Scan(&GGAncientHash)
-	return uint32(GGAncientHash), err
-}
+func (r *UsersRepository) GetPasswords(uin uint32) (*structs.PasswordSet, error) {
+	set := &structs.PasswordSet{}
 
-func (r *UsersRepository) GetGG32Hash(uin uint32) (uint32, error) {
-	var GG32Hash_i64 int64
-	err := r.conn.QueryRow(
-		context.Background(),
-		"SELECT password_gg32 FROM gguser WHERE uin=$1",
-		uin,
-	).Scan(&GG32Hash_i64)
-	return uint32(GG32Hash_i64), err
-}
+	var ancientTmp *int64
+	var gg32Tmp *int64
+	var sha1Tmp *string
+	var argon2Tmp *string
 
-func (r *UsersRepository) GetSHA1Hash(uin uint32) (string, error) {
-	var SHA1 string
 	err := r.conn.QueryRow(
 		context.Background(),
-		"SELECT password_sha1 FROM gguser WHERE uin=$1",
+		"SELECT password_gg_ancient, password_gg32, password_sha1, password FROM gguser WHERE uin=$1",
 		uin,
-	).Scan(&SHA1)
-	return SHA1, err
+	).Scan(&ancientTmp, &gg32Tmp, &sha1Tmp, &argon2Tmp)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if ancientTmp != nil {
+		set.Ancient = uint32(*ancientTmp)
+	}
+
+	if gg32Tmp != nil {
+		set.GG32 = uint32(*gg32Tmp)
+	}
+
+	if sha1Tmp != nil {
+		set.SHA1 = *sha1Tmp
+	} else {
+		set.SHA1 = ""
+	}
+
+	if argon2Tmp != nil {
+		set.Argon2 = *argon2Tmp
+	} else {
+		set.Argon2 = ""
+	}
+
+	return set, nil
 }
 
 func (r *UsersRepository) CreateUserNew(name string, email string, password string, ggAncientHash uint32, gg32Hash uint32, ggSha1Hash string) (int, error) {
