@@ -100,18 +100,6 @@ func (r *UsersRepository) GetUserPasswordHashWithUin(name string) (uint, string,
 	return uin, passwordHash, nil
 }
 
-func (r *UsersRepository) GetUserPasswordByUin(uin uint) (string, error) {
-	// TODO: Replace all usages of this function with GetPasswords
-
-	query := "SELECT password FROM gguser WHERE uin=$1"
-	var passwordHash string
-	err := r.conn.QueryRow(context.Background(), query, uin).Scan(&passwordHash)
-	if err != nil {
-		return "", err
-	}
-	return passwordHash, nil
-}
-
 func (r *UsersRepository) UpdateUserPassword(uin uint, password string, ggAncientHash uint32, gg32Hash uint32, ggSha1Hash string) error {
 	_, err := r.conn.Exec(
 		context.Background(),

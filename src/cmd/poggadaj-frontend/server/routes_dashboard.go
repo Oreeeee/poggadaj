@@ -60,13 +60,13 @@ func (s *Server) handleChangePasswordAction(c *echo.Context) error {
 	}
 
 	// Check if the current password is correct
-	originalPassword, err := s.db.Users.GetUserPasswordByUin(uin)
+	originalPasswords, err := s.db.Users.GetPasswords(uint32(uin))
 	if err != nil {
 		s.logger.Error("failed to get user password from the database", "err", err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	match, err := argon2.ComparePasswords(currentPassword, originalPassword)
+	match, err := argon2.ComparePasswords(currentPassword, originalPasswords.Argon2)
 	if err != nil {
 		s.logger.Error("failed to compare passwords", "err", err)
 		return c.NoContent(http.StatusInternalServerError)
@@ -157,13 +157,13 @@ func (s *Server) handleChangeEmailAction(c *echo.Context) error {
 		return c.NoContent(http.StatusUnauthorized)
 	}
 
-	originalPassword, err := s.db.Users.GetUserPasswordByUin(uin)
+	originalPasswords, err := s.db.Users.GetPasswords(uint32(uin))
 	if err != nil {
 		s.logger.Error("failed to get user password from the database", "err", err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	match, err := argon2.ComparePasswords(password, originalPassword)
+	match, err := argon2.ComparePasswords(password, originalPasswords.Argon2)
 	if err != nil {
 		s.logger.Error("failed to compare passwords", "err", err)
 		return c.NoContent(http.StatusInternalServerError)
