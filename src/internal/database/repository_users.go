@@ -7,7 +7,6 @@ import (
 	"context"
 
 	"charm.land/log/v2"
-	"codeberg.org/or3e/poggadaj/internal/security/argon2"
 	"codeberg.org/or3e/poggadaj/internal/structs"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -59,7 +58,7 @@ func (r *UsersRepository) GetPasswords(uin uint32) (*structs.PasswordSet, error)
 	return set, nil
 }
 
-func (r *UsersRepository) CreateUserNew(name string, email string, password string, ggAncientHash uint32, gg32Hash uint32, ggSha1Hash string) (int, error) {
+func (r *UsersRepository) CreateUser(name string, email string, password string, ggAncientHash uint32, gg32Hash uint32, ggSha1Hash string) (int, error) {
 	// TODO: use transation here in case something goes wrong
 
 	_, err := r.conn.Exec(context.Background(),
@@ -102,6 +101,8 @@ func (r *UsersRepository) GetUserPasswordHashWithUin(name string) (uint, string,
 }
 
 func (r *UsersRepository) GetUserPasswordByUin(uin uint) (string, error) {
+	// TODO: Replace all usages of this function with GetPasswords
+
 	query := "SELECT password FROM gguser WHERE uin=$1"
 	var passwordHash string
 	err := r.conn.QueryRow(context.Background(), query, uin).Scan(&passwordHash)
@@ -122,16 +123,6 @@ func (r *UsersRepository) UpdateUserPassword(uin uint, password string, ggAncien
 		uin,
 	)
 	return err
-}
-
-func (r *UsersRepository) UpdateWebsitePassword(name string, password string) error {
-	hashedPassword, err := argon2.HashPassword(password)
-	if err != nil {
-		return err
-	}
-	query := "UPDATE gguser SET password=$1 WHERE name=$2"
-	_, err2 := r.conn.Exec(context.Background(), query, hashedPassword, name)
-	return err2
 }
 
 func (r *UsersRepository) GetUserDataByUin(uin uint) (*structs.UserData, error) {
