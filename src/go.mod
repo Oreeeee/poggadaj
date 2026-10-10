@@ -1,6 +1,6 @@
 module codeberg.org/or3e/poggadaj
 
-go 1.26.5
+go 1.27
 
 require (
 	charm.land/log/v2 v2.0.1
