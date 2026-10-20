@@ -20,33 +20,16 @@ type UsersRepository struct {
 func (r *UsersRepository) GetPasswords(uin uint32) (*structs.PasswordSet, error) {
 	set := &structs.PasswordSet{}
 
-	var ancientTmp *int64
-	var gg32Tmp *int64
-	var sha1Tmp *string
 	var argon2Tmp *string
 
 	err := r.conn.QueryRow(
 		context.Background(),
 		"SELECT password_gg_ancient, password_gg32, password_sha1, password FROM gguser WHERE uin=$1",
 		uin,
-	).Scan(&ancientTmp, &gg32Tmp, &sha1Tmp, &argon2Tmp)
+	).Scan(&set.Ancient, &set.GG32, &set.SHA1, &argon2Tmp)
 
 	if err != nil {
 		return nil, err
-	}
-
-	if ancientTmp != nil {
-		set.Ancient = uint32(*ancientTmp)
-	}
-
-	if gg32Tmp != nil {
-		set.GG32 = uint32(*gg32Tmp)
-	}
-
-	if sha1Tmp != nil {
-		set.SHA1 = *sha1Tmp
-	} else {
-		set.SHA1 = ""
 	}
 
 	if argon2Tmp != nil {

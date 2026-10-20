@@ -342,7 +342,12 @@ func handleLogin30(c *Client, stream *utils.IOStream) error {
 	c.UIN = p.UIN
 
 	passSet, _ := c.server.db.Users.GetPasswords(c.UIN)
-	if p.Hash == passSet.Ancient {
+	if passSet.Ancient == nil {
+		c.logger.Warn("user doesn't have an ancient format password")
+		return errors.New("not authenticated")
+	}
+
+	if p.Hash == *passSet.Ancient {
 		c.Status = p.Status
 		return nil
 	}
@@ -358,7 +363,7 @@ func handleLogin(c *Client, stream *utils.IOStream) error {
 	c.UIN = p.UIN
 
 	passSet, _ := c.server.db.Users.GetPasswords(c.UIN)
-	var passHash uint32
+	var passHash *uint32
 	if p.Version < 0x14 {
 		// GG 4.x used the GG Ancient hash
 		passHash = passSet.Ancient
@@ -367,9 +372,14 @@ func handleLogin(c *Client, stream *utils.IOStream) error {
 		passHash = passSet.GG32
 	}
 
+	if passHash == nil {
+		c.logger.Warn("user doesn't have the required format password")
+		return errors.New("not authenticated")
+	}
+
 	c.logger.Debugf("Sending login response")
 
-	if p.Hash == passHash {
+	if p.Hash == *passHash {
 		c.Status = p.Status
 		c.Version, c.VOIP = utils.GetVersionAndVOIP(p.Version)
 		return nil
@@ -386,7 +396,12 @@ func handleLogin60(c *Client, stream *utils.IOStream) error {
 
 	c.logger.Debugf("Sending login response")
 	passSet, _ := c.server.db.Users.GetPasswords(c.UIN)
-	if p.Hash == passSet.GG32 {
+	if passSet.GG32 == nil {
+		c.logger.Warn("user doens't have a gg32 format password")
+		return errors.New("not authenticated")
+	}
+
+	if p.Hash == *passSet.GG32 {
 		c.Status = p.Status
 		c.Version, c.VOIP = utils.GetVersionAndVOIP(p.Version)
 		return nil
@@ -403,7 +418,12 @@ func handleLogin70(c *Client, stream *utils.IOStream) error {
 
 	c.logger.Debugf("Sending login response")
 	passSet, _ := c.server.db.Users.GetPasswords(c.UIN)
-	if utils.StringifySHA1(p.Hash) == passSet.SHA1 {
+	if passSet.SHA1 == nil {
+		c.logger.Warn("user doesn't have a sha1 format password")
+		return errors.New("not authenticated")
+	}
+
+	if utils.StringifySHA1(p.Hash) == *passSet.SHA1 {
 		c.Status = p.Status
 		c.Version, c.VOIP = utils.GetVersionAndVOIP(p.Version)
 
